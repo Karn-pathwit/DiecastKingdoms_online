@@ -15,6 +15,7 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
@@ -110,6 +111,16 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
+
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
+        const SUPABASE_URL = 'https://eixcgphxqghadvabvleu.supabase.co';
+        // 🔑 Anon public key สำหรับเชื่อมต่อ Supabase Database
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpeGNncGh4cWdoYWR2YWJ2bGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxNTc5MzgsImV4cCI6MjEwMTczMzkzOH0.g0EfjSa37R3ruOMb25ugFjg0cuMCm2rloSr1eDhPrYo';
+        const supabase = (window.supabase && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') 
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+            : null;
 
         function calculateLevel(totalExp) {
             let level = 1;
@@ -1953,6 +1964,56 @@
             const [kingdomEXP, setKingdomEXP] = useState({ 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
             const [popBossScores, setPopBossScores] = useState({ 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
 
+            // 🔄 ดึงข้อมูลสาส์นพัฒนาและคะแนน PopBoss จาก Supabase เมื่อเปิดใช้งาน
+            useEffect(() => {
+                if (!supabase) return;
+
+                async function loadInitialData() {
+                    try {
+                        const { data: projData, error: projErr } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+                        if (!projErr && projData) {
+                            const mappedProjects = projData.map(item => ({
+                                id: item.id,
+                                emp: item.emp,
+                                name: item.name,
+                                origin: item.origin,
+                                target: item.target,
+                                category: item.category,
+                                factory: item.factory,
+                                location: item.location,
+                                pinpoint: item.pinpoint,
+                                title: item.title,
+                                problem: item.problem,
+                                solution: item.solution,
+                                benefit: item.benefit,
+                                imagePreview: item.image_preview,
+                                status: item.status,
+                                comment: item.comment,
+                                targetComment: item.target_comment,
+                                imageAfterPreview: item.image_after_preview,
+                                wasAbandoned: item.was_abandoned,
+                                ideaApproved: item.idea_approved,
+                                isSecret: item.is_secret,
+                                isQualityEvent: item.is_quality_event,
+                                isSuperRising: item.is_super_rising
+                            }));
+                            setProjects(mappedProjects);
+                        }
+
+                        const { data: bossData, error: bossErr } = await supabase.from('popboss_scores').select('*');
+                        if (!bossErr && bossData) {
+                            const scoresMap = {};
+                            bossData.forEach(row => { scoresMap[row.kingdom] = row.score; });
+                            setPopBossScores(prev => ({ ...prev, ...scoresMap }));
+                        }
+                    } catch (e) {
+                        console.log("Supabase connect notice:", e);
+                    }
+                }
+
+                loadInitialData();
+            }, []);
+
             useEffect(() => {
                 const scores = { 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 };
                 projects.forEach(p => {
@@ -1971,8 +2032,56 @@
                 setKingdomEXP(scores);
             }, [projects]);
 
-            const handleAddProject = (newProject) => { setProjects(prev => [newProject, ...prev]); };
-            const handleUpdateProject = (updatedProject) => { setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); };
+            const handleAddProject = async (newProject) => { 
+                setProjects(prev => [newProject, ...prev]); 
+
+                if (supabase) {
+                    await supabase.from('projects').insert([{
+                        id: newProject.id,
+                        emp: newProject.emp,
+                        name: newProject.name,
+                        origin: newProject.origin,
+                        target: newProject.target,
+                        category: newProject.category,
+                        factory: newProject.factory,
+                        location: newProject.location,
+                        pinpoint: newProject.pinpoint,
+                        title: newProject.title,
+                        problem: newProject.problem,
+                        solution: newProject.solution,
+                        benefit: newProject.benefit,
+                        image_preview: newProject.imagePreview,
+                        status: newProject.status,
+                        comment: newProject.comment,
+                        target_comment: newProject.targetComment,
+                        image_after_preview: newProject.imageAfterPreview,
+                        was_abandoned: newProject.wasAbandoned,
+                        idea_approved: newProject.ideaApproved,
+                        is_secret: newProject.isSecret,
+                        is_quality_event: newProject.isQualityEvent,
+                        is_super_rising: newProject.isSuperRising
+                    }]);
+                }
+            };
+
+            const handleUpdateProject = async (updatedProject) => { 
+                setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); 
+
+                if (supabase) {
+                    await supabase.from('projects').update({
+                        category: updatedProject.category,
+                        status: updatedProject.status,
+                        comment: updatedProject.comment,
+                        target_comment: updatedProject.targetComment,
+                        image_after_preview: updatedProject.imageAfterPreview,
+                        was_abandoned: updatedProject.wasAbandoned,
+                        idea_approved: updatedProject.ideaApproved,
+                        is_secret: updatedProject.isSecret,
+                        is_quality_event: updatedProject.isQualityEvent,
+                        is_super_rising: updatedProject.isSuperRising
+                    }).eq('id', updatedProject.id);
+                }
+            };
 
             const showSidebar = currentView !== 'popboss'; 
 
@@ -2019,7 +2128,15 @@
                             )}
 
                             {currentView === 'popboss' && (
-                                <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => setPopBossScores(prev => ({...prev, [kingdom]: prev[kingdom] + 1}))} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
+                                <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => {
+                                    setPopBossScores(prev => {
+                                        const nextScore = (prev[kingdom] || 0) + 1;
+                                        if (supabase) {
+                                            supabase.from('popboss_scores').update({ score: nextScore }).eq('kingdom', kingdom).then();
+                                        }
+                                        return { ...prev, [kingdom]: nextScore };
+                                    });
+                                }} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
                             )}
                         </>
                     )}
