@@ -104,6 +104,20 @@
         .music-marquee-container { overflow: hidden; white-space: nowrap; width: 100%; position: relative; }
         .music-marquee-text { display: inline-block; padding-left: 100%; animation: marquee-scroll 10s linear infinite; }
         @keyframes marquee-scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+        /* ================= TOGGLE BADGE ICON ANIMATION ================= */
+        @keyframes toggle-icon {
+            0%, 45% { opacity: 1; transform: scale(1); }
+            50%, 95% { opacity: 0; transform: scale(0.6); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes toggle-badge {
+            0%, 45% { opacity: 0; transform: scale(0.6); }
+            50%, 95% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.6); }
+        }
+        .animate-toggle-icon { animation: toggle-icon 2.5s ease-in-out infinite; }
+        .animate-toggle-badge { animation: toggle-badge 2.5s ease-in-out infinite; }
     </style>
 </head>
 <body class="font-sarabun overflow-x-hidden antialiased">
@@ -428,11 +442,14 @@
                                 const hasBadge = item.badge && item.badge > 0;
                                 return (
                                     <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
-                                        <div className="flex items-center justify-center w-8 text-center text-lg">
+                                        <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
                                             {hasBadge ? (
-                                                <div className="w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-pulse" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
-                                                    {item.badge}
-                                                </div>
+                                                <>
+                                                    <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                    <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
+                                                        {item.badge}
+                                                    </div>
+                                                </>
                                             ) : (
                                                 <i className={item.icon}></i>
                                             )}
