@@ -2034,7 +2034,13 @@
 
                 if (currentView === 'popboss') {
                     if (bgMusic) bgMusic.pause();
-                    if (popMusic && !isMuted) popMusic.play().catch(e => console.log(e));
+                    if (popMusic) {
+                        if (isPlaying && !isMuted) {
+                            popMusic.play().catch(e => console.log("PopBoss music play blocked", e));
+                        } else {
+                            popMusic.pause();
+                        }
+                    }
                 } else {
                     if (popMusic) popMusic.pause();
                     if (bgMusic) {
@@ -2075,6 +2081,45 @@
             const [projects, setProjects] = useState([]);
             const [kingdomEXP, setKingdomEXP] = useState({ 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
             const [popBossScores, setPopBossScores] = useState({ 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
+            const pendingClicksRef = useRef({});
+
+            // ⚡ ระบบดึงยอดรวมคะแนน POPBOSS ล่าสุดทุก 2 วินาทีเมื่ออยู่ในหน้า POPBOSS
+            useEffect(() => {
+                if (currentView !== 'popboss' || !supabase) return;
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const { data, error } = await supabase.from('popboss_scores').select('*');
+                        if (!error && data) {
+                            const scoresMap = {};
+                            data.forEach(row => { scoresMap[row.kingdom] = row.score; });
+                            setPopBossScores(prev => ({ ...prev, ...scoresMap }));
+                        }
+                    } catch (e) { console.log("Poll POPBOSS error", e); }
+                }, 2000);
+                return () => clearInterval(pollInterval);
+            }, [currentView]);
+
+            // ⚡ ระบบรวมยอดส่งคะแนนจิ้มไปบวกสะสมใน Supabase ทุกๆ 1.5 วินาที (บวกสะสม ป้องกันการเขียนทับ)
+            useEffect(() => {
+                if (!supabase) return;
+                const flushInterval = setInterval(async () => {
+                    const kingdoms = Object.keys(pendingClicksRef.current);
+                    for (const k of kingdoms) {
+                        const delta = pendingClicksRef.current[k];
+                        if (delta > 0) {
+                            pendingClicksRef.current[k] = 0;
+                            try {
+                                const { data } = await supabase.from('popboss_scores').select('score').eq('kingdom', k).single();
+                                const currentScore = data ? (data.score || 0) : 0;
+                                await supabase.from('popboss_scores').update({ score: currentScore + delta }).eq('kingdom', k);
+                            } catch (err) {
+                                console.error("Flush click error:", err);
+                            }
+                        }
+                    }
+                }, 1500);
+                return () => clearInterval(flushInterval);
+            }, []);
 
             // 🔄 ดึงข้อมูลสาส์นพัฒนาและคะแนน PopBoss จาก Supabase เมื่อเปิดใช้งาน
             useEffect(() => {
@@ -2260,13 +2305,9 @@
 
                             {currentView === 'popboss' && (
                                 <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => {
-                                    setPopBossScores(prev => {
-                                        const nextScore = (prev[kingdom] || 0) + 1;
-                                        if (supabase) {
-                                            supabase.from('popboss_scores').update({ score: nextScore }).eq('kingdom', kingdom).then();
-                                        }
-                                        return { ...prev, [kingdom]: nextScore };
-                                    });
+                                    if (!kingdom) return;
+                                    setPopBossScores(prev => ({ ...prev, [kingdom]: (prev[kingdom] || 0) + 1 }));
+                                    pendingClicksRef.current[kingdom] = (pendingClicksRef.current[kingdom] || 0) + 1;
                                 }} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
                             )}
                         </>
