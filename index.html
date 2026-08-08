@@ -1608,7 +1608,26 @@
                                         <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-upload"></i> ส่งมอบ/แก้ไขหลักฐาน (สำหรับอาณาจักรเป้าหมาย)</p>
                                         <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="อธิบายสิ่งที่ได้ลงมือแก้ไขไปแล้ว..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
                                         <input type="file" accept="image/*" onChange={(e) => { 
-                                            if(e.target.files && e.target.files[0]) { const file = e.target.files[0]; setTargetImageFile(file.name); setTargetImagePreview(URL.createObjectURL(file)); }
+                                            if(e.target.files && e.target.files[0]) { 
+                                                const file = e.target.files[0]; 
+                                                setTargetImageFile(file.name); 
+                                                const reader = new FileReader();
+                                                reader.onload = (event) => {
+                                                    const img = new Image();
+                                                    img.onload = () => {
+                                                        const canvas = document.createElement('canvas');
+                                                        let width = img.width, height = img.height;
+                                                        if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
+                                                        else { if (height > 800) { width *= 800 / height; height = 800; } }
+                                                        canvas.width = width; canvas.height = height;
+                                                        const ctx = canvas.getContext('2d');
+                                                        ctx.drawImage(img, 0, 0, width, height);
+                                                        setTargetImagePreview(canvas.toDataURL('image/jpeg', 0.7));
+                                                    };
+                                                    img.src = event.target.result;
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
                                         }} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
                                         {targetImageFile && <p className="text-xs text-blue-800 font-bold">📎 ไฟล์ที่แนบ: {targetImageFile}</p>}
                                         <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
