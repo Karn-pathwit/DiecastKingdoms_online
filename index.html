@@ -384,15 +384,19 @@
         function Sidebar({ 
             currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
             musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
-            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack
+            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack,
+            projects = []
         }) {
             const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+
+            const blueprintCount = projects.filter(p => p.status === 'Blueprint').length;
+            const evidenceCount = projects.filter(p => p.status === 'Evidence').length;
 
             const menuItems = [
                 { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot' },
                 { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
-                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column' },
-                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
                 { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
                 { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
             ];
@@ -421,10 +425,28 @@
                             </button>
                             {menuItems.map((item) => {
                                 const isActive = currentView === item.id;
+                                const hasBadge = item.badge && item.badge > 0;
                                 return (
                                     <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
-                                        <div className="flex items-center justify-center w-8 text-center text-lg"><i className={item.icon}></i></div>
-                                        {!isCollapsed && <span className="text-sm font-semibold truncate text-left">{item.label}</span>}
+                                        <div className="flex items-center justify-center w-8 text-center text-lg">
+                                            {hasBadge ? (
+                                                <div className="w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-pulse" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
+                                                    {item.badge}
+                                                </div>
+                                            ) : (
+                                                <i className={item.icon}></i>
+                                            )}
+                                        </div>
+                                        {!isCollapsed && (
+                                            <div className="flex items-center justify-between flex-1 truncate">
+                                                <span className="text-sm font-semibold truncate text-left">{item.label}</span>
+                                                {hasBadge && (
+                                                    <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
+                                                        {item.badge} เรื่องใหม่
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </button>
                                 );
                             })}
@@ -2201,6 +2223,7 @@
                                     musicTracks={musicTracks} currentTrackIndex={currentTrackIndex} setCurrentTrackIndex={setCurrentTrackIndex}
                                     isPlaying={isPlaying} setIsPlaying={setIsPlaying} isLoopingOne={isLoopingOne} setIsLoopingOne={setIsLoopingOne}
                                     handleNextTrack={handleNextTrack} handlePrevTrack={handlePrevTrack}
+                                    projects={projects}
                                 />
                             )}
 
