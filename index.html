@@ -79,7 +79,7 @@
         .animate-pulse-royal { animation: pulse-royal 3.5s ease-in-out infinite; }
 
         /* ================= POPBOSS CSS ================= */
-        .popboss-bg { background-image: linear-gradient(rgba(26, 26, 46, 0.7), rgba(26, 26, 46, 0.7)), url('Assets/Images/Special_event/Backgrounds/Bg_Landing.png'); background-size: cover; background-position: center; }
+        .popboss-bg { background-image: linear-gradient(rgba(26, 26, 46, 0.7), rgba(26, 26, 46, 0.7)), url('Assets/Images/Special_event/Backgrounds/Bg_landing.png'); background-size: cover; background-position: center; }
         .kingdom-btn { padding: 20px; font-size: 20px; font-weight: bold; color: white; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .kingdom-btn:hover { transform: scale(1.05); }
         .boss-box { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; cursor: pointer; z-index: 1; overflow: hidden; background-color: #0b0713; }
@@ -1984,7 +1984,7 @@
                     <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
 
                     <video autoPlay loop muted playsInline className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-                        <source src="Assets/Video/Diecast_kingdoms_level_1.mp4" type="video/mp4" />
+                        <source src="Assets/video/Diecast_kingdoms_level_1.mp4" type="video/mp4" />
                     </video>
 
                     {!isAuthorized ? (
