@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diecast Kingdoms - ระบบพัฒนาอาณาจักร</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sarabun: ['Sarabun', 'sans-serif'],
+                        cinzel: ['Cinzel', 'serif'],
+                        cinzelDeco: ['Cinzel Decorative', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #0b0713; color: #ebdcb9; min-height: 100vh; overflow-x: hidden; }
+        .parchment { background-color: #f4e4bc; border: 6px double #8b5a2b; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); color: #3d2511; }
+        .parchment-scroll { background-color: #f4e4bc; border: 12px solid #8b5a2b; border-style: ridge; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); color: #3d2511; }
+        .input-style { background-color: #e5d3a6; border: 1px solid #8b5a2b; border-radius: 5px; padding: 10px; width: 100%; color: #5d3a1a; outline: none; transition: all 0.2s ease-in-out; }
+        .input-style:focus { background-color: #ebdcb9; border-color: #5d3a1a; box-shadow: 0 0 5px rgba(139, 90, 43, 0.5); }
+        .stat-card { background: #dcd0b0; border: 2px solid #8b5a2b; color: #5d3a1a; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.2s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15); }
+        .custom-select { background-color: #fff8e7; border: 1px solid #8b5a2b; border-radius: 6px; padding: 0.5rem; color: #5d3a1a; outline: none; }
+        .decree-modal { background-color: #f4e4bc; border: 8px double #8b5a2b; box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); color: #3d2511; }
+        .comment-box { border-left: 4px solid #8b5a2b; background-color: #e5d8b8; }
+        .proof-box { background-color: #e5d8b8; border: 2px dashed #8b5a2b; border-radius: 8px; }
+        .target-panel { background-color: #e0f2fe; border: 2px dashed #0284c7; border-radius: 8px; color: #0369a1; }
+        .central-panel { background-color: #fef08a; border: 2px dashed #b45309; border-radius: 8px; color: #78350f; }
+        .kingdom-card { background-color: rgba(61, 37, 17, 0.05); border: 1px solid rgba(139, 90, 43, 0.25); transition: all 0.3s ease; }
+        .kingdom-card:hover { background-color: rgba(139, 90, 43, 0.12); border-color: #8b5a2b; }
+        .glass-panel { background: rgba(26, 17, 10, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(139, 90, 43, 0.3); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(26, 17, 10, 0.3); }
+        ::-webkit-scrollbar-thumb { background: #8b5a2b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5d3a1a; }
+        
+        @keyframes fade-in { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .animate-float { animation: float 3.5s ease-in-out infinite; }
+
+        /* ================= V.30 THE 3 REALMS SOFT PULSE CSS ================= */
+        @keyframes pulse-heaven { 
+            0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: rgba(125, 211, 252, 0.5); } 
+            50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.8); border-color: rgba(56, 189, 248, 1); } 
+        }
+        .animate-pulse-heaven { animation: pulse-heaven 3.5s ease-in-out infinite; }
+
+        @keyframes pulse-hell { 
+            0%, 100% { box-shadow: 0 0 10px rgba(220, 38, 38, 0.3); border-color: rgba(153, 27, 27, 0.5); } 
+            50% { box-shadow: 0 0 25px rgba(220, 38, 38, 0.8); border-color: rgba(220, 38, 38, 1); } 
+        }
+        .animate-pulse-hell { animation: pulse-hell 3.5s ease-in-out infinite; }
+
+        @keyframes pulse-royal { 
+            0%, 100% { box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-color: rgba(250, 204, 21, 0.6); } 
+            50% { box-shadow: 0 0 35px rgba(250, 204, 21, 1); border-color: rgba(250, 204, 21, 1); } 
+        }
+        .animate-pulse-royal { animation: pulse-royal 3.5s ease-in-out infinite; }
+
+        /* ================= POPBOSS CSS ================= */
+        .popboss-bg { background-image: linear-gradient(rgba(26, 26, 46, 0.7), rgba(26, 26, 46, 0.7)), url('Assets/Images/Special_event/Backgrounds/Bg_Landing.png'); background-size: cover; background-position: center; }
+        .kingdom-btn { padding: 20px; font-size: 20px; font-weight: bold; color: white; border: none; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .kingdom-btn:hover { transform: scale(1.05); }
+        .boss-box { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; cursor: pointer; z-index: 1; overflow: hidden; background-color: #0b0713; }
+        .boss-box img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.05s ease-out; user-select: none; -webkit-user-drag: none; }
+        .boss-box img.popping { transform: scale(0.98); filter: brightness(1.2); }
+        .score-container { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 110px; font-weight: bold; color: #fff; text-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0 8px 25px rgba(0,0,0,0.8); z-index: 5; pointer-events: none; font-family: 'Arial', sans-serif;}
+        .corner-badge { position: absolute; width: 260px; padding: 15px; font-size: 20px; font-weight: bold; border-radius: 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); transition: all 0.3s ease; z-index: 5; pointer-events: none; border: 2px solid transparent; color: white;}
+        
+        .corner-badge.leader-kingdom { opacity: 1 !important; border: 2px solid #ffde7d; box-shadow: 0 0 30px rgba(255, 222, 125, 0.9); transform: scale(1.08); z-index: 10; background-color: rgba(0,0,0,0.8) !important; color: #ffde7d; }
+        .corner-badge.opponent-kingdom { opacity: 0.6; }
+        .top-left { top: 20px; left: 20px; } .top-right { top: 20px; right: 20px; }
+        .bottom-left { bottom: 20px; left: 20px; } .bottom-right { bottom: 20px; right: 20px; }
+        
+        .color-bascentra { background: linear-gradient(90deg, #10b981, #14b8a6); }
+        .color-casteria { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+        .color-blankheim { background: linear-gradient(90deg, #38bdf8, #0284c7); }
+        .color-machine { background: linear-gradient(90deg, #a855f7, #7e22ce); }
+        .color-final { background: linear-gradient(90deg, #facc15, #ca8a04); }
+
+        /* ================= MARQUEE CSS ================= */
+        .music-marquee-container { overflow: hidden; white-space: nowrap; width: 100%; position: relative; }
+        .music-marquee-text { display: inline-block; padding-left: 100%; animation: marquee-scroll 10s linear infinite; }
+        @keyframes marquee-scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+    </style>
+</head>
+<body class="font-sarabun overflow-x-hidden antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function calculateLevel(totalExp) {
+            let level = 1;
+            let requiredExp = 60;
+            let currentExp = totalExp;
+            while (currentExp >= requiredExp) {
+                currentExp -= requiredExp;
+                level++;
+                requiredExp = Math.floor(requiredExp * 1.2); 
+            }
+            return { level, currentExp, requiredExp };
+        }
+
+        function MapPin({ kingdomKey, kingdom, onClick }) {
+            const [imgError, setImgError] = useState(false);
+            return (
+                <div className="absolute z-20 pointer-events-auto" style={{ top: kingdom.position.top, left: kingdom.position.left }}>
+                    <div className="absolute transform -translate-x-1/2 -translate-y-1/2">
+                        <div onClick={onClick} className="flex flex-col items-center group cursor-pointer animate-float">
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-1 border border-white/30 whitespace-nowrap shadow-lg pointer-events-none">
+                                {kingdom.nameThai}
+                            </span>
+                            {imgError ? (
+                                <div className="w-[120px] h-[120px] md:w-[180px] md:h-[180px] bg-gray-800/80 rounded-full border-2 border-white/50 flex flex-col items-center justify-center text-xs md:text-sm font-bold text-white text-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                                    <i className="fa-solid fa-chess-rook mb-1 text-gray-400 text-3xl"></i>
+                                    {kingdomKey.substring(0,4)}
+                                </div>
+                            ) : (
+                                <img 
+                                    src={kingdom.iconImg} 
+                                    alt={kingdomKey} 
+                                    className={`${kingdom.customSize} h-auto object-contain relative z-10 hover:brightness-125 transition-all drop-shadow-[0_5px_15px_rgba(0,0,0,0.6)]`}
+                                    onError={() => setImgError(true)}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        function MediaCarousel({ items, type, onZoom }) {
+            const [index, setIndex] = useState(0);
+            const [imgErrors, setImgErrors] = useState({});
+
+            useEffect(() => {
+                setIndex(0);
+                setImgErrors({});
+            }, [type]);
+
+            const handleNext = () => setIndex((i) => (i + 1) % items.length);
+            const handlePrev = () => setIndex((i) => (i - 1 + items.length) % items.length);
+            const handleImgError = (idx) => setImgErrors(prev => ({...prev, [idx]: true}));
+
+            const isTrophy = type === 'trophy';
+            const emptyIcon = isTrophy ? "fa-award" : "fa-clock-rotate-left";
+            const emptyText = isTrophy ? "ยังไม่มีจารึกเกียรติยศ" : "ยังไม่มีบันทึกวันวาน";
+            const errorText = isTrophy ? "ถ้วยหายไปไหน" : "รูปอดีตหายไปไหน";
+            const glowColor = isTrophy ? "shadow-[0_0_20px_rgba(250,204,21,0.7)] border-yellow-400" : "shadow-[0_0_20px_rgba(56,189,248,0.5)] border-sky-400";
+
+            if (items.length === 0) {
+                return (
+                    <div className="h-32 md:h-40 w-full flex flex-col items-center justify-center text-gray-400 text-xs font-bold border border-white/10 rounded-lg bg-black/50 shadow-inner">
+                        <i className={`fa-solid ${emptyIcon} text-3xl mb-2 opacity-30`}></i>
+                        {emptyText}
+                    </div>
+                );
+            }
+
+            const currentItem = items[index];
+            const hasError = imgErrors[index];
+
+            return (
+                <div className="relative h-32 md:h-40 w-full flex items-center justify-center bg-black/30 group rounded-lg">
+                    {!hasError && (
+                        <span className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-xl border border-white/50 z-20 pointer-events-none shadow-lg max-w-[200px] text-center whitespace-normal">
+                            {isTrophy ? '🏆' : '📜'} {currentItem.name} ({index + 1}/{items.length})
+                        </span>
+                    )}
+
+                    {hasError ? (
+                        <div className="h-full flex flex-col items-center justify-center text-red-400 text-xs font-bold">
+                            <i className="fa-solid fa-image-slash text-3xl mb-2 opacity-30"></i>
+                            {errorText}
+                        </div>
+                    ) : (
+                        <div 
+                            onClick={() => onZoom(currentItem.src)}
+                            className={`relative cursor-pointer transition-transform duration-300 group-hover:scale-105 ${glowColor} border-2 rounded-lg overflow-hidden bg-black flex items-center justify-center p-1 w-28 h-28 md:w-32 md:h-32`}
+                        >
+                            <img 
+                                src={currentItem.src} 
+                                className="w-full h-full object-cover" 
+                                alt={`Media ${index + 1}`}
+                                onError={() => handleImgError(index)}
+                            />
+                        </div>
+                    )}
+
+                    {items.length > 1 && !hasError && (
+                        <>
+                            <button onClick={handlePrev} className={`absolute left-1 bg-black/80 border ${isTrophy ? 'border-yellow-500/50 text-yellow-500 hover:bg-yellow-500' : 'border-sky-500/50 text-sky-500 hover:bg-sky-500'} w-8 h-8 rounded-full flex items-center justify-center hover:text-black transition cursor-pointer shadow-lg z-10 opacity-60 hover:opacity-100`}>
+                                <i className="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <button onClick={handleNext} className={`absolute right-1 bg-black/80 border ${isTrophy ? 'border-yellow-500/50 text-yellow-500 hover:bg-yellow-500' : 'border-sky-500/50 text-sky-500 hover:bg-sky-500'} w-8 h-8 rounded-full flex items-center justify-center hover:text-black transition cursor-pointer shadow-lg z-10 opacity-60 hover:opacity-100`}>
+                                <i className="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                            <div className="absolute -bottom-4 flex gap-1.5">
+                                {items.map((_, i) => (
+                                    <div key={i} className={`w-2 h-2 rounded-full ${i === index ? (isTrophy ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-sky-400 shadow-[0_0_5px_cyan]') : 'bg-white/30'}`}></div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: LoginGate
+        // ==========================================
+        function LoginGate({ onLoginSuccess }) {
+            const [displayPassword, setDisplayPassword] = useState('');
+            const [realPassword, setRealPassword] = useState('');
+            const [error, setError] = useState(false);
+
+            const handlePasswordChange = (e) => {
+                const val = e.target.value;
+                setError(false);
+                
+                if (val.length - displayPassword.length > 1) {
+                    setRealPassword(val);
+                    setDisplayPassword('●'.repeat(val.length - 1) + val.slice(-1));
+                } 
+                else if (val.length < displayPassword.length) { 
+                    setRealPassword(realPassword.slice(0, val.length)); 
+                    setDisplayPassword(val); 
+                } 
+                else { 
+                    const addedChar = val.slice(-1); 
+                    setRealPassword(realPassword + addedChar); 
+                    setDisplayPassword('●'.repeat(val.length - 1) + addedChar); 
+                }
+            };
+
+            useEffect(() => {
+                const timeout = setTimeout(() => { if(displayPassword.length > 0) setDisplayPassword('●'.repeat(displayPassword.length)); }, 800);
+                return () => clearTimeout(timeout);
+            }, [displayPassword]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const trimmedPass = realPassword.trim();
+                if (trimmedPass === 'DCweare1' || trimmedPass === 'ฏฉไำฟพำๅ') {
+                    onLoginSuccess();
+                } else { 
+                    setError(true); setRealPassword(''); setDisplayPassword(''); 
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 flex items-center justify-center z-[100] bg-black/90 p-4">
+                    <div className="parchment max-w-md w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl animate-fade-in">
+                        <div className="text-[#5d3a1a] mb-4 text-5xl"><i className="fa-solid fa-dungeon"></i></div>
+                        <h1 className="text-2xl font-bold text-[#5d3a1a] mb-2 font-cinzel tracking-wide">ประตูสู่ Diecast Kingdoms</h1>
+                        <p className="text-[#8b5a2b] text-sm mb-6 font-bold">โปรดแสดงรหัสผ่านลับขององค์กรเพื่อเข้าสู่อาณาจักร</p>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <input type="text" value={displayPassword} onChange={handlePasswordChange} placeholder="กรอกรหัสผ่านลับ..." className={`input-style text-center text-lg tracking-widest ${error ? 'border-red-600 bg-red-100 placeholder-red-400' : ''}`} required autoComplete="off" />
+                                {error && <p className="text-red-700 text-xs font-bold mt-2 animate-bounce">❌ รหัสผ่านไม่ถูกต้อง! ผู้บุกรุกจงถอยไป!</p>}
+                            </div>
+                            <button type="submit" className="w-full bg-[#5d3a1a] text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">เปิดประตูเมือง (Enter)</button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: WelcomeGate 
+        // ==========================================
+        function WelcomeGate({ onClose }) {
+            const [isVisible, setIsVisible] = useState(false);
+            const [isFadingOut, setIsFadingOut] = useState(false);
+
+            useEffect(() => {
+                const visited = localStorage.getItem('visited_v30');
+                if (!visited) setIsVisible(true);
+            }, []);
+
+            const handleClose = () => {
+                setIsFadingOut(true);
+                localStorage.setItem('visited_v30', 'true');
+                setTimeout(() => { setIsVisible(false); if (onClose) onClose(); }, 500);
+            };
+
+            if (!isVisible) return null;
+
+            return (
+                <div className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                    <div className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
+                        <h1 className="text-3xl font-bold text-[#5d3a1a] mb-6 font-cinzel tracking-wide">ยินดีต้อนรับสู่ Diecast Kingdoms</h1>
+                        <div className="text-[#8b5a2b] space-y-4 mb-8 text-sm md:text-base leading-relaxed">
+                            <p className="italic">"ดินแดนแห่งความร่วมมือ ที่ทุกไอเดียของท่านคืออิฐบล็อกที่ช่วยเสริมสร้างอาณาจักรของเราให้แข็งแกร่งยิ่งขึ้น"</p>
+                            <p>"ที่นี่คือพื้นที่เปิดกว้างสำหรับพนักงาน Diecast ทุกท่าน... ไม่ว่าท่านจะเป็นใคร มาจากอาณาจักรใด พลังแห่งการสร้างสรรค์ของท่านมีความหมายเสมอ"</p>
+                        </div>
+                        <button onClick={handleClose} className="bg-[#5d3a1a] w-full text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">เข้าสู่อาณาจักร</button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: NewsView
+        // ==========================================
+        function NewsView({ onViewChange }) {
+            return (
+                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm">
+                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto">
+                        <button onClick={() => onViewChange('worldmap')} className="absolute top-4 right-5 text-4xl font-bold text-[#8b5a2b] hover:text-red-600 transition cursor-pointer">&times;</button>
+                        <div className="text-center border-b-2 border-[#8b5a2b]/30 pb-4 mb-6 mt-4">
+                            <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> ประกาศิตข่าวสาร</h1>
+                            <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">อัปเดตกิจกรรมและประกาศพิเศษจากสภาเมือง</p>
+                        </div>
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-r from-amber-100 to-yellow-300 p-6 rounded-xl border-2 border-yellow-500 shadow-md flex flex-col md:flex-row items-center gap-6">
+                                <div className="text-6xl md:text-7xl animate-pulse">💎</div>
+                                <div>
+                                    <h3 className="font-bold text-yellow-900 text-xl md:text-2xl mb-2">ฉลองเปิดแผ่นดินใหม่: อีเวนต์ Quality x2!</h3>
+                                    <p className="text-sm md:text-base text-yellow-800 leading-relaxed">
+                                        ฉลองการเปิดใช้งานจริง เพื่อให้ความสำคัญกับคุณภาพ! จัดกิจกรรม <b className="text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">EXP x2</b> สำหรับการส่งสาส์นพัฒนาหมวด Quality<br/>
+                                        🔥 <b>สำหรับคนเสนอไอเดีย:</b> รับคะแนนเพิ่มจากปกติ 5 EXP เป็น <b className="text-red-700 text-lg">10 EXP</b><br/>
+                                        🔥 <b>สำหรับคนลงมือทำ:</b> ได้รับเพิ่มจากปกติ 15 EXP เป็น <b className="text-red-700 text-lg">30 EXP</b><br/>
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="bg-gradient-to-r from-slate-800 to-indigo-900 p-6 rounded-xl border-2 border-indigo-400 shadow-lg flex flex-col md:flex-row items-center gap-6 text-white group relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-2 text-indigo-400 opacity-30 text-8xl transform rotate-12"><i className="fa-solid fa-bolt"></i></div>
+                                <div className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">👆</div>
+                                <div className="relative z-10 flex-1">
+                                    <h3 className="font-bold text-indigo-200 text-xl md:text-2xl mb-2">กิจกรรมพิเศษ: ศึกจิ้มจอทลายจ้าว (POPBOSS)</h3>
+                                    <p className="text-sm md:text-base text-gray-300 mb-4 leading-relaxed">
+                                        มินิเกมส์ที่แสดงถึงการรวมมือกันของทุกคน! เลือกอาณาจักรของคุณแล้วรวมพลัง <b>จิ้ม จิ้ม จิ้ม</b> เพื่อปราบบอส <br/>
+                                        สำหรับอาณาจักรที่ชนะ จะได้สิทธิ์ในการจัดเทศกาลที่หน้าแผนที่โลก ไปที่ทุกอาณาจักรเพื่อประกาศศักดาความเจ๋งแจ๋ว! รวมพลังแล้วไปจัดการบอสกันเลย!<br/>
+                                        <span className="text-yellow-400 font-bold block mt-2 px-3 py-1 bg-black/40 rounded inline-block">⏳ ระยะเวลากิจกรรม: ตั้งแต่วันนี้ถึง 31 ตุลาคม 2026</span>
+                                    </p>
+                                    <button onClick={() => onViewChange('popboss')} className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-400 shadow-md cursor-pointer transition w-full md:w-auto text-lg border border-indigo-300">
+                                        ⚔️ เข้าร่วมศึกจิ้มจอตอนนี้!
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: Sidebar
+        // ==========================================
+        function Sidebar({ 
+            currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
+            musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
+            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack
+        }) {
+            const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+
+            const menuItems = [
+                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot' },
+                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column' },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved' },
+                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
+                { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
+            ];
+
+            return (
+                <div className={`fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
+                    
+                    <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
+                        <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
+                            {!isCollapsed && (
+                                <div className="flex flex-col">
+                                    <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
+                                    <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
+                                </div>
+                            )}
+                            {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
+                            <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
+                                <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+                            </button>
+                        </div>
+                        
+                        <nav className="p-3 space-y-2 mt-2 shrink-0">
+                            <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
+                                <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
+                                {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
+                            </button>
+                            {menuItems.map((item) => {
+                                const isActive = currentView === item.id;
+                                return (
+                                    <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
+                                        <div className="flex items-center justify-center w-8 text-center text-lg"><i className={item.icon}></i></div>
+                                        {!isCollapsed && <span className="text-sm font-semibold truncate text-left">{item.label}</span>}
+                                    </button>
+                                );
+                            })}
+                        </nav>
+                    </div>
+
+                    <div className="mt-auto shrink-0 flex flex-col">
+                        
+                        {!isCollapsed ? (
+                            <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
+                                <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
+                                    {musicTracks.map((t, idx) => (
+                                        <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
+                                            {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
+                                            {t.title}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="px-3 py-2 bg-[#8b5a2b]/20 flex justify-between items-center cursor-pointer border-t border-[#8b5a2b]/30" onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}>
+                                    <div className="flex flex-col w-[140px] overflow-hidden">
+                                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider mb-1">🎵 บทกวีแห่ง 5 ดินแดน</span>
+                                        <div className="music-marquee-container w-full">
+                                            <span className="music-marquee-text text-sm font-bold text-[#f7e6c4]">
+                                                {musicTracks[currentTrackIndex].title}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
+                                </div>
+                                <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
+                                    <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
+                                        <i className="fa-solid fa-repeat"></i>
+                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
+                                        <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
+                                            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
+                                        </button>
+                                        <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mx-3 mb-4 flex justify-center">
+                                <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
+                                    <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
+                            {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: POPBOSS Event 
+        // ==========================================
+        function PopBossEvent({ globalScores, updateGlobalScores, onClose, playHitSound }) {
+            const [myKingdom, setMyKingdom] = useState(null);
+            const [myScore, setMyScore] = useState(0);
+            const [isPopping, setIsPopping] = useState(false);
+            const [bossImgError, setBossImgError] = useState(false);
+
+            const kingdomsList = [
+                { id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
+                { id: 'Casteria', name: 'แคสเทอเรีย', icon: '🔥', color: 'rgba(243, 156, 18, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_casteria_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_casteria_hit.png' },
+                { id: 'Machinepolis', name: 'แมคชีนโพลิส', icon: '⚙️', color: 'rgba(46, 204, 113, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_hit.png' },
+                { id: 'Finalthron', name: 'ไฟนัลธรอน', icon: '✨', color: 'rgba(241, 196, 15, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_finalthron_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_finalthron_hit.png' }
+            ];
+
+            const handlePopStart = (e) => {
+                if(e && e.type === 'touchstart') e.preventDefault();
+                setIsPopping(true); setMyScore(s => s + 1); updateGlobalScores(myKingdom); 
+                playHitSound();
+            };
+            const handlePopEnd = () => setIsPopping(false);
+
+            if (!myKingdom) {
+                return (
+                    <div className="fixed inset-0 z-[60] popboss-bg flex flex-col items-center justify-center text-white animate-fade-in">
+                        <button onClick={onClose} className="absolute top-6 right-8 text-white text-4xl font-bold hover:text-red-500 cursor-pointer">&times;</button>
+                        <h1 className="text-4xl md:text-6xl font-bold mb-4 font-cinzel drop-shadow-lg text-indigo-300">เลือกอาณาจักรที่สังกัด</h1>
+                        <p className="text-lg md:text-xl text-gray-200 mb-10 drop-shadow font-bold">เพื่อเข้าสู่ศึก POPBOSS EVENT!</p>
+                        <div className="grid grid-cols-2 gap-6 w-[90%] max-w-2xl">
+                            {kingdomsList.map(k => (
+                                <button key={k.id} onClick={() => setMyKingdom(k.name)} className="kingdom-btn py-8 text-xl md:text-2xl border border-white/20" style={{backgroundColor: k.color.replace(', 0.95', ', 1')}}>
+                                    {k.icon} {k.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+
+            const maxScore = Math.max(...Object.values(globalScores), 0);
+            const activeKingdomData = kingdomsList.find(k => k.name === myKingdom);
+
+            return (
+                <div className="fixed inset-0 z-[60] overflow-hidden animate-fade-in bg-black">
+                    <button onClick={onClose} className="absolute top-6 right-8 text-white text-4xl font-bold hover:text-red-500 cursor-pointer z-50 drop-shadow-lg">&times;</button>
+                    <div className="relative w-full h-full">
+                        <div className="boss-box" onMouseDown={handlePopStart} onMouseUp={handlePopEnd} onMouseLeave={handlePopEnd} onTouchStart={handlePopStart} onTouchEnd={handlePopEnd}>
+                            {bossImgError ? (
+                                <div className={`text-9xl bg-red-800 flex items-center justify-center transition-transform w-full h-full ${isPopping ? 'scale-95' : ''} select-none`}>👿</div>
+                            ) : (
+                                <img src={isPopping ? activeKingdomData.imgHit : activeKingdomData.imgClose} className={isPopping ? 'popping' : ''} alt="BOSS" onError={() => setBossImgError(true)} />
+                            )}
+                        </div>
+
+                        {kingdomsList.map((k, idx) => {
+                            const isLeader = maxScore > 0 && globalScores[k.name] === maxScore;
+                            const positionClass = idx === 0 ? 'top-left' : idx === 1 ? 'top-right' : idx === 2 ? 'bottom-left' : 'bottom-right';
+                            return (
+                                <div key={k.id} className={`corner-badge ${positionClass} ${isLeader ? 'leader-kingdom' : myKingdom === k.name ? 'selected-kingdom' : 'opponent-kingdom'}`} style={!isLeader ? {backgroundColor: k.color} : {}}>
+                                    {isLeader && <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-4xl animate-bounce">👑</div>}
+                                    {k.icon} {k.id} : {globalScores[k.name] || 0}
+                                </div>
+                            );
+                        })}
+
+                        <div className="score-container">{myScore}</div>
+                        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4 z-20">
+                            <button onClick={() => {setMyKingdom(null); setMyScore(0); setBossImgError(false);}} className="bg-[rgba(83,53,74,0.9)] text-white px-8 py-3 rounded-lg border-2 border-white hover:bg-[rgba(83,53,74,1)] cursor-pointer font-bold shadow-xl text-lg transition">เปลี่ยนอาณาจักร</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: WorldMap 
+        // ==========================================
+        function WorldMap({ kingdomEXP, projects, onViewChange }) {
+            const [selectedKingdom, setSelectedKingdom] = useState(null);
+            const [zoomedImg, setZoomedImg] = useState(null); 
+            const [expandedTab, setExpandedTab] = useState(null);
+
+            useEffect(() => { setExpandedTab(null); }, [selectedKingdom]);
+
+            const kingdomsData = {
+                'Bascentra': {
+                    nameEng: 'BASCENTRA', nameThai: 'เบสเซนตร้า', kingdomId: 'Bascentra',
+                    desc: 'นครเวทมนตร์โบราณอันอบอุ่น ทำหน้าที่เป็นศูนย์กลางการถ่วงดุลอำนาจและการรักษามาตรฐานของทุกอาณาจักร',
+                    duties: 'ข้อเสนอแนะทั่วไป / สวัสดิการส่วนกลาง / ป่าต้องมนตราลับ',
+                    iconImg: 'Assets/Images/Kingdoms/Bascentra_8bit.png', bgImage: 'Assets/Images/Kingdoms/Bascentra_bg.png',
+                    barColor: 'bg-gradient-to-r from-emerald-500 to-teal-400',
+                    trophies: [], history: [], position: { top: '78%', left: '50%' },
+                    customSize: 'w-[120px] md:w-[180px]'
+                },
+                'Blankheimgard': {
+                    nameEng: 'BLANKHEIMGARD', nameThai: 'แบลงค์ไฮม์การ์ด', kingdomId: 'Blankheimgard',
+                    desc: 'ปราการน้ำแข็งและพายุหิมะอันหนาวเหน็บ วิถีชีวิตแบบสโลว์ไลฟ์ รักธรรมชาติและสู้ชีวิต',
+                    duties: 'Deburr, Shot Blast, Pretreatment, E-coating, Inspect 2',
+                    iconImg: 'Assets/Images/Kingdoms/Blankheimgard_8bit.png', bgImage: 'Assets/Images/Kingdoms/Blankheimgard_bg.png',
+                    barColor: 'bg-gradient-to-r from-sky-400 to-blue-600',
+                    trophies: [], history: [], position: { top: '48%', left: '26%' },
+                    customSize: 'w-[120px] md:w-[180px]' 
+                },
+                'Casteria': {
+                    nameEng: 'CASTERIA', nameThai: 'แคสเทอเรีย', kingdomId: 'Casteria',
+                    desc: 'ดินแดนแห่งไฟและเหล็กกล้า ช่างฝีมือผู้ประณีตและเปี่ยมด้วยทักษะการหลอมสรรค์สร้างระดับสูง',
+                    duties: 'Diecast, QC Casting, Casting Engineer, Incoming',
+                    iconImg: 'Assets/Images/Kingdoms/Casteria_8bit.png', bgImage: 'Assets/Images/Kingdoms/Casteria_bg.png',
+                    barColor: 'bg-gradient-to-r from-red-500 to-orange-500',
+                    trophies: [], history: [], position: { top: '48%', left: '74%' },
+                    customSize: 'w-[120px] md:w-[180px]' 
+                },
+                'Machinepolis': {
+                    nameEng: 'MACHINEPOLIS', nameThai: 'แมคชีนโพลิส', kingdomId: 'Machinepolis',
+                    desc: 'มหานครจักรกลล้ำยุคสุดไฮเทค บ้านเกิดของเหล่านักประดิษฐ์และนักวิทยาศาสตร์ผู้ค้นหาความจริง',
+                    duties: 'Machining, QC Machining, Water Jet, Washing',
+                    iconImg: 'Assets/Images/Kingdoms/Machinepolis_8bit.png', bgImage: 'Assets/Images/Kingdoms/Machinepolis_bg.png',
+                    barColor: 'bg-gradient-to-r from-purple-500 to-indigo-500',
+                    trophies: [], history: [], position: { top: '90%', left: '26%' },
+                    customSize: 'w-[120px] md:w-[180px]' 
+                },
+                'Finalthron': {
+                    nameEng: 'FINALTHRON', nameThai: 'ไฟนัลธรอน', kingdomId: 'Finalthron',
+                    desc: 'วิหารศักดิ์สิทธิ์บนยอดเขาสูงเสียดฟ้า มุ่งสู่ความสมบูรณ์แบบสูงสุด เกลียดชังความผิดพลาด',
+                    duties: 'Oven 190C+, Helium Leak Test, Impregnation, Final Inspect, QA',
+                    iconImg: 'Assets/Images/Kingdoms/Finalthron_8bit.png', bgImage: 'Assets/Images/Kingdoms/Finalthron_bg.png',
+                    barColor: 'bg-gradient-to-r from-yellow-400 to-amber-600',
+                    trophies: [], history: [], position: { top: '90%', left: '74%' },
+                    customSize: 'w-[120px] md:w-[180px]' 
+                }
+            };
+
+            const activeData = selectedKingdom ? kingdomsData[selectedKingdom] : null;
+            let levelData = { level: 1, currentExp: 0, requiredExp: 60 };
+            if (activeData) levelData = calculateLevel(kingdomEXP[activeData.nameThai] || 0);
+
+            return (
+                <div className="fixed inset-0 w-full h-full pointer-events-none z-10">
+                    {!selectedKingdom && Object.keys(kingdomsData).map(key => {
+                        return <MapPin key={key} kingdomKey={key} kingdom={kingdomsData[key]} onClick={() => setSelectedKingdom(key)} />
+                    })}
+                    
+                    {selectedKingdom && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] animate-fade-in p-4 md:p-8 pointer-events-auto" onClick={() => setSelectedKingdom(null)}>
+                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col" onClick={(e) => e.stopPropagation()}>
+                                <div className="absolute inset-0 z-0 opacity-80" style={{ backgroundImage: `url('${activeData.bgImage}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}></div>
+                                
+                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-4 right-4 bg-black/70 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-30 flex items-center justify-center border border-white/30 shadow-lg cursor-pointer">&times;</button>
+                                
+                                <div className="absolute top-6 left-6 md:top-10 md:left-10 z-40 flex items-center">
+                                    <div className="relative bg-black/50 pr-5 md:pr-8 py-2 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[70px] md:min-h-[100px] pl-[70px] md:pl-[130px]">
+                                        <img 
+                                            src={activeData.iconImg} 
+                                            alt="logo" 
+                                            className="absolute left-[-20px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-24 h-24 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
+                                        />
+                                        <div className="flex flex-col relative z-10 pt-1">
+                                            <span className="text-3xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-1">{activeData.nameEng}</span>
+                                            <span className="text-sm md:text-xl font-sarabun text-gray-300 font-medium">{activeData.nameThai}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="absolute top-6 right-16 md:top-10 md:right-10 z-20 w-56 md:w-72 bg-black/50 p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
+                                    <div className="flex justify-between text-sm md:text-base text-[#f7e6c4] font-bold mb-2">
+                                        <span>Level {levelData.level}</span>
+                                        <span>{levelData.currentExp} / {levelData.requiredExp} EXP</span>
+                                    </div>
+                                    <div className="w-full bg-black/80 h-3 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
+                                        <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
+                                    </div>
+                                </div>
+                                
+                                <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-6 z-20 items-end pointer-events-none mt-auto">
+                                    <div className="flex-1 bg-black/80 p-5 md:p-6 rounded-xl border border-[#8b5a2b]/50 backdrop-blur-md shadow-2xl pointer-events-auto">
+                                        <p className="text-gray-100 text-sm md:text-base leading-relaxed mb-4">{activeData.desc}</p>
+                                        <div className="text-xs md:text-sm text-[#ebdcb9] bg-black/50 px-4 py-3 rounded-lg border border-white/10">
+                                            <span className="font-bold text-yellow-400 mr-2">กระบวนการรับผิดชอบ:</span> {activeData.duties}
+                                        </div>
+                                    </div>
+
+                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none">
+                                        <button onClick={() => onViewChange('quests')} className="w-full bg-gradient-to-r from-[#8b5a2b] to-[#5d3a1a] hover:from-[#a06830] hover:to-[#6d4514] text-[#f7e6c4] py-3 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-[#ebdcb9]/40 transition text-sm cursor-pointer flex items-center justify-center gap-2 pointer-events-auto">
+                                            <i className="fa-solid fa-door-open text-lg"></i> เข้าสู่ลานภารกิจ
+                                        </button>
+
+                                        <div className="w-full bg-black/80 border border-[#8b5a2b]/50 rounded-xl p-3 md:p-4 backdrop-blur-md shadow-2xl pointer-events-auto flex flex-col transition-all duration-300">
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setExpandedTab(expandedTab === 'trophy' ? null : 'trophy')} className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition cursor-pointer ${expandedTab === 'trophy' ? 'bg-yellow-600 text-white shadow-inner border border-yellow-400' : 'bg-black/50 text-yellow-500 hover:bg-yellow-600/30 border border-yellow-500/30'}`}>
+                                                    <i className="fa-solid fa-trophy mr-1"></i> หอเกียรติยศ
+                                                </button>
+                                                <button onClick={() => setExpandedTab(expandedTab === 'history' ? null : 'history')} className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition cursor-pointer ${expandedTab === 'history' ? 'bg-sky-600 text-white shadow-inner border border-sky-400' : 'bg-black/50 text-sky-500 hover:bg-sky-600/30 border border-sky-500/30'}`}>
+                                                    <i className="fa-solid fa-clock-rotate-left mr-1"></i> อาณาจักรในวันวาน
+                                                </button>
+                                            </div>
+                                            
+                                            {expandedTab && (
+                                                <div className="mt-4 animate-fade-in border-t border-white/10 pt-4">
+                                                    <MediaCarousel items={expandedTab === 'trophy' ? activeData.trophies : activeData.history} type={expandedTab} onZoom={setZoomedImg} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {zoomedImg && (
+                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
+                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
+                            <img src={zoomedImg} alt="Zoomed" className="max-h-[80vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" onClick={(e) => e.stopPropagation()} />
+                            <p className="absolute bottom-10 text-gray-400 text-sm italic">คลิกที่ใดก็ได้เพื่อปิด</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: SuggestionForm 
+        // ==========================================
+        function SuggestionForm({ projects, onAddProject, onViewChange, runningSeq, setRunningSeq }) {
+            const [formData, setFormData] = useState({
+                name: '', empId: '', origin: '', target: '', category: '',
+                process: '', factory: '', pinpoint: '', title: '', problem: '',
+                solution: '', benefit: '', image: null, imagePreview: null
+            });
+            const [notification, setNotification] = useState('');
+
+            const processMap = {
+                'แคสเทอเรีย': ['Incoming (อินคัมมิ่ง)', 'Casting (แคสติ้ง)'],
+                'แบลงค์ไฮม์การ์ด': ['Deburring (ดีเบอร์ริ่ง)', 'Shot blast (ช็อตบลาส)', 'Auto deburring (ออโต้ดีเบอร์ริ่ง)', 'Washing after Deburring (วอชชิ่งอาฟเตอร์ดีเบอร์ริ่ง)', 'Stress Relieve oven (สเตรสรีลีฟโอเว่น)', 'Pre treatment (พรีทรีทเม้นท์)', 'E-Coat (อีโค้ท)', 'Inspection-2 และ Flatness', 'Knocking (น็อคกิ้ง)'],
+                'แมคชีนโพลิส': ['Machine Pre cut (แมชชีนพรีคัท)', 'Washing after pre cut (วอชชิ่งอาฟเตอร์พรีคัท)', 'Machine Post cut (แมชชีนโพสต์คัท)', 'Water jet (วอเตอร์เจ็ท)', 'Washing after MC Post cut (วอชชิ่งอาฟเตอร์เอ็มซีโพสต์คัท)'],
+                'ไฟนัลธรอน': ['W Baking 190C (วอชเบคกิ้ง 190 องศา)', 'Helium leak check (ฮีเลียมลีคเช็ค)', 'Impregnation (อิมเพรกเนชั่น)', 'Oven A/F Imp (โอเว่น เอ/เอฟ อิมเพรก)', 'Washing A/F Imp (วอชชิ่ง เอ/เอฟ อิมเพรก)', 'Final Inspection (ไฟนอลอินสเปคชั่น)', 'OQA (โอคิวเอ)', 'Packing/Shipping (แพ็คกิ้ง/ชิปปิ้ง)'],
+                'เบสเซนตร้า': ['อื่นๆ / Other (ข้อเสนอแนะทั่วไป)']
+            };
+
+            const defaultNames = { 'เบสเซนตร้า': 'อัญมณีนักปราชญ์', 'แคสเทอเรีย': 'สิงโตเพลิง', 'แบลงค์ไฮม์การ์ด': 'กวางหิมะ', 'แมคชีนโพลิส': 'ม้าบินจักรกล', 'ไฟนัลธรอน': 'นกยูงขาว' };
+
+            useEffect(() => {
+                if (formData.origin === 'เบสเซนตร้า') setFormData(prev => ({...prev, category: '🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)'}));
+                else if (formData.category.includes('Secret')) setFormData(prev => ({...prev, category: ''}));
+            }, [formData.origin]);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => { const newData = { ...prev, [name]: value }; if (name === 'target') newData.process = ''; return newData; });
+            };
+
+            const handleFileChange = (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    setFormData(prev => ({ ...prev, image: file.name, imagePreview: URL.createObjectURL(file) }));
+                }
+            };
+
+            const isAnonymous = formData.origin === 'เบสเซนตร้า';
+            const isSecret = formData.category.includes('Secret');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!isAnonymous && !formData.empId.trim()) { alert('กรุณากรอกรหัสพนักงานเพื่อใช้รับรางวัลและยืนยันตัวตนค่ะ'); return; }
+                if (!formData.origin || !formData.target || !formData.category || !formData.process || !formData.factory || !formData.title || !formData.problem || !formData.benefit) { alert('กรุณากรอกข้อมูลให้ครบถ้วนก่อนส่งสาส์นค่ะ'); return; }
+
+                let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
+                let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
+                
+                const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+                const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
+                
+                const newId = `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
+                setRunningSeq(prev => prev + 1); 
+
+                const newProject = {
+                    id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                    origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
+                    factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
+                    title: formData.title, problem: formData.problem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
+                    imageText: formData.image ? `📷 รูปแนบ: ${formData.image}` : '📷 รูปจำลองสาส์นปัญหา', imagePreview: formData.imagePreview, 
+                    status: isSecret ? 'Hidden' : 'Blueprint', comment: '', targetComment: '', imageAfterPreview: null,
+                    wasAbandoned: false, ideaApproved: false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality'), isSuperRising: false 
+                };
+
+                onAddProject(newProject);
+                setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
+                setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null });
+                setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+            };
+
+            const availableProcesses = formData.target ? processMap[formData.target] : [];
+
+            return (
+                <div className="parchment max-w-3xl mx-auto p-6 md:p-8 rounded-2xl relative animate-fade-in overflow-hidden mt-4">
+                    <div className="absolute top-4 right-4 z-20">
+                        <button onClick={() => onViewChange('chronicles', 'rules')} className="bg-red-800 text-white flex flex-col items-center px-4 py-1.5 rounded-lg border-2 border-red-400 hover:bg-red-700 shadow-xl transition cursor-pointer">
+                            <i className="fa-solid fa-circle-question text-xl mb-0.5"></i>
+                            <span className="text-[10px] md:text-xs font-bold tracking-wider">ปุจฉา-วิสัชนา (FAQ)</span>
+                        </button>
+                    </div>
+
+                    {notification && <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 bg-green-800 border-2 border-green-400 text-white font-bold px-6 py-3 rounded-xl shadow-2xl animate-bounce">{notification}</div>}
+                    
+                    {formData.category.includes('Quality') && <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg animate-pulse border border-yellow-600 hidden md:block">💎 EVENT: Quality EXP x2</div>}
+                    
+                    <h1 className="text-3xl font-bold text-center mb-6 text-[#5d3a1a] font-cinzel mt-8 md:mt-0">สาส์นพัฒนาแด่อาณาจักร<br /><span className="text-lg italic font-normal font-sans">Kingdom's Decree for Improvement</span></h1>
+                    {isAnonymous && <div className="bg-gray-800 text-gray-200 border border-gray-600 p-4 rounded-lg mb-6 shadow-inner text-sm font-bold animate-pulse"><i className="fa-solid fa-user-secret mr-2"></i> โหมดสาส์นลับ: ซ่อนข้อมูลประจำตัวคุณแล้ว ส่งตรงถึง HR</div>}
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <section className="space-y-4">
+                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1 w-full flex justify-between items-center">
+                                <span>1. ข้อมูลแห่งผู้นำเสนอ <span className="text-sm font-normal">(Identity)</span></span>
+                            </h2>
+                            
+                            {!isAnonymous && (
+                                <div className="bg-[#e5d3a6]/40 p-4 rounded-lg border border-[#8b5a2b]/30 mb-4">
+                                    <p className="text-xs text-[#8b5a2b] font-bold mb-2"><i className="fa-solid fa-user-shield"></i> ข้อมูลระบุตัวตน (Identity)</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div><input type="text" name="empId" value={formData.empId} onChange={handleChange} placeholder="รหัสพนักงาน (บังคับ)" className="input-style font-medium text-sm" required /><p className="text-[9px] mt-1 text-red-600 font-bold">*รหัสจะถูกบันทึกเพื่อใช้พิจารณาแจกรางวัล</p></div>
+                                        <div><input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="นามแฝง / ฉายาในเกม (ไม่บังคับ)" className="input-style font-medium text-sm" /><p className="text-[9px] mt-1 text-[#8b5a2b]">*หากเว้นว่าง ระบบจะตั้งฉายาให้</p></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <select name="origin" value={formData.origin} onChange={handleChange} className="input-style font-semibold" required>
+                                    <option value="">อาณาจักรต้นสังกัด / Origin Kingdom</option>
+                                    <option value="แคสเทอเรีย">แคสเทอเรีย (สิงโตอัคคี) / Casteria</option>
+                                    <option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด (กวางน้ำแข็ง) / Blankheimgard</option>
+                                    <option value="แมคชีนโพลิส">แมคชีนโพลิส (จักรกลวิจัย) / Machinepolis</option>
+                                    <option value="ไฟนัลธรอน">ไฟนัลธรอน (นกยูงแสง) / Finalthron</option>
+                                    <option value="เบสเซนตร้า" className="text-red-700 font-bold">🔒 ส่งแบบสาส์นลับ (เบสเซนตร้า)</option>
+                                </select>
+                                <select name="target" value={formData.target} onChange={handleChange} className="input-style font-semibold text-red-900" required>
+                                    <option value="">อาณาจักรเป้าหมายที่เกิดเหตุ / Target</option>
+                                    <option value="เบสเซนตร้า">เบสเซนตร้า / Bascentra</option>
+                                    <option value="แคสเทอเรีย">แคสเทอเรีย / Casteria</option>
+                                    <option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด / Blankheimgard</option>
+                                    <option value="แมคชีนโพลิส">แมคชีนโพลิส / Machinepolis</option>
+                                    <option value="ไฟนัลธรอน">ไฟนัลธรอน / Finalthron</option>
+                                </select>
+                            </div>
+                            
+                            <div className="w-full">
+                                <select name="category" value={formData.category} onChange={handleChange} className={`w-full input-style font-bold ${isAnonymous ? 'bg-gray-800 text-white' : ''}`} required>
+                                    {isAnonymous ? <option value="🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)">🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)</option> : (
+                                        <><option value="">เลือกพลังของสาส์น / Select Category</option><option value="💎 Quality (EVENT x2 EXP!)">💎 Quality (กิจกรรมพิเศษ x2 EXP!)</option><option value="🛡️ Safety - มนตราแห่งเกราะคุ้มภัย">🛡️ Safety</option><option value="📜 Culture - คัมภีร์แห่งปัญญา">📜 Culture</option></>
+                                    )}
+                                </select>
+                                
+                                {formData.category.includes('Quality') && (
+                                    <div className="mt-2 text-center bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 font-bold px-3 py-2 rounded-lg text-sm shadow-lg animate-pulse border border-yellow-600">
+                                        <i className="fa-regular fa-gem mr-1"></i> EVENT: Quality EXP x2
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                        <section className="space-y-4">
+                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">2. พิกัดของเรื่องราว <span className="text-sm font-normal">(Location Point)</span></h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <select name="process" value={formData.process} onChange={handleChange} className="input-style font-bold text-blue-900" required disabled={!formData.target}><option value="">{formData.target ? 'เลือกกระบวนการ / Select Process' : 'กรุณาเลือกเป้าหมายก่อน'}</option>{availableProcesses.map((p, idx) => <option key={idx} value={p}>{p}</option>)}</select>
+                                <select name="factory" value={formData.factory} onChange={handleChange} className="input-style" required><option value="">เลือกโรงงาน / Select Location</option><option value="โรจนะ">โรจนะ / Rojana</option><option value="บางปะอิน">บางปะอิน / Bang Pa-in</option><option value="บ้านหว้า 2">บ้านหว้า 2 / Baan Wa 2</option></select>
+                            </div>
+                            <input type="text" name="pinpoint" value={formData.pinpoint} onChange={handleChange} placeholder="ระบุพิกัดปัญหา / Specific Point (e.g. Casting Machine 31)" className="input-style" />
+                        </section>
+                        <section className="space-y-4">
+                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">3. รายละเอียดแห่งสาส์น <span className="text-sm font-normal">(Content)</span></h2>
+                            <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder={isSecret ? "หัวข้อเรื่องร้องเรียน" : "ชื่อโครงการ / Project Name"} className="input-style font-bold" required />
+                            <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder="รายละเอียดปัญหาที่พบ / Problem Description" className="input-style h-24 font-sans" required></textarea>
+                            <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder="วิธีแก้ไขที่ต้องการ (ถ้ามี) / Proposed Solution" className="input-style h-24 font-sans"></textarea>
+                            <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder="ผลลัพธ์ที่คาดหวัง / Expected Benefits" className="input-style h-24 font-sans" required></textarea>
+                            <div className="bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">
+                                <label className="block text-sm font-bold text-[#8b5a2b] mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
+                                <input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-[#5d3a1a] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#8b5a2b]/20 hover:file:bg-[#8b5a2b]/35 file:cursor-pointer" />
+                                {formData.imagePreview && <div className="mt-2 h-32 w-48 border-2 border-dashed border-[#8b5a2b] rounded-lg overflow-hidden"><img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover" /></div>}
+                            </div>
+                        </section>
+                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>{isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}</button>
+                    </form>
+                </div>
+            );
+        }
+
+        const getFormattedDate = () => {
+            const d = new Date();
+            return `${d.getFullYear()}_${String(d.getMonth() + 1).padStart(2, '0')}_${String(d.getDate()).padStart(2, '0')}`;
+        };
+
+        // ==========================================
+        // COMPONENT 5: Dashboard
+        // ==========================================
+        function Dashboard({ projects, onUpdateProject, kingdomEXP }) {
+            const [isAdminMode, setIsAdminMode] = useState(false);
+            const [selectedProject, setSelectedProject] = useState(null);
+            const [adminStatus, setAdminStatus] = useState('');
+            const [adminFeedback, setAdminFeedback] = useState('');
+            const [adminCategory, setAdminCategory] = useState(''); 
+
+            const [filters, setFilters] = useState({ origin: '', target: '', location: '', category: '', status: '', search: '' });
+            const [cardStatusFilter, setCardStatusFilter] = useState('Blueprint');
+            const [currentPage, setCurrentPage] = useState(1);
+            const itemsPerPage = 5; 
+
+            const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
+            useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter]);
+
+            const handleAdminLogin = () => {
+                if (isAdminMode) { setIsAdminMode(false); alert('ออกจากโหมดสภาเมืองเรียบร้อยแล้ว'); return; }
+                const pass = prompt('🔐 กรุณาใส่รหัสผ่านสภาเมือง:');
+                if (pass === '1234') { setIsAdminMode(true); alert('✅ รหัสผ่านถูกต้อง เข้าสู่โหมดสภาเมือง'); } 
+                else if (pass !== null) alert('❌ รหัสผ่านไม่ถูกต้อง!');
+            };
+
+            const getDashboardStatusStr = (p) => {
+                if (p.status === 'Deleted') return 'Deleted';
+                if (p.status === 'Hidden') return 'Hidden';
+                if (p.status === 'Hall of fame') return 'Hall of fame';
+                if (p.status === 'Blueprint') return 'Blueprint';
+                if (p.status === 'Ruined' && !p.ideaApproved) return 'Ruined';
+                if (p.ideaApproved) return p.isSuperRising ? 'Super Rising' : 'Rising';
+                return 'Founding';
+            };
+
+            const handleExportCSV = () => {
+                const exportProjects = isAdminMode ? activeProjects : activeProjects.filter(p => p.status !== 'Hidden');
+                
+                if (exportProjects.length === 0) { alert('ไม่มีข้อมูลให้เบิกบันทึกค่ะ'); return; }
+                
+                const headers = ['รหัสแบบแปลน', 'รหัสพนักงาน', 'ผู้เสนอ', 'อาณาจักรต้นสังกัด', 'อาณาจักรเป้าหมาย', 'ประเภทพลังสาส์น', 'โรงงาน/สถานที่', 'กระบวนการที่พัฒนา', 'พิกัดปัญหา', 'ชื่อโครงการ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'วิธีแก้ไข(ที่เสนอ)', 'ประโยชน์ที่คาดว่าจะได้รับ', 'รูปภาพแนบ', 'สถานะ'];
+                const csvRows = exportProjects.map(p => [
+                    p.id, p.emp, p.name, p.origin, p.target, p.category, p.factory, p.location, p.pinpoint, p.title, p.problem, p.solution, p.benefit, p.imagePreview ? 'มี' : 'ไม่มี', getDashboardStatusStr(p)
+                ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
+                
+                const csvString = [headers.join(','), ...csvRows].join('\n');
+                const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `DK_Idea_report_${getFormattedDate()}.csv`;
+                link.click();
+            };
+
+            const openModal = (project) => { 
+                setSelectedProject(project); setAdminStatus(''); setAdminFeedback(''); 
+                setAdminCategory(project.category.includes('Quality') ? 'Quality' : project.category.includes('Safety') ? 'Safety' : project.category.includes('Culture') ? 'Culture' : 'Secret');
+            };
+            const closeModal = () => { setSelectedProject(null); };
+
+            const handleAdminSubmit = () => {
+                if (!adminStatus) { alert('กรุณาเลือกสถานะก่อนบันทึกค่ะ'); return; }
+                let updatedProject = { ...selectedProject };
+                updatedProject.category = adminCategory;
+                updatedProject.isQualityEvent = adminCategory === 'Quality';
+
+                if (adminStatus === 'Rising') {
+                    updatedProject.status = 'Founding'; updatedProject.ideaApproved = true; updatedProject.isSuperRising = false;
+                    const qBonus = updatedProject.isQualityEvent ? ' (+10 EXP กิจกรรม Quality)' : ' (+5 EXP)';
+                    updatedProject.comment = adminFeedback || `ยอดเยี่ยม! สภาและอาณาจักรเห็นชอบ อนุมัติไอเดียให้เป็นแผนแม่แบบ${qBonus} โปรดติดตามผลที่ลานภารกิจต่อไป`;
+                } else if (adminStatus === 'Founding') {
+                    updatedProject.status = 'Founding'; updatedProject.ideaApproved = false;
+                    updatedProject.comment = adminFeedback || 'กำลังอยู่ในกระบวนการพิจารณาและประเมินไอเดียร่วมกับอาณาจักรเป้าหมาย';
+                } else if (adminStatus === 'Ruined') {
+                    updatedProject.status = 'Ruined'; updatedProject.ideaApproved = false;
+                    updatedProject.comment = adminFeedback || 'ไม่อนุมัติ: เนื่องจากรายละเอียดไม่สอดคล้องกับงบประมาณหลักในส่วนอื่นค่ะ';
+                }
+                onUpdateProject(updatedProject);
+                alert('บันทึกคำพิจารณาสาส์นเรียบร้อยแล้ว!');
+                closeModal();
+            };
+
+            const handleUpgradeSuperRising = () => {
+                if (window.confirm('👑 ยืนยันการอัปเกรดสาส์นนี้เป็น "Super Rising" เพื่อมอบโบนัสพิเศษให้ผู้เสนอ (+10 EXP) หรือไม่?')) {
+                    let updatedProject = { ...selectedProject };
+                    updatedProject.isSuperRising = true;
+                    const qBonus = updatedProject.isQualityEvent ? ' (+20 EXP กิจกรรม Quality)' : ' (+10 EXP)';
+                    updatedProject.comment = `👑 ยอดเยี่ยมระดับซูเปอร์! สภาอนุมัติไอเดียที่ช่วยลด Cost/Cycle Time นี้${qBonus} โปรดติดตามผลที่ลานภารกิจ`;
+                    onUpdateProject(updatedProject);
+                    setSelectedProject(updatedProject); 
+                    alert('👑 อัปเกรดสาส์นเป็น Super Rising เรียบร้อยแล้ว!');
+                }
+            };
+
+            const handleSecretAction = (actionType) => {
+                if (actionType === 'Delete') {
+                    if (window.confirm('⚠️ คำเตือน: คุณกำลังจะทำลายสาส์นฉบับนี้แบบถาวร! ข้อมูลจะหายไปจากระบบทั้งหมด ยืนยันการทำลายหรือไม่?')) {
+                        onUpdateProject({ ...selectedProject, status: 'Deleted' });
+                        alert('🔥 เผาทำลายสาส์นเรียบร้อยแล้ว!'); closeModal();
+                    }
+                } else if (actionType === 'Hide') {
+                    if (window.confirm('🔒 ต้องการซ่อนสาส์นนี้จากกระดานสาธารณะหรือไม่? (จะมีแค่แอดมินที่มองเห็น)')) {
+                        onUpdateProject({ ...selectedProject, status: 'Hidden' });
+                        alert('🔒 ซ่อนสาส์นเรียบร้อยแล้ว!'); closeModal();
+                    }
+                } else if (actionType === 'HallOfFame') {
+                    if (window.confirm('⭐ ต้องการบรรจุสาส์นนี้เข้าสู่ Hall of fame เพื่อเคลียร์กระดานหรือไม่?')) {
+                        onUpdateProject({ ...selectedProject, status: 'Hall of fame' });
+                        alert('⭐ บรรจุเข้าหอเกียรติยศเรียบร้อยแล้ว!'); closeModal();
+                    }
+                } else if (actionType === 'Restore') {
+                    if (window.confirm('🔄 ต้องการดึงสาส์นนี้กลับคืนสู่กระดานหลักหรือไม่?')) {
+                        const restoreStatus = selectedProject.ideaApproved ? 'Rising' : 'Blueprint';
+                        onUpdateProject({ ...selectedProject, status: restoreStatus });
+                        alert('🔄 ดึงกลับมาเรียบร้อยแล้ว!'); closeModal();
+                    }
+                }
+            };
+
+            const getStatusBadge = (project) => {
+                if (project.status === 'Deleted') return null;
+                if (project.status === 'Hidden') return <span className="bg-gray-800 text-gray-300 border border-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[80px] inline-block text-center">ถูกซ่อนลับ</span>;
+                if (project.status === 'Hall of fame') return <span className="bg-yellow-900 text-yellow-300 border border-yellow-500 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[100px] inline-block text-center"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span>;
+                if (project.status === 'Blueprint') return <span className="bg-blue-200 text-blue-800 border border-blue-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[70px] inline-block text-center">Blueprint</span>;
+                if (project.status === 'Ruined' && !project.ideaApproved) return <span className="bg-red-200 text-red-800 border border-red-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[70px] inline-block text-center">Ruined</span>;
+                
+                if (project.ideaApproved) {
+                    if (project.isSuperRising) return <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border border-yellow-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm inline-block text-center"><i className="fa-solid fa-crown mr-1"></i>Super Rising</span>;
+                    else return <span className="bg-green-200 text-green-800 border border-green-500 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[70px] inline-block text-center">Rising</span>;
+                }
+                return <span className="bg-yellow-200 text-yellow-800 border border-yellow-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[70px] inline-block text-center">Founding</span>;
+            };
+
+            const activeProjects = projects.filter(p => p.status !== 'Deleted');
+            const visibleProjects = isAdminMode ? activeProjects : activeProjects.filter(p => p.status !== 'Hidden' && p.status !== 'Hall of fame');
+
+            const filteredProjects = visibleProjects.filter(project => {
+                const matchOrigin = !filters.origin || project.origin.includes(filters.origin);
+                const matchTarget = !filters.target || project.target.includes(filters.target);
+                const matchLocation = !filters.location || project.factory === filters.location;
+                const matchCategory = !filters.category || project.category.toLowerCase().includes(filters.category.toLowerCase());
+                let matchStatus = true;
+                if (filters.status) {
+                    if (filters.status === 'Blueprint') matchStatus = project.status === 'Blueprint';
+                    else if (filters.status === 'Founding') matchStatus = project.status === 'Founding' && !project.ideaApproved;
+                    else if (filters.status === 'Rising') matchStatus = project.status === 'Rising' || project.ideaApproved;
+                    else if (filters.status === 'Ruined') matchStatus = project.status === 'Ruined';
+                }
+                const rowText = `${project.id} ${project.title} ${project.name} ${project.emp}`.toLowerCase();
+                const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
+                return matchOrigin && matchTarget && matchLocation && matchCategory && matchStatus && matchSearch;
+            });
+
+            const totalFiltered = filteredProjects.length;
+            const countCardStatus = filteredProjects.filter(project => {
+                if (cardStatusFilter === 'Blueprint') return project.status === 'Blueprint';
+                if (cardStatusFilter === 'Founding') return project.status === 'Founding' && !project.ideaApproved;
+                if (cardStatusFilter === 'Rising') return project.status === 'Rising' || project.ideaApproved;
+                if (cardStatusFilter === 'Ruined') return project.status === 'Ruined';
+                return false;
+            }).length;
+
+            const percentage = totalFiltered > 0 ? ((countCardStatus / totalFiltered) * 100).toFixed(1) : '0.0';
+
+            const kingdoms = [
+                { name: 'เบสเซนตร้า', id: 'bes', hexColor: '#10b981' },
+                { name: 'แคสเทอเรีย', id: 'cas', hexColor: '#ef4444' },
+                { name: 'แบลงค์ไฮม์การ์ด', id: 'bla', hexColor: '#38bdf8' },
+                { name: 'แมคชีนโพลิส', id: 'mac', hexColor: '#a855f7' },
+                { name: 'ไฟนัลธรอน', id: 'fin', hexColor: '#facc15' },
+            ];
+
+            const indexOfLastItem = currentPage * itemsPerPage;
+            const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+            const currentItems = filteredProjects.slice(indexOfFirstItem, indexOfLastItem);
+            const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#8b5a2b]/30 pb-4">
+                        <div className="bg-[#f4e4bc] border-2 border-[#8b5a2b] px-5 py-2.5 rounded-xl shadow-lg inline-block">
+                            <h1 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] drop-shadow-sm font-cinzel">ประกาศิตแห่งแผ่นดิน Diecast</h1>
+                            <p className="text-xs text-[#8b5a2b] font-sans mt-0.5 font-bold">(Idea Summary Dashboard)</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={handleExportCSV} className="px-4 py-2.5 rounded-xl border border-blue-600 bg-blue-100 text-blue-800 font-bold shadow hover:bg-blue-200 transition text-xs flex items-center gap-2 cursor-pointer">
+                                <i className="fa-solid fa-download"></i> เบิกบันทึกสภา (Export CSV)
+                            </button>
+                            <button onClick={handleAdminLogin} className={`px-4 py-2.5 rounded-xl border-2 font-bold transition shadow-lg flex items-center gap-2 cursor-pointer text-xs ${isAdminMode ? 'bg-green-800 text-white border-green-500 hover:bg-green-700' : 'bg-[#f4e4bc] text-[#5d3a1a] border-[#8b5a2b] hover:bg-[#e5d3a6]'}`}>
+                                <i className={`fa-solid ${isAdminMode ? 'fa-unlock' : 'fa-lock'}`}></i>
+                                {isAdminMode ? 'โหมดสภาเมือง (ปลดล็อก)' : 'โหมดสภาเมือง'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl">
+                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
+                        <div className="space-y-4">
+                            {kingdoms.map(k => {
+                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                return (
+                                    <div key={k.id}>
+                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
+                                        </div>
+                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="stat-card p-5 rounded-2xl text-center flex flex-col justify-center">
+                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">แผนพัฒนาตามฟิลเตอร์<br />(Filtered Plans)</p>
+                            <h2 className="text-4xl font-bold text-[#5d3a1a] font-cinzel">{totalFiltered}</h2>
+                        </div>
+                        <div className="stat-card p-4 rounded-2xl text-center flex flex-col items-center justify-center">
+                            <select value={cardStatusFilter} onChange={(e) => setCardStatusFilter(e.target.value)} className="custom-select text-xs font-bold text-[#5d3a1a] mb-1 w-full text-center bg-[#f4e4bc]">
+                                <option value="Blueprint">📌 Blueprint (รอตรวจ)</option>
+                                <option value="Founding">🏗️ Founding (กำลังพิจารณา)</option>
+                                <option value="Rising">⭐ Rising (อนุมัติไอเดียแล้ว)</option>
+                                <option value="Ruined">❌ Ruined (ปัดตก)</option>
+                            </select>
+                            <h2 className={`text-4xl font-bold font-cinzel ${cardStatusFilter === 'Blueprint' ? 'text-blue-700' : cardStatusFilter === 'Founding' ? 'text-yellow-700' : cardStatusFilter === 'Rising' ? 'text-emerald-700' : 'text-red-700'}`}>{countCardStatus}</h2>
+                        </div>
+                        <div className="stat-card p-5 rounded-2xl text-center flex flex-col justify-center">
+                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">สัดส่วนจากแผนทั้งหมด<br />(Percentage)</p>
+                            <h2 className="text-4xl font-bold text-[#5d3a1a] font-cinzel">{percentage}%</h2>
+                        </div>
+                    </div>
+
+                    <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <span className="font-bold text-[#5d3a1a] mr-1">FILTERS:</span>
+                            <select name="origin" value={filters.origin} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Origin (ผู้เสนอ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
+                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (ผู้ถูกเสนอ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
+                            <select name="location" value={filters.location} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Location (สถานที่)</option><option value="โรจนะ">โรจนะ</option><option value="บางปะอิน">บางปะอิน</option><option value="บ้านหว้า 2">บ้านหว้า 2</option></select>
+                            <select name="category" value={filters.category} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Category (หมวดหมู่)</option><option value="Safety">Safety</option><option value="Quality">Quality</option><option value="Culture">Culture</option></select>
+                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Status (สถานะไอเดีย)</option><option value="Blueprint">Blueprint</option><option value="Founding">Founding</option><option value="Rising">Rising</option><option value="Ruined">Ruined</option></select>
+                        </div>
+                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID, ชื่อ, รหัส..." className="w-full md:w-64 custom-select text-xs font-medium" />
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
+                        <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
+                            <thead>
+                                <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
+                                    <th className="py-3 px-2">รหัสแบบแปลน</th>
+                                    <th className="py-3 px-2 max-w-[200px]">ชื่อโครงการ</th>
+                                    <th className="py-3 px-2">รหัสพนักงาน</th>
+                                    <th className="py-3 px-2">ผู้เสนอ (ฉายา)</th>
+                                    <th className="py-3 px-2 text-blue-800">บ้านเกิด</th>
+                                    <th className="py-3 px-2 text-red-800">เป้าหมาย</th>
+                                    <th className="py-3 px-2 bg-[#e5d3a6]/60 rounded-t-lg">สถานที่</th>
+                                    <th className="py-3 px-2">หมวดหมู่</th>
+                                    <th className="py-3 px-2 text-center w-24">สถานะ</th>
+                                    <th className="py-3 px-2 text-center">เปิดสาส์น</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-[#8b5a2b]">
+                                {currentItems.length === 0 ? (
+                                    <tr><td colSpan={10} className="py-8 text-center font-bold text-[#8b5a2b]/60">🛡️ ไม่พบข้อมูลสาส์น</td></tr>
+                                ) : (
+                                    currentItems.map(p => {
+                                        const isHiddenRow = p.status === 'Hidden' || p.status === 'Hall of fame';
+                                        return (
+                                        <tr key={p.id} className={`border-b border-[#8b5a2b]/25 hover:bg-[#e7d5a5]/50 transition duration-150 ${isHiddenRow ? 'bg-gray-800/10 opacity-75' : ''}`}>
+                                            <td className="py-3.5 px-2 font-bold text-slate-800">
+                                                {p.id} 
+                                                {p.isQualityEvent && <span className="ml-1 text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
+                                                {p.isSuperRising && <span className="ml-1 text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
+                                            </td>
+                                            <td className="py-3.5 px-2 font-semibold max-w-[200px] truncate">{p.title}</td>
+                                            <td className="py-3.5 px-2">{p.emp}</td>
+                                            <td className="py-3.5 px-2">{p.name}</td>
+                                            <td className="py-3.5 px-2 font-bold">{p.origin}</td>
+                                            <td className="py-3.5 px-2 font-bold">{p.target}</td>
+                                            <td className="py-3.5 px-2 font-bold text-[#5d3a1a]">{p.factory}</td>
+                                            <td className="py-3.5 px-2">
+                                                {p.category.includes('Secret') ? <span className="text-gray-800 font-bold"><i className="fa-solid fa-user-secret"></i> Secret</span> : p.category}
+                                            </td>
+                                            <td className="py-3.5 px-2 text-center">{getStatusBadge(p)}</td>
+                                            <td className="py-3.5 px-2 text-center">
+                                                <button onClick={() => openModal(p)} className="bg-[#5d3a1a] text-[#f7e6c4] px-3 py-1.5 rounded-lg hover:bg-[#8b5a2b] hover:text-white shadow transition cursor-pointer text-xs font-bold whitespace-nowrap">
+                                                    <i className="fa-solid fa-envelope-open-text mr-1"></i> ดูเพิ่มเติม
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        )
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                        
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-3 mt-6 border-t border-[#8b5a2b]/20 pt-4">
+                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer"><i className="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ</button>
+                                <span className="text-sm font-bold text-[#5d3a1a] bg-white px-4 py-1.5 border border-[#8b5a2b]/40 rounded-lg shadow-inner">{currentPage} / {totalPages}</span>
+                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer">ถัดไป <i className="fa-solid fa-chevron-right ml-1"></i></button>
+                            </div>
+                        )}
+                    </div>
+
+                    {selectedProject && (
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
+                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto">
+                                <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
+                                <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
+                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">📜 สาส์นพัฒนาแด่อาณาจักร 📜</h2>
+                                    <p className="text-[#8b5a2b] mt-1.5 italic font-bold">รหัสแบบแปลน: {selectedProject.id}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 mb-6 text-[#5d3a1a] text-xs">
+                                    {isAdminMode && <p><strong>รหัสพนักงาน (Admin Only):</strong> <span className="text-red-700 font-bold">{selectedProject.emp}</span></p>}
+                                    <p className={!isAdminMode ? "col-span-2" : ""}><strong>ผู้เสนอ (นามแฝง):</strong> {selectedProject.name}</p>
+                                    <p><strong>อาณาจักรต้นสังกัด:</strong> <span className="font-bold text-blue-700">{selectedProject.origin}</span></p>
+                                    <p><strong>อาณาจักรเป้าหมาย:</strong> <span className="font-bold text-red-700">{selectedProject.target}</span></p>
+                                    <p className="col-span-2"><strong>ประเภทพลังสาสน์:</strong> <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded font-bold border border-blue-300">{selectedProject.category}</span></p>
+                                </div>
+                                <div className="space-y-4 text-[#5d3a1a] bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
+                                    <p><strong>โรงงาน / สถานที่:</strong> <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">{selectedProject.factory}</span></p>
+                                    <p><strong>กระบวนการที่พัฒนา:</strong> {selectedProject.location}</p>
+                                    <p><strong>พิกัดปัญหา:</strong> {selectedProject.pinpoint}</p>
+                                    <p><strong>ชื่อโครงการ:</strong> <span className="font-bold text-[#5d3a1a] text-base">{selectedProject.title}</span></p>
+                                    <div>
+                                        <p className="font-bold">รายละเอียดปัญหา/ข้อร้องเรียน:</p>
+                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.problem}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold">วิธีแก้ไข (ที่เสนอ):</p>
+                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.solution}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold">ประโยชน์ที่คาดว่าจะได้รับ:</p>
+                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.benefit}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> ภาพพิกัดปัญหา (Before):</p>
+                                        {selectedProject.imagePreview ? (
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner">
+                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain" />
+                                            </div>
+                                        ) : (
+                                            <div className="bg-gray-200 h-24 mt-1.5 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 font-bold"><span>{selectedProject.imageText}</span></div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 p-4 comment-box rounded-xl shadow-inner">
+                                    <div className="flex justify-between items-center mb-2 border-b border-[#8b5a2b]/25 pb-1 text-xs">
+                                        <p className="font-bold text-[#5d3a1a]">👑 บัญชาจากสภาเมือง:</p>
+                                        {isAdminMode && selectedProject.ideaApproved && !selectedProject.isSuperRising && selectedProject.status !== 'Deleted' ? (
+                                            <button onClick={handleUpgradeSuperRising} className="bg-green-200 text-green-800 border border-green-500 px-4 py-1.5 rounded-full text-xs font-bold shadow-md hover:scale-105 hover:bg-green-300 transition cursor-pointer flex items-center gap-1" title="คลิกเพื่ออัปเกรดเป็น Super Rising">
+                                                Rising <i className="fa-solid fa-arrow-up animate-bounce"></i>
+                                            </button>
+                                        ) : (
+                                            <span className="font-bold">{getStatusBadge(selectedProject)}</span>
+                                        )}
+                                    </div>
+                                    <div className="text-[#5d3a1a] text-xs leading-relaxed">
+                                        {selectedProject.status === 'Blueprint' && <span>⏳ ม้าเร็วกำลังวิ่งนำสาส์นของท่านส่งถึงสภาเมือง อดใจรอสักนิด</span>}
+                                        {selectedProject.status === 'Hidden' && <span>🔒 สาส์นฉบับนี้ถูกเก็บเป็นความลับสุดยอดโดยสภาเมือง</span>}
+                                        {selectedProject.status === 'Hall of fame' && <span>⭐ สาส์นฉบับนี้ถูกบรรจุลงในหอเกียรติยศแล้ว (ซ่อนจากหน้าหลัก)</span>}
+                                        {selectedProject.status !== 'Blueprint' && selectedProject.status !== 'Hidden' && selectedProject.status !== 'Hall of fame' && selectedProject.comment && <span dangerouslySetInnerHTML={{ __html: selectedProject.comment }}></span>}
+                                    </div>
+                                </div>
+
+                                {isAdminMode && (
+                                    <div className="mt-6 p-4 bg-gray-800 border border-gray-600 rounded-xl space-y-3 shadow-inner">
+                                        <p className="font-bold text-gray-300 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-user-secret"></i> คำสั่งลับสภาเมือง (จัดการปัญหา / เคลียร์ขยะ)</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedProject.status === 'Hidden' || selectedProject.status === 'Hall of fame' ? (
+                                                <button onClick={() => handleSecretAction('Restore')} className="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> ดึงกลับคืนมา (Restore)</button>
+                                            ) : (
+                                                <>
+                                                    <button onClick={() => handleSecretAction('Hide')} className="flex-1 bg-gray-600 text-white font-bold py-2 rounded hover:bg-gray-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-eye-slash mr-1"></i> ซ่อน (Hide)</button>
+                                                </>
+                                            )}
+                                            <button onClick={() => handleSecretAction('Delete')} className="flex-1 bg-red-900 text-white font-bold py-2 rounded hover:bg-red-800 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-fire mr-1"></i> ลบทิ้ง (Delete)</button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isAdminMode && (selectedProject.status === 'Blueprint' || !selectedProject.ideaApproved) && selectedProject.status !== 'Hidden' && selectedProject.status !== 'Hall of fame' && (
+                                    <div className="mt-4 p-4 bg-red-50 border border-red-300 rounded-xl space-y-3">
+                                        <p className="font-bold text-red-800 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> แผงควบคุมสภาเมือง (พิจารณาสาส์นต้นทาง)</p>
+                                        <select value={adminCategory} onChange={(e) => setAdminCategory(e.target.value)} className="w-full p-2.5 border border-red-300 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none mb-1">
+                                            <option value="Quality">💎 หมวดหมู่: Quality (กิจกรรมพิเศษ x2 EXP!)</option>
+                                            <option value="Safety">🛡️ หมวดหมู่: Safety</option>
+                                            <option value="Culture">📜 หมวดหมู่: Culture</option>
+                                            <option value="Secret">🔒 หมวดหมู่: Secret</option>
+                                        </select>
+                                        <select value={adminStatus} onChange={(e) => setAdminStatus(e.target.value)} className="w-full p-2.5 border border-red-300 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
+                                            <option value="">-- อัปเดตสถานะไอเดีย --</option>
+                                            <option value="Founding">🏗️ Founding (กำลังพิจารณา / ปรึกษาเป้าหมาย)</option>
+                                            <option value="Rising">⭐ Rising (อนุมัติไอเดียปกติ)</option>
+                                            <option value="Ruined">❌ Ruined (ปัดตกไอเดีย)</option>
+                                        </select>
+                                        <textarea rows={2} value={adminFeedback} onChange={(e) => setAdminFeedback(e.target.value)} placeholder="สภาเมืองขอคอมเมนต์ว่า..." className="w-full p-2.5 border border-red-300 rounded-lg text-xs bg-white text-slate-800 outline-none"></textarea>
+                                        <button onClick={handleAdminSubmit} className="w-full bg-red-800 text-white font-bold py-2.5 rounded-lg hover:bg-red-700 shadow transition cursor-pointer text-xs">บันทึกคำพิจารณาสาส์น</button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT 6: QuestBoard
+        // ==========================================
+        function QuestBoard({ projects, onUpdateProject, kingdomEXP }) {
+            const [currentRole, setCurrentRole] = useState('none');
+            const [selectedQuest, setSelectedQuest] = useState(null);
+            const [targetCommentText, setTargetCommentText] = useState('');
+            const [targetImageFile, setTargetImageFile] = useState(null);
+            const [targetImagePreview, setTargetImagePreview] = useState(null);
+            const [centralStatus, setCentralStatus] = useState('');
+            const [centralComment, setCentralComment] = useState('');
+
+            const [filters, setFilters] = useState({ target: '', status: '', search: '' });
+            const [currentPage, setCurrentPage] = useState(1);
+            const itemsPerPage = 5;
+
+            const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
+            useEffect(() => { setCurrentPage(1); }, [filters]);
+
+            const handleRoleLogin = (role) => {
+                if (role === 'target') {
+                    if (currentRole !== 'none' && currentRole !== 'central') { setCurrentRole('none'); alert('ออกจากระบบตัวแทนอาณาจักรเรียบร้อย'); return; }
+                    const pass = prompt('🔐 ใส่รหัสผ่านตัวแทนอาณาจักร:');
+                    if (pass === '1111') { setCurrentRole('เบสเซนตร้า'); alert("✅ ล็อกอินเป็นตัวแทน 'เบสเซนตร้า' เรียบร้อย"); }
+                    else if (pass === '2222') { setCurrentRole('แคสเทอเรีย'); alert("✅ ล็อกอินเป็นตัวแทน 'แคสเทอเรีย' เรียบร้อย"); }
+                    else if (pass === '3333') { setCurrentRole('แบลงค์ไฮม์การ์ด'); alert("✅ ล็อกอินเป็นตัวแทน 'แบลงค์ไฮม์การ์ด' เรียบร้อย"); }
+                    else if (pass === '4444') { setCurrentRole('แมคชีนโพลิส'); alert("✅ ล็อกอินเป็นตัวแทน 'แมคชีนโพลิส' เรียบร้อย"); }
+                    else if (pass === '5555') { setCurrentRole('ไฟนัลธรอน'); alert("✅ ล็อกอินเป็นตัวแทน 'ไฟนัลธรอน' เรียบร้อย"); }
+                    else if (pass) alert('❌ รหัสผ่านไม่ถูกต้อง!');
+                } else if (role === 'central') {
+                    if (currentRole === 'central') { setCurrentRole('none'); alert('ออกจากระบบสภาเมืองส่วนกลาง'); return; }
+                    const pass = prompt('🔐 ใส่รหัสผ่านสภาเมืองกลาง:');
+                    if (pass === '9999') { setCurrentRole('central'); alert("✅ ล็อกอินเป็น 'สภาเมืองส่วนกลาง' เรียบร้อย"); }
+                    else if (pass) alert('❌ รหัสผิด!');
+                }
+            };
+
+            const getQuestStatusStr = (p) => {
+                if (p.status === 'Rising' && p.isSuperRising) return 'Super Rising';
+                return p.status;
+            };
+
+            const handleExportCSV = () => {
+                const activeQuestsToExport = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
+                
+                if (activeQuestsToExport.length === 0) { alert('ไม่มีข้อมูลให้เบิกบันทึกค่ะ'); return; }
+                
+                const headers = [
+                    'รหัสสาส์น', 'โรงงาน', 'กระบวนการ', 'พิกัดจุดเกิดเหตุ', 'ผู้เสนอ (Origin)', 
+                    'รายละเอียดปัญหา', 'วิธีแก้ไขที่เสนอ', 'รูปสาส์นตั้งต้น', 
+                    'ผู้รับผิดชอบ (Target)', 'ข้อความจากทีมงาน', 'รูปหลังการแก้ไข', 'สถานะภารกิจ'
+                ];
+                
+                const csvRows = activeQuestsToExport.map(p => [ 
+                    p.id, p.factory, p.location, p.pinpoint, p.origin, 
+                    p.problem, p.solution, p.imagePreview ? 'มี' : 'ไม่มี', 
+                    p.target, p.targetComment || '-', p.imageAfterPreview ? 'มี' : 'ไม่มี', getQuestStatusStr(p) 
+                ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
+                
+                const csvString = [headers.join(','), ...csvRows].join('\n');
+                const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `DK_Quest_report_${getFormattedDate()}.csv`; link.click();
+            };
+
+            const openQuestModal = (quest) => { setSelectedQuest(quest); setTargetCommentText(''); setTargetImageFile(null); setTargetImagePreview(null); setCentralStatus(''); setCentralComment(''); };
+            
+            const closeModal = () => { 
+                setSelectedQuest(null); 
+                setTargetCommentText(''); 
+                setTargetImageFile(null); 
+                setTargetImagePreview(null); 
+            };
+
+            const handleTargetSubmit = () => {
+                if (!targetCommentText) { alert('กรุณากรอกข้อความอธิบายด้วยค่ะ'); return; }
+                const updatedQuest = { ...selectedQuest, status: 'Evidence', targetComment: targetCommentText, imageAfterText: targetImageFile ? `📸 ภาพหลักฐาน: ${targetImageFile}` : '📸 ภาพหลักฐานการแก้ไข (After)', imageAfterPreview: targetImagePreview, adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' };
+                onUpdateProject(updatedQuest);
+                alert("อัปโหลดหลักฐานสำเร็จ!");
+                closeModal();
+            };
+
+            const handleCentralSubmit = () => {
+                if (!centralStatus) { alert('กรุณาเลือกคำตัดสินก่อนค่ะ'); return; }
+                const bonusText = selectedQuest.isQualityEvent ? ' (+30 EXP กิจกรรม Quality)' : ' (+15 EXP)';
+                const updatedQuest = { ...selectedQuest, status: centralStatus, adminComment: centralComment || (centralStatus === 'Rising' ? `ตรวจสอบผ่าน! ได้รับการอนุมัติแล้ว${bonusText}` : 'ส่งกลับแก้ไข') };
+                if (centralStatus === 'Abandoned') updatedQuest.wasAbandoned = true;
+                onUpdateProject(updatedQuest);
+                alert('บันทึกคำพิจารณาเรียบร้อย!');
+                closeModal();
+            };
+
+            const handleCentralQuestAction = (actionType) => {
+                if (actionType === 'HallOfFame') {
+                    if (window.confirm('⭐ บรรจุภารกิจนี้ลง Hall of fame เพื่อให้กระดานโล่งขึ้นหรือไม่?')) {
+                        onUpdateProject({ ...selectedQuest, status: 'Hall of fame' });
+                        alert('⭐ บรรจุเข้าหอเกียรติยศเรียบร้อยแล้ว!'); closeModal();
+                    }
+                } else if (actionType === 'Restore') {
+                    if (window.confirm('🔄 ดึงภารกิจกลับสู่กระดานหลักหรือไม่?')) {
+                        onUpdateProject({ ...selectedQuest, status: 'Rising' });
+                        alert('🔄 ดึงกลับมาเรียบร้อยแล้ว!'); closeModal();
+                    }
+                }
+            };
+
+            const activeQuests = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
+            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p.status !== 'Hall of fame');
+            
+            const filteredQuests = visibleQuests.filter(q => {
+                const matchTarget = !filters.target || q.target.includes(filters.target);
+                const matchStatus = !filters.status || q.status === filters.status;
+                const rowText = `${q.id} ${q.title} ${q.origin} ${q.target}`.toLowerCase();
+                const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
+                return matchTarget && matchStatus && matchSearch;
+            });
+
+            const indexOfLastItem = currentPage * itemsPerPage;
+            const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+            const currentItems = filteredQuests.slice(indexOfFirstItem, indexOfLastItem);
+            const totalPages = Math.ceil(filteredQuests.length / itemsPerPage);
+
+            const getStatusBadge = (q) => {
+                if (q.status === 'Founding') return <span className="px-3 py-1 rounded-full bg-yellow-200 text-yellow-800 border border-yellow-400 text-xs font-bold w-[80px] inline-block text-center">Founding</span>;
+                if (q.status === 'Evidence') return <span className="px-3 py-1 rounded-full bg-purple-200 text-purple-800 border border-purple-400 text-xs font-bold w-[80px] inline-block text-center">Evidence</span>;
+                if (q.status === 'Rising') {
+                    if (q.isSuperRising) return <span className="px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border border-yellow-700 text-xs font-bold w-[90px] inline-block text-center"><i className="fa-solid fa-crown mr-1"></i>Super Rising</span>;
+                    return <span className="px-3 py-1 rounded-full bg-green-200 text-green-800 border border-green-500 text-xs font-bold w-[80px] inline-block text-center">Rising</span>;
+                }
+                if (q.status === 'Ruined') return <span className="px-3 py-1 rounded-full bg-red-200 text-red-800 border border-red-500 text-xs font-bold w-[80px] inline-block text-center">Ruined</span>;
+                if (q.status === 'Abandoned') return <span className="px-3 py-1 rounded-full bg-gray-300 text-gray-800 border border-gray-400 text-xs font-bold w-[80px] inline-block text-center">Abandoned</span>;
+                if (q.status === 'Hall of fame') return <span className="px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 text-xs font-bold w-[100px] inline-block text-center"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span>;
+                return null;
+            };
+
+            const kingdoms = [
+                { name: 'เบสเซนตร้า', id: 'bes', hexColor: '#10b981' },
+                { name: 'แคสเทอเรีย', id: 'cas', hexColor: '#ef4444' },
+                { name: 'แบลงค์ไฮม์การ์ด', id: 'bla', hexColor: '#38bdf8' },
+                { name: 'แมคชีนโพลิส', id: 'mac', hexColor: '#a855f7' },
+                { name: 'ไฟนัลธรอน', id: 'fin', hexColor: '#facc15' },
+            ];
+
+            const isTargetLoggedIn = currentRole !== 'none' && currentRole !== 'central';
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#8b5a2b]/30 pb-4">
+                        <div className="bg-[#f4e4bc] border-2 border-[#8b5a2b] px-5 py-2.5 rounded-xl shadow-lg inline-block">
+                            <h1 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] drop-shadow-sm font-cinzel">⚔️ ลานส่งมอบภารกิจ ⚔️</h1>
+                            <p className="text-xs text-[#8b5a2b] font-sans mt-0.5 font-bold">(Quest Turn-In & Approval Board)</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={handleExportCSV} className="px-4 py-2.5 rounded-xl border border-blue-600 bg-blue-100 text-blue-800 font-bold shadow hover:bg-blue-200 transition text-xs flex items-center gap-2 cursor-pointer">
+                                <i className="fa-solid fa-download"></i> เบิกบันทึกสภา (Export CSV)
+                            </button>
+                            <button onClick={() => handleRoleLogin('target')} className={`px-4 py-2.5 rounded-xl border-2 font-bold shadow transition cursor-pointer flex items-center gap-2 text-xs ${isTargetLoggedIn ? 'bg-blue-600 text-white border-blue-400' : 'bg-[#e0f2fe] text-[#0369a1] border-[#0284c7]'}`}>
+                                <i className="fa-solid fa-user-shield"></i>
+                                {isTargetLoggedIn ? `ตัวแทน: ${currentRole}` : 'ตัวแทนอาณาจักร'}
+                            </button>
+                            <button onClick={() => handleRoleLogin('central')} className={`px-4 py-2.5 rounded-xl border-2 font-bold shadow transition cursor-pointer flex items-center gap-2 text-xs ${currentRole === 'central' ? 'bg-yellow-600 text-white border-yellow-400' : 'bg-[#fef08a] text-[#b45309] border-[#d97706]'}`}>
+                                <i className="fa-solid fa-gavel"></i>
+                                {currentRole === 'central' ? 'สภาส่วนกลาง (ล็อกอิน)' : 'สภาเมืองส่วนกลาง'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl">
+                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
+                        <div className="space-y-4">
+                            {kingdoms.map(k => {
+                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                return (
+                                    <div key={k.id}>
+                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
+                                        </div>
+                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <span className="font-bold text-[#5d3a1a] mr-1">FILTERS ภารกิจ:</span>
+                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (อาณาจักรที่ต้องรับผิดชอบ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
+                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-bold border-blue-600"><option value="">Status (สถานะภารกิจ)</option><option value="Founding">🏗️ Founding (กำลังดำเนินการแก้ไข)</option><option value="Evidence">📤 Evidence (ส่งมอบหลักฐานแล้ว)</option><option value="Rising">⭐ Rising (ตรวจสอบผ่าน รับ EXP)</option><option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน/รอกลับไปแก้ใหม่)</option><option value="Abandoned">👻 Abandoned (ทิ้งร้าง)</option></select>
+                        </div>
+                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID สาส์น..." className="w-full md:w-64 custom-select text-xs font-medium" />
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
+                        <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
+                            <thead>
+                                <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
+                                    <th className="py-3 px-2">รหัสสาส์น</th>
+                                    <th className="py-3 px-2 max-w-[200px]">ชื่อภารกิจ</th>
+                                    <th className="py-3 px-2 text-blue-800">ผู้เสนอไอเดีย (Origin)</th>
+                                    <th className="py-3 px-2 text-red-800">ผู้รับผิดชอบ (Target)</th>
+                                    <th className="py-3 px-2 text-center w-24">สถานะภารกิจ</th>
+                                    <th className="py-3 px-2 text-center">ตรวจสอบ</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-[#8b5a2b]">
+                                {currentItems.length === 0 ? (
+                                    <tr><td colSpan={6} className="py-8 text-center font-bold text-[#8b5a2b]/60">⚔️ ไม่พบภารกิจ</td></tr>
+                                ) : (
+                                    currentItems.map(q => {
+                                        let rowBg = '';
+                                        if (q.status === 'Abandoned') rowBg = 'bg-gray-200/50';
+                                        else if (q.status === 'Ruined') rowBg = 'bg-red-100/40';
+                                        else if (q.status === 'Hall of fame') rowBg = 'bg-gray-800/10 opacity-75';
+
+                                        return (
+                                            <tr key={q.id} className={`border-b border-[#8b5a2b]/25 hover:bg-[#e7d5a5]/50 transition duration-150 ${rowBg}`}>
+                                                <td className="py-4 px-2 font-bold text-slate-800">
+                                                    {q.id} {q.isQualityEvent && <span className="ml-1 text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
+                                                </td>
+                                                <td className="py-4 px-2 font-semibold max-w-[200px] truncate">{q.title}</td>
+                                                <td className="py-4 px-2">{q.origin}</td>
+                                                <td className="py-4 px-2 font-bold text-red-800">{q.target}</td>
+                                                <td className="py-4 px-2 text-center">{getStatusBadge(q)}</td>
+                                                <td className="py-4 px-2 text-center">
+                                                    <button onClick={() => openQuestModal(q)} className="bg-[#5d3a1a] text-[#f7e6c4] px-4 py-1.5 rounded-lg hover:bg-[#8b5a2b] hover:text-white shadow font-bold text-xs cursor-pointer transition whitespace-nowrap">เปิดภารกิจ</button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-3 mt-6 border-t border-[#8b5a2b]/20 pt-4">
+                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer"><i className="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ</button>
+                                <span className="text-sm font-bold text-[#5d3a1a] bg-white px-4 py-1.5 border border-[#8b5a2b]/40 rounded-lg shadow-inner">{currentPage} / {totalPages}</span>
+                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer">ถัดไป <i className="fa-solid fa-chevron-right ml-1"></i></button>
+                            </div>
+                        )}
+                    </div>
+
+                    {selectedQuest && (
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
+                            <div className="decree-modal max-w-4xl w-full p-6 md:p-8 rounded-2xl relative max-h-[95vh] overflow-y-auto">
+                                <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-3xl font-bold cursor-pointer transition">&times;</button>
+                                <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
+                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">🛡️ รายละเอียดภารกิจ 🛡️</h2>
+                                    <p className="text-[#8b5a2b] mt-1 italic font-bold">อ้างอิงสาส์น: {selectedQuest.id}</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
+                                        <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> สาส์นตั้งต้น (สิ่งที่ต้องแก้ไข)</h3>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> {selectedQuest.factory}</p>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> {selectedQuest.location}</p>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> {selectedQuest.pinpoint}</p>
+                                        <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">ผู้เสนอ (Origin):</strong> {selectedQuest.origin}</p>
+                                        <div className="mb-3 mt-3 text-[#3f2a14]">
+                                            <strong className="font-bold">รายละเอียดปัญหา:</strong>
+                                            <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.problem}</p>
+                                        </div>
+                                        <div className="mb-3 text-[#3f2a14]">
+                                            <p className="font-bold flex items-center justify-between">วิธีแก้ไข (ที่เสนอมา):</p>
+                                            <p className="text-[#8b5a2b] ml-4 bg-white p-2 mt-1 rounded-lg border border-[#8b5a2b]/20 italic">{selectedQuest.solution}</p>
+                                        </div>
+                                        {selectedQuest.imagePreview ? (
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain" /></div>
+                                        ) : (
+                                            <div className="bg-gray-200 h-32 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 text-xs font-bold shadow-inner"><span>{selectedQuest.imageText}</span></div>
+                                        )}
+                                    </div>
+
+                                    <div className="proof-box p-4 text-xs relative rounded-xl">
+                                        <div className="absolute top-2 right-2">{getStatusBadge(selectedQuest)}</div>
+                                        <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> หลักฐานจากหน้างาน (ผลลัพธ์)</h3>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> {selectedQuest.target}</p>
+                                        <div className="mb-3 text-[#3f2a14]">
+                                            <strong className="font-bold">ข้อความจากทีมงาน:</strong>
+                                            <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
+                                        </div>
+                                        {selectedQuest.imageAfterPreview ? (
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain" /></div>
+                                        ) : (
+                                            <div className="bg-white h-32 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '📸 ภาพหลักฐานการแก้ไข (After)'}</span></div>
+                                        )}
+                                        <div className="mt-3 bg-[#fff8e7] p-2.5 rounded-lg border border-gray-300 text-xs text-gray-600">
+                                            <strong className="text-amber-800">👑 สภาเมืองกลางคอมเมนต์:</strong>
+                                            <p className="italic mt-0.5">{selectedQuest.adminComment || '-'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {currentRole === selectedQuest.target && (selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Evidence') && (
+                                    <div className="mt-6 p-4 target-panel space-y-3">
+                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-upload"></i> ส่งมอบ/แก้ไขหลักฐาน (สำหรับอาณาจักรเป้าหมาย)</p>
+                                        <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="อธิบายสิ่งที่ได้ลงมือแก้ไขไปแล้ว..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
+                                        <input type="file" accept="image/*" onChange={(e) => { 
+                                            if(e.target.files && e.target.files[0]) { const file = e.target.files[0]; setTargetImageFile(file.name); setTargetImagePreview(URL.createObjectURL(file)); }
+                                        }} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
+                                        {targetImageFile && <p className="text-xs text-blue-800 font-bold">📎 ไฟล์ที่แนบ: {targetImageFile}</p>}
+                                        <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
+                                            {selectedQuest.status === 'Evidence' ? 'แก้ไขและอัปโหลดหลักฐานใหม่ (Update)' : 'ส่งมอบหลักฐาน (เปลี่ยนสถานะเป็น Evidence)'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {currentRole === 'central' && (selectedQuest.status === 'Evidence' || selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Rising' || selectedQuest.status === 'Hall of fame') && (
+                                    <div className="mt-6 p-4 central-panel space-y-3">
+                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> พิพากษาผลงาน (สำหรับสภาเมืองส่วนกลาง)</p>
+                                        
+                                        {selectedQuest.status !== 'Hall of fame' && selectedQuest.status !== 'Rising' && (
+                                            <>
+                                                <select value={centralStatus} onChange={(e) => setCentralStatus(e.target.value)} className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
+                                                    <option value="">-- เลือกคำพิพากษา --</option>
+                                                    <option value="Rising">{selectedQuest.wasAbandoned || selectedQuest.status === 'Abandoned' ? '⭐ Rising (อนุมัติแจก +5 EXP เนื่องจากส่งล่าช้า)' : `⭐ Rising (อนุมัติแจกคะแนนเต็ม)`}</option>
+                                                    <option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน ให้กลับไปทำใหม่)</option>
+                                                    <option value="Abandoned">👻 Abandoned (ทิ้งร้าง ปล่อยไว้นานเกินกำหนด)</option>
+                                                </select>
+                                                <textarea rows={2} value={centralComment} onChange={(e) => setCentralComment(e.target.value)} placeholder="เหตุผลประกอบคำพิจารณา..." className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs bg-white text-slate-800 outline-none font-sans"></textarea>
+                                                <button onClick={handleCentralSubmit} className="w-full bg-[#b45309] text-white font-bold py-2.5 rounded-lg hover:bg-[#92400e] shadow transition cursor-pointer text-xs mb-2">บันทึกคำพิจารณา</button>
+                                            </>
+                                        )}
+
+                                        <div className="flex gap-2 pt-2 border-t border-[#d97706]/30">
+                                            {selectedQuest.status === 'Hall of fame' ? (
+                                                <button onClick={() => handleCentralQuestAction('Restore')} className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> ดึงกลับกระดานหลัก (Restore)</button>
+                                            ) : (
+                                                (selectedQuest.status === 'Rising' || selectedQuest.ideaApproved) && (
+                                                    <button onClick={() => handleCentralQuestAction('HallOfFame')} className="w-full bg-yellow-600 text-black font-bold py-2 rounded hover:bg-yellow-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-star mr-1"></i> บรรจุเข้า Hall of fame (ซ่อนจากหน้าหลัก)</button>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT 7: Chronicles
+        // ==========================================
+        function Chronicles({ onViewChange, initialTab }) {
+            const [activeTab, setActiveTab] = useState(initialTab || 'lore');
+
+            useEffect(() => {
+                if (initialTab) setActiveTab(initialTab);
+            }, [initialTab]);
+
+            return (
+                <div className="max-w-5xl mx-auto w-full parchment-scroll p-6 md:p-12 rounded-lg relative my-4 animate-fade-in text-[#3d2511]">
+                    <div className="text-center border-b-4 border-double border-[#8b5a2b] pb-6 mb-8">
+                        <h1 className="text-4xl md:text-5xl font-bold font-cinzelDeco text-[#5d3a1a] mb-2 tracking-wider">📜 Diecast Chronicles 📜</h1>
+                        <p className="text-md md:text-lg text-[#8b5a2b] font-bold tracking-wider uppercase font-cinzel">The Lost Lore and Architect Playbook</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-8 bg-[#e5d3a6] p-1.5 rounded-lg border border-[#8b5a2b]/40">
+                        <button onClick={() => setActiveTab('lore')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'lore' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-book-open mr-1"></i> ปฐมบท & ปมความขัดแย้ง</button>
+                        <button onClick={() => setActiveTab('rules')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'rules' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-scroll-old mr-1"></i> กฎและพจนานุกรมแห่งสภา</button>
+                        <button onClick={() => setActiveTab('alignment')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'alignment' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-pen-nib mr-1"></i> คัมภีร์วิถีนักสร้างสรรค์</button>
+                    </div>
+
+                    {activeTab === 'lore' && (
+                        <div className="space-y-8 animate-fade-in">
+                            <section className="text-justify">
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-feather-pointed"></i> 1. ปฐมบทแห่งดินแดน (The Lost Chronicles)</h2>
+                                <p className="leading-relaxed text-[#3d2511] text-base mb-4 indent-8">ขอต้อนรับนักผจญภัยทุกท่านเข้าสู่ <b>Diecast Kingdoms</b> ดินแดนที่ถูกขับเคลื่อนด้วยพลังอันเป็นเอกลักษณ์จาก 5 อาณาจักรที่ยิ่งใหญ่ ภายนอกแผ่นดินนี้คือภาพแทนของความปรองดองและการร่วมมือเป็นพันธมิตรที่แน่นแฟ้นช่วยเหลือซึ่งกันและกัน แต่ทว่า... ภายใต้รอยยิ้มและการกุมมือกันนี้ กลับมีรอยร้าวแห่งอุดมการณ์ ความเชื่อ และวิถีชีวิตที่ขัดแย้ง พร้อมจะปะทุขึ้นมาสะบั้นมิตรภาพได้ตลอดเวลา!</p>
+                            </section>
+
+                            <section className="mb-8">
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 font-cinzel">
+                                    <i className="fa-solid fa-shield-halved"></i> 2. เสาหลักทั้งห้า (The Five Realms)
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-red-600 bg-white/40">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">🔥 Casteria (แคสเทอเรีย)</h3>
+                                            <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
+                                                ดินแดนแห่งไฟและเหล็กกล้า มีหน้าผาสิงโตลาวาปะทุคอยพิทักษ์เมือง ผู้คนมีบุคลิกเหมือน <b>"คนแคระช่างตีเหล็ก"</b> ผู้ประณีตและเปี่ยมด้วยทักษะการหลอมสรรค์สร้างระดับสูง บูชาสัญลักษณ์สิงโตเหล็กอัคคี คลั่งไคล้ในหยาดเหงื่อและการลงมือทำ
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-sky-500 bg-white/40">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">❄️ BlankHeimgard (แบลงค์ไฮม์การ์ด)</h3>
+                                            <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
+                                                ปราการน้ำแข็งและพายุหิมะอันหนาวเหน็บ ผู้คนมีวิถีชีวิตแบบ <b>"ชาวนอร์สรักสงบ"</b> ที่ใช้ชีวิตแบบสโลว์ไลฟ์ รักธรรมชาติและสันโดษ แม้ภายนอกจะดูเย็นชาไม่เป็นมิตรเนื่องจากภัยธรรมชาติรุมเร้า แต่แท้จริงแล้วจริงใจและสู้ชีวิตอย่างหาใครเปรียบไม่ได้ บูชาเกล็ดหิมะและเทพกวางขาวกิ่งก้านตระการตา
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-purple-600 bg-white/40">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">⚙️ Machinepolis (แมคชีนโพลิส)</h3>
+                                            <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
+                                                มหานครจักรกลล้ำยุคสุดไฮเทค บ้านเกิดของเหล่า <b>"นักประดิษฐ์และนักวิทยาศาสตร์"</b>ผู้ค้นหาความจริง ตรรกะ และผลลัพธ์ที่พิสูจน์ได้ด้วยความรวดเร็ว พร้อมจะปฏิวัติและปรับเปลี่ยนสิ่งรอบตัวอยู่เสมอ ยึดมั่นในความจริงที่ตาเห็นและสัมผัส ศรัทธาในฟันเฟื่องและกลไล สัญลักษณ์คือม้าเพกาซัสมีปีกที่ทะยานไปสู่อนาคต
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-amber-500 bg-white/40">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">✨ Finalthron (ไฟนัลธรอน)</h3>
+                                            <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
+                                                ดินแดนศักดิ์สิทธิ์บนยอดเขาสูงเสียดฟ้า โอบล้อมไปด้วยผืนทรายและเสียงคลื่นกังวาล พรมแดนระหว่างเทพธิดาแห่งแสงออโรราสีทองอันศักดิ์สิทธิ์และ<b>"นักบวชสาวก"</b> ผู้เชื่อมโยงโลกความจริงและโลกแห่งศรัทธา ทำหน้าที่ตัดสินพิพากษาด้วยมาตรฐานความสมบูรณ์แบบสูงสุด เกลียดชังความผิดพลาดและความไร้ระเบียบ สัญลักษณ์คือพญานกยูงสวรรค์ทองคำขาวผู้บริสุทธิ์
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between md:col-span-2 border-l-4 border-l-emerald-700 bg-white/40">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">🏰 Bascentra (เบสเซนตร้า)</h3>
+                                            <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
+                                                นครเวทมนตร์โบราณอันอบอุ่น ตั้งอยู่กึ่งกลางแผนที่บนผืนดินเขียวขจีอันอุดมสมบูรณ์ ทำหน้าที่เป็น <b>"ศูนย์กลางการถ่วงดุลอำนาจและการรักษามาตรฐาน" (The Balancing Center & Standard)</b> ศูนย์กลางแห่งความปรองดอง คอยร้อยเรียงประสานเรื่องราวและโครงสร้างของทุกอาณาจักรให้เป็นอันหนึ่งอันเดียวกัน
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            
+                            <section>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-face-angry"></i> 3. บันทึกรอยร้าวและแรงอคติ (The Hidden Friction)</h2>
+                                <p className="text-[#8b5a2b] font-bold mb-4 italic text-sm">คลิกเลือกอาณาจักรเพื่อดูปมลึกความอคติของพวกเขา:</p>
+                                <div className="space-y-3">
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>🔥 อคติของ Casteria (สิงโตเพลิง)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารมณ์ Blankheimgard:</b> "พวกสโลว์ไลฟ์เฉื่อยชา วันๆ เอาแต่กลัวหนาว ไม่รู้จักความเร่าร้อนกระตือรือร้นและจิตวิญญาณแห่งการทำงานหนัก!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกบ้าวิทยาศาสตร์ไฮเทค เอาใจออกห่างรากเหง้าดั้งเดิม ใช้แต่เครื่องจักรทื่อๆ แล้วมาดูถูกการหลอมด้วยฝีมืออันประณีตโบราณของเรา!"</p><p>🚫 <b>ไม่ถูกชะตา Finalthron:</b> "พวกวันๆ ดีแต่สวดอ้อนวอนร้องขอต่อพระเจ้า รังเกียจเหงื่อและเขม่าดำ แต่ไม่เคยคิดทำอะไรด้วยตัวเองสักอย่างเลย!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>❄️ อคติของ Blankheimgard (หิมะขาวบริสุทธิ์)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารมณ์ Casteria:</b> "พวกบ้าพลังโผงผาง ร้อนรนกระวนกระวายจนเหงื่อท่วมกายตลอดเวลา น่ารำคาญใจ ไม่รู้จักคุณค่าของความสงบของธรรมชาติ!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกไฮเปอร์ทำอะไรหุ้นหันพลันแล่น เปลี่ยนไปเปลี่ยนมารวดเร็วราวพายุจนศูนย์เสียจิตใจที่สบายๆ เหมือนหิมะโปรย!"</p><p>🚫 <b>ไม่ถูกชะตา Finalthron:</b> "แสงอบอุ่นสว่างโร่จอมปลอมที่พยายามส่องลงมาละลายดินแดนและดูถูกความสงบเหน็บหนาวของธรรมชาติอันงดงาม!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>⚙️ อคติของ Machinepolis (จักรกลไฮเทค)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารณ์ Casteria:</b> "พวกใช้แต่วิธีล้าหลังโบราณ ดื้อดึงดักดานไม่พัฒนา ปัดปฏิเสธระบบอัตโนมัติที่รวดเร็วและแม่นยำกว่า!"</p><p>🚫 <b>ไม่ชอบ Blankheimgard:</b> "พวกสโลว์ไลฟ์เฉื่อยชา ชักช้าไร้ประสิทธิภาพ มีดีแค่ทำตัวสงบเสงี่ยมรักษารูปการแต่ถ่วงเวลาแห่งการพัฒนา!"</p><p>🚫 <b>เกลียด Finalthron:</b> "พวกงมงายอ้อนวอนพึ่งพาแต่พระเจ้าและสิ่งศักดิ์สิทธิ์ ทั้งที่ความจริงที่พิสูจน์ได้ทางวิทยาศาสตร์และตรรกะต่างหากคือสัจธรรม!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>✨ อคติของ Finalthron (วิหารแสงศักดิ์สิทธิ์)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่ชอบ Casteria:</b> "พวกป่าเถื่อน ดิบหยาบ เปื้อนมอมไปด้วยคราบเถ้าถ่านสกปรก ทำลายจารีตแห่งความบริสุทธิ์สง่างาม!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกหยิ่งยโสคิดค้นจักรกลฝืนกฎท้าทายธรรมชาติ ท้าทายอำนาจเทพสวรรค์ มันช่างบาปหนาและหยาบคาย!"</p><p>🚫 <b>เบื่อหน่าย Blankheimgard:</b> "พวกปฏิเสธไม่ยอมน้อมรับแสงอันอบอุ่น ดันชอบจมปลักอยู่ในความมืดมิดอันเหน็บหนาวและศรัทธาธรรมชาติอย่างไร้กฎเกณฑ์!"</p></div></details>
+                                </div>
+                            </section>
+                            
+                            <section className="text-justify border-t-2 border-[#8b5a2b]/30 pt-8 mt-8">
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-scroll"></i> 4. ภารกิจพังทลายกำแพงแห่งอคติ (Your Mission)</h2>
+                                <p className="leading-relaxed text-sm mb-4">เมื่ออคติและสงครามเย็นเริ่มสั่นคลอนความมั่นคงและบ่อนทำลาย "มาตรฐานของแผ่นดิน" สภาแห่ง <b>Bascentra</b> จึงได้ใช้บัญชาสิทธิ์ ประกาศระดมพลเรียกตัว <b>"นักผจญภัย"</b> จากแต่ละอาณาจักรบ้านเกิด เพื่อเรียนรู้และแก้ปัญหาร่วมกัน!</p>
+                                <p className="leading-relaxed text-sm bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">👉 <b>เป้าหมายสูงสุด:</b> คุณต้องทำหน้าที่ค้นหา "จุดบกพร่อง/ปัญหา" ในแผ่นดินเป้าหมาย แล้วยื่น <b>"สาส์นแห่งการพัฒนา (Decrees of Development)"</b> ผ่านระบบเพื่อนำคะแนน EXP กลับไปยกระดับให้เมืองบ้านเกิดให้รุ่งเรืองเหนือใคร ขณะเดียวกันคุณก็ต้องเดินทางร่วมมือพัฒนาแผ่นดินอื่น เพื่อพังทลายกำแพงแห่งอคติและพิสูจน์คุณค่าของคำว่า <b>"Unity (สามัคคีเป็นหนึ่งเดียว)"</b> ให้ประจักษ์แก่สายตาสภาเมือง!</p>
+                            </section>
+                        </div>
+                    )}
+
+                    {activeTab === 'rules' && (
+                        <div className="space-y-10 animate-fade-in">
+                            <section className="text-justify">
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel">
+                                    <i className="fa-solid fa-swords"></i> 1. กฎแห่งการสถาปนา (Workflow & System)
+                                </h2>
+                                <p className="text-sm text-[#8b5a2b] mb-4 font-bold">ระบบนี้ถูกแบ่งบทบาทออกเป็น 3 ฝ่าย เพื่อให้การพัฒนาเป็นไปอย่างยุติธรรม: "ผู้เสนอ (Origin)", "ผู้ลงมือทำ (Target)" และ "สภาเมือง (Central Admin)"</p>
+                                <div className="space-y-6">
+                                    <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-blue-600 shadow">
+                                        <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-lightbulb text-yellow-600 mr-2"></i> เฟสที่ 1: เสนอไอเดีย (หน้า ประกาศิตแห่งแผ่นดิน)</h3>
+                                        <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
+                                            <li><b>ยื่นสาส์น:</b> พบปัญหาหน้างาน ให้กรอก "สาส์นพัฒนาแด่อาณาจักร" พร้อมระบุเมืองเป้าหมาย สาส์นจะแสดงผลที่กระดานประกาศิตฯ (สถานะ Blueprint)</li>
+                                            <li><b>สภาอนุมัติ:</b> แอดมินสภาเมืองจะพิจารณาความเหมาะสม หากทำได้จริงจะปรับสถานะเป็น <b>Rising</b> (อนุมัติผ่าน) หรือ <b>Founding</b> (อยู่ระหว่างพิจารณา)</li>
+                                            <li><b>Super Rising:</b> หากเป็นไอเดียที่ยอดเยี่ยมระดับช่วยลดต้นทุน (Cost/Cycle Time) สภาอาจพิจารณาอัปเกรดเป็น <b className="text-yellow-700">👑 Super Rising</b> ทันที!</li>
+                                            <li className="text-blue-700 font-bold bg-blue-100 p-2 rounded inline-block mt-2 shadow-inner">🏆 รางวัลผู้เสนอ: อนุมัติปกติรับ +5 EXP / หากได้ Super Rising รับเบิ้ลเป็น +10 EXP!</li>
+                                        </ul>
+                                    </div>
+                                    <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-red-600 shadow">
+                                        <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-hammer text-gray-600 mr-2"></i> เฟสที่ 2: ลงมือปฏิบัติ (หน้า ลานส่งมอบภารกิจ)</h3>
+                                        <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
+                                            <li><b>รับเควสต์และแก้ไข:</b> เมื่อสาส์นอนุมัติแล้ว จะมาโผล่ที่ลานภารกิจ (สถานะ Founding) ตัวแทนเมืองเป้าหมายต้องนำไปลงมือแก้ไขหน้างานจริง</li>
+                                            <li><b>ส่งหลักฐาน:</b> ทำเสร็จแล้วให้อัปโหลดภาพผลลัพธ์ (After) เพื่อเปลี่ยนสถานะเป็น <b>Evidence</b> รอสภากลางมาตรวจ</li>
+                                            <li><b>สภาตรวจงาน:</b> สภากลางประเมินหลักฐาน หากผ่านเกณฑ์จะปรับสถานะขั้นสุดยอดเป็น <b>Rising</b> หากไม่ผ่าน จะปัดตกเป็น <b>Ruined</b> ให้กลับไปแก้ใหม่</li>
+                                            <li className="text-green-700 font-bold bg-green-100 p-2 rounded inline-block mt-2 shadow-inner">🏆 รางวัลผู้ทำ: เมื่อสภาตรวจผ่าน อาณาจักรเป้าหมายที่ลงมือทำรับทันที +15 EXP!</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel">
+                                    <i className="fa-solid fa-chart-line"></i> 2. เลเวล, เกียรติยศ และความลับ
+                                </h2>
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20">
+                                        <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-400 font-bold text-xs mb-2 shadow-sm">📈 การคำนวณ EXP (Leveling)</span>
+                                        <p className="text-sm text-[#3d2511] leading-relaxed">
+                                            การจะอัปเกรดเลเวลเมือง จะใช้ระบบหลอด EXP แบบทวีคูณ (Scale) โดยเริ่มจาก <b>Level 1 ต้องการ 60 EXP</b> และทุกครั้งที่เลเวลอัป หลอด EXP จะถูกรีเซ็ตใหม่ และเป้าหมายรอบถัดไปจะขยายความยากเพิ่มขึ้น <b>20%</b> (เช่น เลเวล 2 ต้องการ 72 EXP, เลเวล 3 ต้องการ 86 EXP) ดังนั้นความร่วมมือจึงสำคัญที่สุด!
+                                        </p>
+                                    </div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20">
+                                        <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-400 font-bold text-xs mb-2 shadow-sm">📜 อาณาจักรในวันวาน (History of Kingdom)</span>
+                                        <p className="text-sm text-[#3d2511] leading-relaxed">
+                                            เมื่ออาณาจักรของท่านบรรลุเลเวลตามที่สภากำหนดไว้ อาณาจักรนั้นจะเกิดการวิวัฒนาการ! (ภาพเมืองในแผนที่จะเปลี่ยนไป) และภาพเมืองในอดีตทั้งหมดจะถูกบันทึกไว้ในหอจดหมายเหตุ "อาณาจักรในวันวาน" เพื่อให้คนรุ่นหลังได้ดูความภาคภูมิใจที่พวกท่านช่วยกันสร้างขึ้นมา
+                                        </p>
+                                    </div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20">
+                                        <span className="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-400 font-bold text-xs mb-2 shadow-sm">🏆 หอเกียรติยศ (Trophies)</span>
+                                        <p className="text-sm text-[#3d2511] leading-relaxed">
+                                            นอกจากคะแนน EXP แล้ว ระบบยังมีการบันทึกความภาคภูมิใจของแต่ละอาณาจักรไว้ในหน้า World Map ด้วย หากเมืองใดเข้าร่วมกิจกรรม มินิเกม หรือทำผลงานบรรลุเป้าหมายพิเศษที่สภากำหนด จะได้รับ "ถ้วยรางวัลเกียรติยศ" ไปประดับไว้ในหน้าข้อมูลอาณาจักรให้แคว้นอื่นได้ประจักษ์!
+                                        </p>
+                                    </div>
+                                    <div className="p-4 bg-gray-800 rounded border border-gray-600">
+                                        <span className="inline-block px-3 py-1 rounded-full bg-gray-600 text-white border border-gray-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> สาส์นลับแห่งเงา (Secret Message)</span>
+                                        <p className="text-sm text-gray-300 leading-relaxed">
+                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ไม่ต้องการเปิดเผยชื่อ ท่าน ক্ষমতায়เลือกส่งสาส์นในนามแคว้น <b>"Bascentra (เบสเซนตร้า)"</b> ได้ ระบบจะปิดบังตัวตนของท่านเป็นความลับขั้นสูงสุด และส่งสาส์นฉบับนี้ตรงถึงสภากลาง (HR) โดยที่ผู้อื่นจะไม่มีสิทธิ์มองเห็นในกระดานสาธารณะโดยเด็ดขาด!
+                                        </p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel"><i className="fa-solid fa-spell-book"></i> 3. พจนานุกรมแห่งสภา (Status Dictionary)</h2>
+                                <p className="text-sm text-[#8b5a2b] mb-4 font-bold">เนื่องจากมี 2 กระดาน ความหมายของสถานะจึงแบ่งตามบริบทของกระดานนั้นๆ ดังนี้:</p>
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-400 font-bold text-xs mb-2 shadow-sm">Blueprint</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สาส์นเพิ่งถูกส่งเข้ามา ยังไม่ได้รับการพิจารณาใดๆ (รอสภาเปิดอ่าน)</li><li><b>ในหน้าลานภารกิจ:</b> <i>(ไม่มีสถานะนี้ในลานภารกิจ)</i></li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-400 font-bold text-xs mb-2 shadow-sm">Founding</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเมืองรับเรื่องแล้ว กำลังปรึกษากับอาณาจักรเป้าหมายว่าทำได้จริงไหม (ยังไม่ได้คะแนน)</li><li><b>ในหน้าลานภารกิจ:</b> อาณาจักรเป้าหมายรับเรื่องแล้ว กำลังลงมือแก้ไขหน้างานจริง (กำลังก่อสร้าง)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-400 font-bold text-xs mb-2 shadow-sm">Evidence</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> อาณาจักรเป้าหมายแก้ไขเสร็จและส่งรูปหลักฐานแล้ว กำลังรอสภาเมืองกลางเข้ามาตรวจรับ (ตัวแทนเป้าหมายกดอัปเดตหลักฐานใหม่ได้เรื่อยๆ ในขั้นตอนนี้)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-500 font-bold text-xs mb-2 shadow-sm">Rising</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเห็นชอบว่าไอเดียนี้ดีเลิศ! (อนุมัติไอเดียสำเร็จ แจก +5 EXP ให้คนคิด และส่งเรื่องเป็นภารกิจต่อไป)</li><li><b>ในหน้าลานภารกิจ:</b> สภาตรวจหลักฐานผ่าน! (อนุมัติการลงมือทำ แจก +15 EXP ให้คนทำ) ถือว่าปิดภารกิจสมบูรณ์ 100%</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-bold text-xs mb-2 shadow-sm">Ruined</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> ไอเดียถูกปัดตกตั้งแต่แรก ไม่ได้รับการอนุมัติ</li><li><b>ในหน้าลานภารกิจ:</b> หลักฐานการแก้ไขยังไม่ผ่านเกณฑ์ (สภาจะคอมเมนต์จุดที่ต้องแก้ อาณาจักรเป้าหมายนำไปปรับปรุงและส่งรูปหลักฐานใหม่ได้ ระบบไม่หักคะแนน ถือเป็นวงจร PDCA)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-500 font-bold text-xs mb-2 shadow-sm">Abandoned</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> ภารกิจถูกปล่อยทิ้งร้างนานเกินกำหนด หากผู้รับผิดชอบกลับมาทำจนเสร็จในภายหลัง สภาจะลงโทษโดยลดรางวัลเหลือเพียง +5 EXP</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>สถานะพิเศษ:</b> เป็นการนำสาส์นหรือภารกิจที่ <b>สำเร็จไปแล้ว (Rising/Super Rising)</b> ไปเก็บเข้ากรุ เพื่อให้กระดานหน้าจอหลักสะอาดตา (ข้อมูลไม่หาย เลเวลไม่ลด และทุกคนยังโหลด CSV ไปดูประวัติผลงานได้ปกติ)</li></ul></div>
+                                </div>
+                            </section>
+                        </div>
+                    )}
+
+                    {/* แท็บ 3: คัมภีร์วิถีนักสร้างสรรค์ (V.30 The 3 Realms Design) */}
+                    {activeTab === 'alignment' && (
+                        <div className="space-y-8 animate-fade-in">
+                            <div className="text-center mb-8">
+                                <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-pen-nib"></i> คัมภีร์วิถีนักสร้างสรรค์ (The Architect's Code)</h2>
+                                <p className="text-sm text-[#8b5a2b] font-bold mt-2">แนวทางการเขียนสาส์นให้สภาเมืองอ่านแล้วเข้าใจ เพื่อพิชิตรางวัลแห่งแผ่นดิน</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* คัมภีร์สวรรค์ (DOs) */}
+                                <section className="md:col-span-1 bg-gradient-to-br from-sky-50 to-blue-100 border-2 border-sky-300 text-sky-900 rounded-xl p-6 relative overflow-hidden animate-pulse-heaven">
+                                    <div className="absolute -right-4 -top-4 text-white opacity-60 text-8xl pointer-events-none drop-shadow-md"><i className="fa-solid fa-cloud"></i></div>
+                                    <div className="absolute right-10 top-10 text-sky-200 opacity-50 text-6xl pointer-events-none"><i className="fa-solid fa-dove"></i></div>
+                                    <div className="relative z-10">
+                                        <h3 className="text-xl font-bold text-sky-700 mb-4 flex items-center gap-2 border-b border-sky-300 pb-2"><i className="fa-solid fa-feather-pointed text-sky-500"></i> บัญญัติแห่งความรุ่งโรจน์</h3>
+                                        <ul className="space-y-3 text-sm font-medium">
+                                            <li><b className="text-sky-800">ระบุพิกัดชัดเจนดั่งตาเห็น:</b> ไม่เขียนกว้างๆ เช่น <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"เครื่องพังบ่อย"</strong> แต่ระบุให้เป๊ะว่า <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"เครื่อง CNC เบอร์ 05 แผนก Machining มีน้ำมันรั่วซึมตรงข้อต่อ"</strong></li>
+                                            <li><b className="text-sky-800">มีภาพประกอบเสมอ:</b> <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"ภาพ 1 ภาพ แทนคำพูดพันคำ"</strong> สาส์นที่มีภาพหน้างานประกอบ จะทำให้สภาเมืองและอาณาจักรเป้าหมายเข้าใจปัญหาได้ทันทีโดยไม่ต้องเดินไปดู</li>
+                                            <li><b className="text-sky-800">เสนอทางออก ไม่ใช่แค่บอกปัญหา:</b> สาส์นที่ดีควรมี <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"Solution (วิธีแก้)"</strong> ติดมาด้วย แม้จะเป็นแค่วิธีบ้านๆ หรือไอเดียเล็กๆ แต่แสดงถึงความใส่ใจ มากกว่าชี้เป้าแล้วทิ้งภาระให้คนอื่น</li>
+                                        </ul>
+                                    </div>
+                                </section>
+
+                                {/* คัมภีร์นรก (DON'Ts) */}
+                                <section className="md:col-span-1 bg-gradient-to-br from-gray-900 to-red-950 border-2 border-red-800 text-gray-300 rounded-xl p-6 relative overflow-hidden animate-pulse-hell">
+                                    <div className="absolute -right-4 -top-4 text-red-900 opacity-30 text-8xl pointer-events-none"><i className="fa-solid fa-skull-crossbones"></i></div>
+                                    <div className="relative z-10">
+                                        <h3 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2 border-b border-red-800/50 pb-2"><i className="fa-solid fa-fire-flame-curved text-red-600"></i> ข้อห้ามแห่งความเสื่อม</h3>
+                                        <ul className="space-y-3 text-sm">
+                                            <li><b className="text-red-400">กระดาษระบายอารมณ์:</b> สาส์นที่มีแต่คำบ่น ด่าทอ หรือใช้อารมณ์โดยไม่มีสาระของปัญหาและวิธีแก้ สภาเมืองจะปัดตก <strong className="text-red-500 font-bold drop-shadow-[0_0_2px_red]">"Ruined"</strong> ทันที</li>
+                                            <li><b className="text-red-400">ฝันใหญ่แต่ไร้งบ:</b> เสนอให้ซื้อเครื่องจักรใหม่ราคาหลายล้าน หรือรื้อระบบใหม่ทั้งหมดโดยไม่จำเป็น สาส์นเหล่านี้มักจะถูกปัดตกเพราะไม่สอดคล้องกับงบประมาณ (สภาชอบ <strong className="text-red-500 font-bold drop-shadow-[0_0_2px_red]">"Kaizen"</strong> ลงทุนน้อยแต่ได้ผลมาก)</li>
+                                            <li><b className="text-red-400">โยนงานให้เมืองอื่น:</b> เสนอไอเดียที่ตัวเองได้ประโยชน์ แต่ไปเพิ่มขั้นตอนหรือความลำบากให้อาณาจักรอื่นโดยไม่ปรึกษากันก่อน</li>
+                                        </ul>
+                                    </div>
+                                </section>
+
+                                {/* คัมภีร์ราชา (Super Rising - Gold Pulse) */}
+                                <section className="md:col-span-2 bg-gradient-to-br from-yellow-700 via-amber-500 to-yellow-900 border-2 border-yellow-400 text-yellow-50 rounded-xl p-6 relative overflow-hidden animate-pulse-royal">
+                                    <div className="absolute -right-4 -top-4 text-yellow-300 opacity-30 text-8xl pointer-events-none drop-shadow-lg"><i className="fa-solid fa-crown"></i></div>
+                                    <div className="relative z-10 text-center md:text-left">
+                                        <h3 className="text-xl font-bold text-yellow-200 mb-3 flex items-center justify-center md:justify-start gap-2 border-b border-yellow-400/40 pb-2"><i className="fa-solid fa-gem text-white drop-shadow-md"></i> ตำนานแห่งมงกุฎ (The Rare Legend)</h3>
+                                        <div className="text-sm leading-relaxed space-y-3 font-medium">
+                                            <p>หลายคนสงสัยว่าทำอย่างไรจึงจะได้สถานะ <strong className="text-amber-300 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.8)] text-base">"Super Rising (+10 EXP)"</strong></p>
+                                            <p>สภาเมืองขอประกาศว่า <strong className="text-amber-300 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]">"มันไม่มีสูตรตายตัว"</strong> มงกุฎนี้คือรางวัลเกียรติยศขั้นสุดยอด (Rare) ที่สภาเมืองจะมอบให้ "นานๆ ครั้ง" สำหรับสาส์นที่สร้างแรงกระเพื่อมมหาศาล เช่น ช่วยลดของเสีย (Defect) ได้เป็นจำนวนมาก, ป้องกันอุบัติเหตุร้ายแรง, หรือลดต้นทุน (Cost/Cycle Time) ได้อย่างเป็นรูปธรรม</p>
+                                            <p className="font-bold text-yellow-200 mt-4 text-base italic text-center drop-shadow-md">"จงอย่าโฟกัสที่การล่ามงกุฎ แต่จงโฟกัสที่การสร้างประโยชน์ให้แผ่นดิน แล้วมงกุฎจะเลือกผู้ที่คู่ควรเอง!"</p>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="text-center mt-10 pt-6 border-t border-[#8b5a2b]/30">
+                        <button onClick={() => onViewChange('worldmap')} className="bg-[#5d3a1a] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8b5a2b] shadow-xl border-2 border-[#ebdcb9] transition duration-200 cursor-pointer">
+                            <i className="fa-solid fa-arrow-left-to-line mr-2"></i> กลับสู่แผนที่โลก (World Map)
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT 8: Root App
+        // ==========================================
+        function App() {
+            const [isAuthorized, setIsAuthorized] = useState(false);
+            const [currentView, setCurrentView] = useState('news');
+            const [chronicleTab, setChronicleTab] = useState('lore'); 
+            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+            const [isLoaded, setIsLoaded] = useState(false);
+            
+            const [runningSeq, setRunningSeq] = useState(1);
+            
+            const [isMuted, setIsMuted] = useState(false);
+            const audioRef = useRef(null);
+            const popbossMusicRef = useRef(null);
+            const hitSoundRef = useRef(null);
+
+            // 🎵 Music Player State
+            const musicTracks = [
+                { id: 1, src: 'Assets/Audio/Music/Music_bg-1.mp3', title: '1. เทศกาลงานรื่นเริง' },
+                { id: 2, src: 'Assets/Audio/Music/Music_bg-2.mp3', title: '2. ทั่ง, ถ่านและอัคคี' },
+                { id: 3, src: 'Assets/Audio/Music/Music_bg-3.mp3', title: '3. ครั้งเยือนแดนเหมันต์' },
+                { id: 4, src: 'Assets/Audio/Music/Music_bg-4.mp3', title: '4. เมื่อฟันเฟื่องหมุนไป' },
+                { id: 5, src: 'Assets/Audio/Music/Music_bg-5.mp3', title: '5. บทเพลงในหมู่เมฆ' }
+            ];
+            const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [isLoopingOne, setIsLoopingOne] = useState(false);
+
+            const handleNextTrack = () => setCurrentTrackIndex((prev) => (prev + 1) % musicTracks.length);
+            const handlePrevTrack = () => setCurrentTrackIndex((prev) => (prev - 1 + musicTracks.length) % musicTracks.length);
+
+            useEffect(() => {
+                const authSession = sessionStorage.getItem('isAuthorized');
+                if (authSession) setIsAuthorized(true);
+                setIsLoaded(true);
+            }, []);
+
+            useEffect(() => {
+                if (!isAuthorized) return;
+                
+                const bgMusic = audioRef.current;
+                const popMusic = popbossMusicRef.current;
+
+                if (isMuted) {
+                    if (bgMusic) bgMusic.muted = true;
+                    if (popMusic) popMusic.muted = true;
+                } else {
+                    if (bgMusic) bgMusic.muted = false;
+                    if (popMusic) popMusic.muted = false;
+                }
+
+                if (currentView === 'popboss') {
+                    if (bgMusic) bgMusic.pause();
+                    if (popMusic && !isMuted) popMusic.play().catch(e => console.log(e));
+                } else {
+                    if (popMusic) popMusic.pause();
+                    if (bgMusic) {
+                        if (isPlaying && !isMuted) {
+                            bgMusic.play().catch(e => console.log("Auto-play blocked"));
+                        } else {
+                            bgMusic.pause();
+                        }
+                    }
+                }
+            }, [currentView, isAuthorized, isMuted, isPlaying, currentTrackIndex]);
+
+            const handleLoginSuccess = () => {
+                sessionStorage.setItem('isAuthorized', 'true');
+                setIsAuthorized(true);
+                setIsPlaying(true); 
+                if (audioRef.current) { audioRef.current.volume = 0.5; }
+                if (popbossMusicRef.current) popbossMusicRef.current.volume = 0.6;
+                if (hitSoundRef.current) hitSoundRef.current.volume = 0.8;
+            };
+
+            const toggleMute = () => { setIsMuted(!isMuted); };
+            const playHitSound = () => {
+                if (hitSoundRef.current && !isMuted) {
+                    hitSoundRef.current.currentTime = 0;
+                    hitSoundRef.current.play().catch(e => console.log("SFX play failed"));
+                }
+            };
+
+            const handleViewChange = (view, extraParam) => {
+                setCurrentView(view);
+                if (view === 'chronicles') {
+                    if (extraParam) setChronicleTab(extraParam); 
+                    else setChronicleTab('lore'); 
+                }
+            };
+
+            const [projects, setProjects] = useState([]);
+            const [kingdomEXP, setKingdomEXP] = useState({ 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
+            const [popBossScores, setPopBossScores] = useState({ 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
+
+            useEffect(() => {
+                const scores = { 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 };
+                projects.forEach(p => {
+                    if (p.ideaApproved && p.status !== 'Deleted') {
+                        let originPts = 5;
+                        if (p.isSuperRising) originPts += 5; 
+                        if (p.isQualityEvent) originPts *= 2; 
+                        if (scores[p.origin] !== undefined) scores[p.origin] += originPts;
+                    }
+                    if (p.status === 'Rising' || p.status === 'Hall of fame') {
+                        let targetPts = p.wasAbandoned ? 5 : 15;
+                        if (p.isQualityEvent && !p.wasAbandoned) targetPts = 30; 
+                        if (scores[p.target] !== undefined) scores[p.target] += targetPts;
+                    }
+                });
+                setKingdomEXP(scores);
+            }, [projects]);
+
+            const handleAddProject = (newProject) => { setProjects(prev => [newProject, ...prev]); };
+            const handleUpdateProject = (updatedProject) => { setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); };
+
+            const showSidebar = currentView !== 'popboss'; 
+
+            return (
+                <div className="relative min-h-screen flex flex-col">
+                    <audio ref={audioRef} id="bgMusic" src={musicTracks[currentTrackIndex].src} loop={isLoopingOne} onEnded={handleNextTrack}></audio>
+                    
+                    <audio ref={popbossMusicRef} loop id="popbossMusic"><source src="Assets/Audio/Special_event/Music/Music_popboss.mp3" type="audio/mpeg" /></audio>
+                    <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
+
+                    <video autoPlay loop muted playsInline className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                        <source src="Assets/Video/Diecast_kingdoms_level_1.mp4" type="video/mp4" />
+                    </video>
+
+                    {!isAuthorized ? (
+                        <LoginGate onLoginSuccess={handleLoginSuccess} />
+                    ) : (
+                        <>
+                            <WelcomeGate />
+                            
+                            {showSidebar && (
+                                <Sidebar 
+                                    currentView={currentView} onViewChange={handleViewChange} 
+                                    isCollapsed={isSidebarCollapsed} onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+                                    visible={true} isMuted={isMuted} toggleMute={toggleMute} 
+                                    musicTracks={musicTracks} currentTrackIndex={currentTrackIndex} setCurrentTrackIndex={setCurrentTrackIndex}
+                                    isPlaying={isPlaying} setIsPlaying={setIsPlaying} isLoopingOne={isLoopingOne} setIsLoopingOne={setIsLoopingOne}
+                                    handleNextTrack={handleNextTrack} handlePrevTrack={handlePrevTrack}
+                                />
+                            )}
+
+                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} />}
+
+                            {currentView !== 'worldmap' && currentView !== 'popboss' && (
+                                <main className={`transition-all duration-500 p-4 md:p-8 flex-grow ${showSidebar ? (isSidebarCollapsed ? 'ml-24' : 'ml-[18rem]') : 'ml-0'}`}>
+                                    <div className="max-w-6xl mx-auto py-4">
+                                        {currentView === 'news' && <NewsView onViewChange={handleViewChange} />}
+                                        {currentView === 'suggestion' && <SuggestionForm projects={projects} onAddProject={handleAddProject} onViewChange={handleViewChange} runningSeq={runningSeq} setRunningSeq={setRunningSeq} />}
+                                        {currentView === 'dashboard' && <Dashboard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
+                                        {currentView === 'quests' && <QuestBoard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
+                                        {currentView === 'chronicles' && <Chronicles onViewChange={handleViewChange} initialTab={chronicleTab} />}
+                                    </div>
+                                </main>
+                            )}
+
+                            {currentView === 'popboss' && (
+                                <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => setPopBossScores(prev => ({...prev, [kingdom]: prev[kingdom] + 1}))} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
