@@ -737,7 +737,11 @@
             const handleFileChange = (e) => {
                 if (e.target.files && e.target.files[0]) {
                     const file = e.target.files[0];
-                    setFormData(prev => ({ ...prev, image: file.name, imagePreview: URL.createObjectURL(file) }));
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setFormData(prev => ({ ...prev, image: file.name, imagePreview: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
                 }
             };
 
@@ -2036,7 +2040,7 @@
                 setProjects(prev => [newProject, ...prev]); 
 
                 if (supabase) {
-                    await supabase.from('projects').insert([{
+                    const { error } = await supabase.from('projects').insert([{
                         id: newProject.id,
                         emp: newProject.emp,
                         name: newProject.name,
@@ -2061,6 +2065,7 @@
                         is_quality_event: newProject.isQualityEvent,
                         is_super_rising: newProject.isSuperRising
                     }]);
+                    if (error) console.error("Supabase insert error:", error);
                 }
             };
 
@@ -2068,7 +2073,7 @@
                 setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); 
 
                 if (supabase) {
-                    await supabase.from('projects').update({
+                    const { error } = await supabase.from('projects').update({
                         category: updatedProject.category,
                         status: updatedProject.status,
                         comment: updatedProject.comment,
@@ -2080,6 +2085,7 @@
                         is_quality_event: updatedProject.isQualityEvent,
                         is_super_rising: updatedProject.isSuperRising
                     }).eq('id', updatedProject.id);
+                    if (error) console.error("Supabase update error:", error);
                 }
             };
 
