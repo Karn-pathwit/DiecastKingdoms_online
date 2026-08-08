@@ -320,8 +320,8 @@
             if (!isVisible) return null;
 
             return (
-                <div className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                    <div className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
+                <div onClick={handleClose} className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                    <div onClick={(e) => e.stopPropagation()} className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
                         <h1 className="text-3xl font-bold text-[#5d3a1a] mb-6 font-cinzel tracking-wide">ยินดีต้อนรับสู่ Diecast Kingdoms</h1>
                         <div className="text-[#8b5a2b] space-y-4 mb-8 text-sm md:text-base leading-relaxed">
                             <p className="italic">"ดินแดนแห่งความร่วมมือ ที่ทุกไอเดียของท่านคืออิฐบล็อกที่ช่วยเสริมสร้างอาณาจักรของเราให้แข็งแกร่งยิ่งขึ้น"</p>
@@ -338,8 +338,8 @@
         // ==========================================
         function NewsView({ onViewChange }) {
             return (
-                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm">
-                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm" onClick={() => onViewChange('worldmap')}>
+                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => onViewChange('worldmap')} className="absolute top-4 right-5 text-4xl font-bold text-[#8b5a2b] hover:text-red-600 transition cursor-pointer">&times;</button>
                         <div className="text-center border-b-2 border-[#8b5a2b]/30 pb-4 mb-6 mt-4">
                             <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> ประกาศิตข่าวสาร</h1>
@@ -901,6 +901,7 @@
         function Dashboard({ projects, onUpdateProject, kingdomEXP }) {
             const [isAdminMode, setIsAdminMode] = useState(false);
             const [selectedProject, setSelectedProject] = useState(null);
+            const [zoomedImg, setZoomedImg] = useState(null);
             const [adminStatus, setAdminStatus] = useState('');
             const [adminFeedback, setAdminFeedback] = useState('');
             const [adminCategory, setAdminCategory] = useState(''); 
@@ -1203,8 +1204,8 @@
                     </div>
 
                     {selectedProject && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
-                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto">
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                                 <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
                                 <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
                                     <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">📜 สาส์นพัฒนาแด่อาณาจักร 📜</h2>
@@ -1237,8 +1238,11 @@
                                     <div>
                                         <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> ภาพพิกัดปัญหา (Before):</p>
                                         {selectedProject.imagePreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner">
-                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain" />
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedProject.imagePreview)}>
+                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
+                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
+                                                </div>
                                             </div>
                                         ) : (
                                             <div className="bg-gray-200 h-24 mt-1.5 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 font-bold"><span>{selectedProject.imageText}</span></div>
@@ -1303,6 +1307,14 @@
                             </div>
                         </div>
                     )}
+
+                    {zoomedImg && (
+                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
+                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
+                            <img src={zoomedImg} alt="Zoomed" className="max-h-[85vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] rounded-lg border border-white/20" onClick={(e) => e.stopPropagation()} />
+                            <p className="absolute bottom-6 text-gray-400 text-sm italic bg-black/60 px-4 py-1 rounded-full border border-white/10">คลิกที่ใดก็ได้เพื่อปิด</p>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1313,6 +1325,7 @@
         function QuestBoard({ projects, onUpdateProject, kingdomEXP }) {
             const [currentRole, setCurrentRole] = useState('none');
             const [selectedQuest, setSelectedQuest] = useState(null);
+            const [zoomedImg, setZoomedImg] = useState(null);
             const [targetCommentText, setTargetCommentText] = useState('');
             const [targetImageFile, setTargetImageFile] = useState(null);
             const [targetImagePreview, setTargetImagePreview] = useState(null);
@@ -1554,8 +1567,8 @@
                     </div>
 
                     {selectedQuest && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
-                            <div className="decree-modal max-w-4xl w-full p-6 md:p-8 rounded-2xl relative max-h-[95vh] overflow-y-auto">
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+                            <div className="decree-modal max-w-4xl w-full p-6 md:p-8 rounded-2xl relative max-h-[95vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                                 <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-3xl font-bold cursor-pointer transition">&times;</button>
                                 <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
                                     <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">🛡️ รายละเอียดภารกิจ 🛡️</h2>
@@ -1577,7 +1590,12 @@
                                             <p className="text-[#8b5a2b] ml-4 bg-white p-2 mt-1 rounded-lg border border-[#8b5a2b]/20 italic">{selectedQuest.solution}</p>
                                         </div>
                                         {selectedQuest.imagePreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain" /></div>
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imagePreview)}>
+                                                <img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
+                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
+                                                </div>
+                                            </div>
                                         ) : (
                                             <div className="bg-gray-200 h-32 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 text-xs font-bold shadow-inner"><span>{selectedQuest.imageText}</span></div>
                                         )}
@@ -1592,7 +1610,12 @@
                                             <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
                                         </div>
                                         {selectedQuest.imageAfterPreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain" /></div>
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imageAfterPreview)}>
+                                                <img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
+                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
+                                                </div>
+                                            </div>
                                         ) : (
                                             <div className="bg-white h-32 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '📸 ภาพหลักฐานการแก้ไข (After)'}</span></div>
                                         )}
@@ -1665,6 +1688,14 @@
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {zoomedImg && (
+                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
+                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
+                            <img src={zoomedImg} alt="Zoomed" className="max-h-[85vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] rounded-lg border border-white/20" onClick={(e) => e.stopPropagation()} />
+                            <p className="absolute bottom-6 text-gray-400 text-sm italic bg-black/60 px-4 py-1 rounded-full border border-white/10">คลิกที่ใดก็ได้เพื่อปิด</p>
                         </div>
                     )}
                 </div>
