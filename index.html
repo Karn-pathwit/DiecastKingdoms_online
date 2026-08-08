@@ -439,7 +439,7 @@
                             </button>
                             {menuItems.map((item) => {
                                 const isActive = currentView === item.id;
-                                const hasBadge = item.badge && item.badge > 0;
+                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
                                 return (
                                     <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
                                         <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
