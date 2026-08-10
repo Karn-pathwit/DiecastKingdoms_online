@@ -1199,7 +1199,7 @@
             const handleAdminLogin = () => {
                 if (isAdminMode) { setIsAdminMode(false); alert('ออกจากโหมดสภาเมืองเรียบร้อยแล้ว'); return; }
                 const pass = prompt('🔐 กรุณาใส่รหัสผ่านสภาเมือง:');
-                if (pass === '1234') { setIsAdminMode(true); alert('✅ รหัสผ่านถูกต้อง เข้าสู่โหมดสภาเมือง'); } 
+                if (pass === '9999' || pass === '1234') { setIsAdminMode(true); alert('✅ รหัสผ่านถูกต้อง เข้าสู่โหมดสภาเมือง'); } 
                 else if (pass !== null) alert('❌ รหัสผ่านไม่ถูกต้อง!');
             };
 
@@ -1684,11 +1684,37 @@
 
             const handleRoleLogin = (type) => {
                 if (type === 'target') {
-                    const role = prompt('🛡️ กรุณาระบุชื่ออาณาจักรของคุณ (เบสเซนตร้า, แคสเทอเรีย, แบลงค์ไฮม์การ์ด, แมคชีนโพลิส, ไฟนัลธรอน):');
-                    if (role) setCurrentRole(role.trim());
+                    if (currentRole !== 'none' && currentRole !== 'central') {
+                        setCurrentRole('none');
+                        alert('🚪 ออกจากระบบตัวแทนอาณาจักรเรียบร้อยแล้ว');
+                        return;
+                    }
+                    const pass = prompt('🗝️ กรุณาใส่รหัสผ่านตัวแทนอาณาจักรของคุณ:\n(1111 = เบสเซนตร้า, 2222 = แคสเทอเรีย, 3333 = แบลงค์ไฮม์การ์ด, 4444 = แมคชีนโพลิส, 5555 = ไฟนัลธรอน)');
+                    if (!pass) return;
+                    
+                    const passMap = {
+                        '1111': 'เบสเซนตร้า',
+                        '2222': 'แคสเทอเรีย',
+                        '3333': 'แบลงค์ไฮม์การ์ด',
+                        '4444': 'แมคชีนโพลิส',
+                        '5555': 'ไฟนัลธรอน'
+                    };
+                    
+                    const matchedKingdom = passMap[pass.trim()];
+                    if (matchedKingdom) {
+                        setCurrentRole(matchedKingdom);
+                        alert(`✅ ล็อกอินเข้าสู่สิทธิสภาตัวแทนอาณาจักร "${matchedKingdom}" เรียบร้อยแล้ว!`);
+                    } else {
+                        alert('❌ รหัสผ่านตัวแทนอาณาจักรไม่ถูกต้อง!');
+                    }
                 } else if (type === 'central') {
+                    if (currentRole === 'central') {
+                        setCurrentRole('none');
+                        alert('🚪 ออกจากระบบสภาเมืองส่วนกลางเรียบร้อยแล้ว');
+                        return;
+                    }
                     const pass = prompt('🔐 กรุณาใส่รหัสผ่านสภาเมืองส่วนกลาง:');
-                    if (pass === '1234') {
+                    if (pass === '9999' || pass === '1234') {
                         setCurrentRole('central');
                         alert('✅ ล็อกอินเข้าสู่สิทธิสภาเมืองส่วนกลางเรียบร้อยแล้ว!');
                     } else if (pass !== null) {
