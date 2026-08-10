@@ -121,25 +121,21 @@
 
         /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
         @media (max-width: 640px) and (orientation: portrait) {
-            .pin-blankheimgard { top: 38% !important; left: 28% !important; }
+            .pin-blankheimgard { top: 37% !important; left: 28% !important; }
             .pin-casteria { top: 40% !important; left: 74% !important; }
             .pin-bascentra { top: 60% !important; left: 50% !important; }
             .pin-machinepolis { top: 80% !important; left: 26% !important; }
-            .pin-finalthron { top: 80% !important; left: 74% !important; }
+            .pin-finalthron { top: 78% !important; left: 74% !important; }
 
-            /* Stack EXP bar below Title Badge ONLY on Mobile Portrait */
+            /* Position EXP bar cleanly below Title Badge ONLY on Mobile Portrait */
             .modal-exp-bar-stacked {
-                position: relative !important;
-                top: auto !important;
-                left: auto !important;
+                position: absolute !important;
+                top: 4.5rem !important;
+                left: 0.75rem !important;
                 right: auto !important;
-                margin-top: 0.5rem !important;
-                width: 100% !important;
-                max-width: 220px !important;
-            }
-            .modal-header-wrapper {
-                flex-direction: column !important;
-                align-items: flex-start !important;
+                width: calc(100% - 6rem) !important;
+                max-width: 210px !important;
+                z-index: 30 !important;
             }
         }
     </style>
