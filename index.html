@@ -121,33 +121,36 @@
 
         /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
         @media (max-width: 640px) and (orientation: portrait) {
-            .pin-blankheimgard { top: 44% !important; left: 28% !important; }
-            .pin-casteria { top: 44% !important; left: 74% !important; }
+            .pin-blankheimgard { top: 40% !important; left: 28% !important; }
+            .pin-casteria { top: 40% !important; left: 74% !important; }
             .pin-bascentra { top: 60% !important; left: 50% !important; }
-            .pin-machinepolis { top: 76% !important; left: 26% !important; }
-            .pin-finalthron { top: 76% !important; left: 74% !important; }
+            .pin-machinepolis { top: 80% !important; left: 26% !important; }
+            .pin-finalthron { top: 80% !important; left: 74% !important; }
         }
 
-        /* Scale down Kingdom Detail Modal elements on short height screens (Mobile Landscape) */
+        /* Mobile Landscape Modal Layout based on Image 2 Blueprint (height <= 550px) */
         @media (max-height: 550px) {
+            .modal-action-buttons {
+                display: none !important;
+            }
             .modal-landscape-container .modal-landscape-header-box {
-                min-height: 40px !important;
-                padding-left: 42px !important;
-                padding-right: 12px !important;
+                min-height: 36px !important;
+                padding-left: 36px !important;
+                padding-right: 10px !important;
                 padding-top: 2px !important;
                 padding-bottom: 2px !important;
             }
             .modal-landscape-container .modal-landscape-logo-img {
-                width: 44px !important;
-                height: 44px !important;
-                left: -8px !important;
+                width: 38px !important;
+                height: 38px !important;
+                left: -6px !important;
             }
             .modal-landscape-container .modal-landscape-title-text {
-                font-size: 1rem !important;
-                line-height: 1.1 !important;
+                font-size: 0.875rem !important;
+                line-height: 1 !important;
             }
             .modal-landscape-container .modal-landscape-sub-text {
-                font-size: 0.7rem !important;
+                font-size: 0.65rem !important;
             }
         }
     </style>
@@ -826,7 +829,7 @@
                                         </div>
                                     </div>
 
-                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none">
+                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none modal-action-buttons">
                                         <button onClick={() => onViewChange('quests')} className="w-full bg-gradient-to-r from-[#8b5a2b] to-[#5d3a1a] hover:from-[#a06830] hover:to-[#6d4514] text-[#f7e6c4] py-3 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-[#ebdcb9]/40 transition text-sm cursor-pointer flex items-center justify-center gap-2 pointer-events-auto">
                                             <i className="fa-solid fa-door-open text-lg"></i> เข้าสู่ลานภารกิจ
                                         </button>
@@ -928,11 +931,18 @@
             const isAnonymous = formData.origin === 'เบสเซนตร้า';
             const isSecret = formData.category.includes('Secret');
 
+            const [showConfirmModal, setShowConfirmModal] = useState(false);
+
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (!isAnonymous && !formData.empId.trim()) { alert('กรุณากรอกรหัสพนักงานเพื่อใช้รับรางวัลและยืนยันตัวตนค่ะ'); return; }
                 if (!formData.origin || !formData.target || !formData.category || !formData.process || !formData.factory || !formData.title || !formData.problem || !formData.benefit) { alert('กรุณากรอกข้อมูลให้ครบถ้วนก่อนส่งสาส์นค่ะ'); return; }
 
+                setShowConfirmModal(true);
+            };
+
+            const handleFinalSubmit = () => {
+                setShowConfirmModal(false);
                 let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
                 let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
                 
@@ -1052,6 +1062,26 @@
                         </section>
                         <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>{isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}</button>
                     </form>
+
+                    {showConfirmModal && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-[#ebdcb9] relative">
+                                <div className="text-5xl mb-3 animate-bounce">📜</div>
+                                <h3 className="text-xl md:text-2xl font-bold text-[#f7e6c4] font-cinzel mb-2">ยืนยันการยื่นสาส์นพัฒนา?</h3>
+                                <p className="text-xs md:text-sm text-gray-300 mb-6 leading-relaxed">
+                                    กรุณาตรวจสอบรายละเอียดความถูกต้องของสาส์นก่อนส่งมอบเข้าสู่สภาเมืองนะคะ
+                                </p>
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setShowConfirmModal(false)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
+                                        <i className="fa-solid fa-rotate-left mr-1.5"></i> ตรวจสอบซ้ำ
+                                    </button>
+                                    <button type="button" onClick={handleFinalSubmit} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300">
+                                        <i className="fa-solid fa-paper-plane mr-1.5"></i> ยืนยันการส่งสาส์น
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1575,8 +1605,15 @@
                 setTargetImagePreview(null); 
             };
 
+            const [showQuestConfirm, setShowQuestConfirm] = useState(false);
+
             const handleTargetSubmit = () => {
                 if (!targetCommentText) { alert('กรุณากรอกข้อความอธิบายด้วยค่ะ'); return; }
+                setShowQuestConfirm(true);
+            };
+
+            const handleFinalTargetSubmit = () => {
+                setShowQuestConfirm(false);
                 const updatedQuest = { ...selectedQuest, status: 'Evidence', targetComment: targetCommentText, imageAfterText: targetImageFile ? `📸 ภาพหลักฐาน: ${targetImageFile}` : '📸 ภาพหลักฐานการแก้ไข (After)', imageAfterPreview: targetImagePreview, adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' };
                 onUpdateProject(updatedQuest);
                 alert("อัปโหลดหลักฐานสำเร็จ!");
@@ -1883,6 +1920,26 @@
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {showQuestConfirm && (
+                        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
+                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-[#ebdcb9] relative">
+                                <div className="text-5xl mb-3 animate-bounce">🛡️</div>
+                                <h3 className="text-xl md:text-2xl font-bold text-[#f7e6c4] font-cinzel mb-2">ยืนยันการส่งมอบภารกิจ?</h3>
+                                <p className="text-xs md:text-sm text-gray-300 mb-6 leading-relaxed">
+                                    กรุณาตรวจสอบหลักฐานและคำอธิบายก่อนส่งมอบเข้าสู่สภาเมืองกลางนะคะ
+                                </p>
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setShowQuestConfirm(false)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
+                                        <i className="fa-solid fa-rotate-left mr-1.5"></i> ตรวจสอบซ้ำ
+                                    </button>
+                                    <button type="button" onClick={handleFinalTargetSubmit} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300">
+                                        <i className="fa-solid fa-check mr-1.5"></i> ยืนยันส่งมอบงาน
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
