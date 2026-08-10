@@ -1792,13 +1792,14 @@
                 }
             };
 
-            const activeQuests = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p.status !== 'Hall of fame');
+            const activeQuests = (projects || []).filter(p => p && p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
+            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p && p.status !== 'Hall of fame');
             
             const filteredQuests = visibleQuests.filter(q => {
-                const matchTarget = !filters.target || q.target.includes(filters.target);
+                if (!q) return false;
+                const matchTarget = !filters.target || (q.target && q.target.includes(filters.target));
                 const matchStatus = !filters.status || q.status === filters.status;
-                const rowText = `${q.id} ${q.title} ${q.origin} ${q.target}`.toLowerCase();
+                const rowText = `${q.id || ''} ${q.title || ''} ${q.origin || ''} ${q.target || ''}`.toLowerCase();
                 const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
                 return matchTarget && matchStatus && matchSearch;
             });
@@ -1806,9 +1807,10 @@
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
             const currentItems = filteredQuests.slice(indexOfFirstItem, indexOfLastItem);
-            const totalPages = Math.ceil(filteredQuests.length / itemsPerPage);
+            const totalPages = Math.max(1, Math.ceil(filteredQuests.length / itemsPerPage));
 
             const getStatusBadge = (q) => {
+                if (!q) return null;
                 if (q.status === 'Founding') return <span className="px-3 py-1 rounded-full bg-yellow-200 text-yellow-800 border border-yellow-400 text-xs font-bold w-[80px] inline-block text-center">Founding</span>;
                 if (q.status === 'Evidence') return <span className="px-3 py-1 rounded-full bg-purple-200 text-purple-800 border border-purple-400 text-xs font-bold w-[80px] inline-block text-center">Evidence</span>;
                 if (q.status === 'Rising') {
@@ -1870,8 +1872,9 @@
                         {isExpBoardOpen && (
                             <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
                                 {kingdoms.map(k => {
-                                    const levelData = calculateLevel(kingdomEXP[k.name] || 0);
-                                    const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                    const expVal = (kingdomEXP && kingdomEXP[k.name]) ? kingdomEXP[k.name] : 0;
+                                    const levelData = calculateLevel(expVal);
+                                    const percent = levelData.requiredExp > 0 ? (levelData.currentExp / levelData.requiredExp) * 100 : 0;
                                     return (
                                         <div key={k.id}>
                                             <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
