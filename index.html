@@ -605,25 +605,9 @@
                                     </button>
                                 );
                             })}
-                                            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
-                                        </button>
-                                        <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="mx-3 mb-4 flex justify-center">
-                                <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
-                                    <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                            {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
                         </div>
                     </div>
-                </div>
+                </>
             );
         }
 
