@@ -121,11 +121,34 @@
 
         /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
         @media (max-width: 640px) and (orientation: portrait) {
-            .pin-blankheimgard { top: 32% !important; left: 28% !important; }
-            .pin-casteria { top: 36% !important; left: 74% !important; }
-            .pin-bascentra { top: 66% !important; left: 50% !important; }
-            .pin-machinepolis { top: 84% !important; left: 26% !important; }
-            .pin-finalthron { top: 84% !important; left: 74% !important; }
+            .pin-blankheimgard { top: 44% !important; left: 28% !important; }
+            .pin-casteria { top: 44% !important; left: 74% !important; }
+            .pin-bascentra { top: 60% !important; left: 50% !important; }
+            .pin-machinepolis { top: 76% !important; left: 26% !important; }
+            .pin-finalthron { top: 76% !important; left: 74% !important; }
+        }
+
+        /* Scale down Kingdom Detail Modal elements on short height screens (Mobile Landscape) */
+        @media (max-height: 550px) {
+            .modal-landscape-container .modal-landscape-header-box {
+                min-height: 40px !important;
+                padding-left: 42px !important;
+                padding-right: 12px !important;
+                padding-top: 2px !important;
+                padding-bottom: 2px !important;
+            }
+            .modal-landscape-container .modal-landscape-logo-img {
+                width: 44px !important;
+                height: 44px !important;
+                left: -8px !important;
+            }
+            .modal-landscape-container .modal-landscape-title-text {
+                font-size: 1rem !important;
+                line-height: 1.1 !important;
+            }
+            .modal-landscape-container .modal-landscape-sub-text {
+                font-size: 0.7rem !important;
+            }
         }
     </style>
 </head>
@@ -2152,7 +2175,7 @@
             const [isAuthorized, setIsAuthorized] = useState(false);
             const [currentView, setCurrentView] = useState('news');
             const [chronicleTab, setChronicleTab] = useState('lore'); 
-            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
             const [isLoaded, setIsLoaded] = useState(false);
             
             const [runningSeq, setRunningSeq] = useState(1);
