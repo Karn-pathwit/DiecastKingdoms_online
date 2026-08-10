@@ -757,28 +757,28 @@
                             <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col" onClick={(e) => e.stopPropagation()}>
                                 <div className="absolute inset-0 z-0 opacity-80" style={{ backgroundImage: `url('${activeData.bgImage}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}></div>
                                 
-                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-4 right-4 bg-black/70 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-30 flex items-center justify-center border border-white/30 shadow-lg cursor-pointer">&times;</button>
+                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/80 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-50 flex items-center justify-center border border-white/40 shadow-xl cursor-pointer">&times;</button>
                                 
-                                <div className="absolute top-6 left-6 md:top-10 md:left-10 z-40 flex items-center">
-                                    <div className="relative bg-black/50 pr-5 md:pr-8 py-2 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[70px] md:min-h-[100px] pl-[70px] md:pl-[130px]">
+                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center max-w-[62%] md:max-w-none">
+                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[56px] md:min-h-[100px] pl-[55px] md:pl-[130px] overflow-hidden">
                                         <img 
                                             src={activeData.iconImg} 
                                             alt="logo" 
-                                            className="absolute left-[-20px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-24 h-24 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
+                                            className="absolute left-[-15px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-16 h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
                                         />
-                                        <div className="flex flex-col relative z-10 pt-1">
-                                            <span className="text-3xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-1">{activeData.nameEng}</span>
-                                            <span className="text-sm md:text-xl font-sarabun text-gray-300 font-medium">{activeData.nameThai}</span>
+                                        <div className="flex flex-col relative z-10 pt-0.5 truncate">
+                                            <span className="text-xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate">{activeData.nameEng}</span>
+                                            <span className="text-xs md:text-xl font-sarabun text-gray-300 font-medium truncate">{activeData.nameThai}</span>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div className="absolute top-6 right-16 md:top-10 md:right-10 z-20 w-56 md:w-72 bg-black/50 p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
-                                    <div className="flex justify-between text-sm md:text-base text-[#f7e6c4] font-bold mb-2">
+                                <div className="absolute top-16 left-3 md:top-10 md:left-auto md:right-16 z-20 w-44 md:w-72 bg-black/60 p-2.5 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
+                                    <div className="flex justify-between text-xs md:text-base text-[#f7e6c4] font-bold mb-1 md:mb-2">
                                         <span>Level {levelData.level}</span>
-                                        <span>{levelData.currentExp} / {levelData.requiredExp} EXP</span>
+                                        <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
                                     </div>
-                                    <div className="w-full bg-black/80 h-3 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
+                                    <div className="w-full bg-black/80 h-2.5 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
                                         <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
                                     </div>
                                 </div>
@@ -1031,6 +1031,7 @@
         // ==========================================
         function Dashboard({ projects, onUpdateProject, kingdomEXP }) {
             const [isAdminMode, setIsAdminMode] = useState(false);
+            const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedProject, setSelectedProject] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null);
             const [adminStatus, setAdminStatus] = useState('');
@@ -1221,25 +1222,39 @@
                         </div>
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
-                        <div className="space-y-4">
-                            {kingdoms.map(k => {
-                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
-                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
-                                return (
-                                    <div key={k.id}>
-                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
-                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
-                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
-                                        </div>
-                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
-                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                    <div className={`parchment rounded-2xl shadow-xl transition-all duration-300 ${isExpBoardOpen ? 'p-6 bg-gradient-to-b from-[#f4e4bc] to-[#ebdcb9]' : 'p-4 hover:bg-[#e8d6ab]'}`}>
+                        <div 
+                            onClick={() => setIsExpBoardOpen(!isExpBoardOpen)}
+                            className="flex justify-between items-center cursor-pointer select-none"
+                            title={isExpBoardOpen ? "คลิกเพื่อพับเก็บ" : "คลิกเพื่อแสดงสถานะความก้าวหน้า"}
+                        >
+                            <h3 className="text-lg md:text-xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
+                                <span>สถานะความก้าวหน้าแต่ละอาณาจักร</span>
+                            </h3>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isExpBoardOpen ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.9)] scale-110' : 'bg-[#8b5a2b]/20 text-[#5d3a1a]'}`}>
+                                <i className="fa-solid fa-chevron-down text-base"></i>
+                            </div>
                         </div>
+
+                        {isExpBoardOpen && (
+                            <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
+                                {kingdoms.map(k => {
+                                    const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                    const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                    return (
+                                        <div key={k.id}>
+                                            <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                                <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                                <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
+                                            </div>
+                                            <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                                <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1455,6 +1470,7 @@
         // ==========================================
         function QuestBoard({ projects, onUpdateProject, kingdomEXP }) {
             const [currentRole, setCurrentRole] = useState('none');
+            const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedQuest, setSelectedQuest] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null);
             const [targetCommentText, setTargetCommentText] = useState('');
@@ -1617,25 +1633,39 @@
                         </div>
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
-                        <div className="space-y-4">
-                            {kingdoms.map(k => {
-                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
-                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
-                                return (
-                                    <div key={k.id}>
-                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
-                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
-                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
-                                        </div>
-                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
-                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                    <div className={`parchment rounded-2xl shadow-xl transition-all duration-300 ${isExpBoardOpen ? 'p-6 bg-gradient-to-b from-[#f4e4bc] to-[#ebdcb9]' : 'p-4 hover:bg-[#e8d6ab]'}`}>
+                        <div 
+                            onClick={() => setIsExpBoardOpen(!isExpBoardOpen)}
+                            className="flex justify-between items-center cursor-pointer select-none"
+                            title={isExpBoardOpen ? "คลิกเพื่อพับเก็บ" : "คลิกเพื่อแสดงสถานะความก้าวหน้า"}
+                        >
+                            <h3 className="text-lg md:text-xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
+                                <span>สถานะความก้าวหน้าแต่ละอาณาจักร</span>
+                            </h3>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isExpBoardOpen ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.9)] scale-110' : 'bg-[#8b5a2b]/20 text-[#5d3a1a]'}`}>
+                                <i className="fa-solid fa-chevron-down text-base"></i>
+                            </div>
                         </div>
+
+                        {isExpBoardOpen && (
+                            <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
+                                {kingdoms.map(k => {
+                                    const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                    const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                    return (
+                                        <div key={k.id}>
+                                            <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                                <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                                <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
+                                            </div>
+                                            <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                                <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
@@ -2063,7 +2093,38 @@
                         </div>
                     )}
 
-                    <div className="text-center mt-10 pt-6 border-t border-[#8b5a2b]/30">
+                    {/* แถบปุ่มเปลี่ยนบทด้านล่างสุด (Bottom Chapter Navigation) */}
+                    <div className="flex justify-between items-center gap-3 mt-8 pt-6 border-t border-[#8b5a2b]/30">
+                        {activeTab === 'rules' && (
+                            <button onClick={() => { setActiveTab('lore'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b]/20 hover:bg-[#8b5a2b] text-[#5d3a1a] hover:text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#8b5a2b]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow">
+                                <i className="fa-solid fa-chevron-left text-xs"></i>
+                                <span>ปฐมบท & ปมความขัดแย้ง</span>
+                            </button>
+                        )}
+                        {activeTab === 'alignment' && (
+                            <button onClick={() => { setActiveTab('rules'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b]/20 hover:bg-[#8b5a2b] text-[#5d3a1a] hover:text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#8b5a2b]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow">
+                                <i className="fa-solid fa-chevron-left text-xs"></i>
+                                <span>กฎและพจนานุกรมแห่งสภา</span>
+                            </button>
+                        )}
+
+                        <div className="flex-1"></div>
+
+                        {activeTab === 'lore' && (
+                            <button onClick={() => { setActiveTab('rules'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b] hover:bg-[#5d3a1a] text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#ebdcb9]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
+                                <span>กฎและพจนานุกรมแห่งสภา</span>
+                                <i className="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        )}
+                        {activeTab === 'rules' && (
+                            <button onClick={() => { setActiveTab('alignment'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b] hover:bg-[#5d3a1a] text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#ebdcb9]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
+                                <span>คัมภีร์วิถีนักสร้างสรรค์</span>
+                                <i className="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="text-center mt-6 pt-4">
                         <button onClick={() => onViewChange('worldmap')} className="bg-[#5d3a1a] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8b5a2b] shadow-xl border-2 border-[#ebdcb9] transition duration-200 cursor-pointer">
                             <i className="fa-solid fa-arrow-left-to-line mr-2"></i> กลับสู่แผนที่โลก (World Map)
                         </button>
