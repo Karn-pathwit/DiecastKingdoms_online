@@ -1008,6 +1008,7 @@
                     };
 
                     await onAddProject(newProject);
+                    await new Promise(resolve => setTimeout(resolve, 800));
                     setShowConfirmModal(false);
                     setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
                     setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
@@ -1158,7 +1159,7 @@
                                         <i className="fa-solid fa-rotate-left mr-1.5"></i> ตรวจสอบซ้ำ
                                     </button>
                                     <button type="button" onClick={handleFinalSubmit} disabled={isSubmitting} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5">
-                                        {isSubmitting ? <><i className="fa-solid fa-spinner animate-spin"></i> ⏳ กำลังส่งมอบสาส์น...</> : <><i className="fa-solid fa-paper-plane"></i> ยืนยันการส่งสาส์น</>}
+                                        {isSubmitting ? <><span className="inline-block animate-pulse text-base">🐎💨</span> ⏳ กำลังควบม้าส่งสาส์นสู่สภา...</> : <><i className="fa-solid fa-paper-plane"></i> ยืนยันการส่งสาส์น</>}
                                     </button>
                                 </div>
                             </div>
@@ -1756,6 +1757,8 @@
                         adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' 
                     };
                     await onUpdateProject(updatedQuest);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    setShowQuestConfirm(false);
                     alert("อัปโหลดหลักฐานสำเร็จ!");
                     closeModal();
                 } catch (err) {
@@ -2052,7 +2055,7 @@
                                                         <i className="fa-solid fa-rotate-left mr-1"></i> ตรวจสอบซ้ำ
                                                     </button>
                                                     <button type="button" onClick={handleFinalTargetSubmit} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-[11px] transition cursor-pointer shadow border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1">
-                                                        {isSubmitting ? <><i className="fa-solid fa-spinner animate-spin"></i> ⏳ กำลังส่ง...</> : <><i className="fa-solid fa-check"></i> ยืนยันส่งมอบงาน</>}
+                                                        {isSubmitting ? <><span className="inline-block animate-pulse text-xs">🐎💨</span> ⏳ กำลังควบม้าส่งมอบหลักฐาน...</> : <><i className="fa-solid fa-check"></i> ยืนยันส่งมอบงาน</>}
                                                     </button>
                                                 </div>
                                             </div>
