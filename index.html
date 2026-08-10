@@ -121,11 +121,26 @@
 
         /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
         @media (max-width: 640px) and (orientation: portrait) {
-            .pin-blankheimgard { top: 42% !important; left: 28% !important; }
+            .pin-blankheimgard { top: 38% !important; left: 28% !important; }
             .pin-casteria { top: 40% !important; left: 74% !important; }
             .pin-bascentra { top: 60% !important; left: 50% !important; }
             .pin-machinepolis { top: 80% !important; left: 26% !important; }
             .pin-finalthron { top: 80% !important; left: 74% !important; }
+
+            /* Stack EXP bar below Title Badge ONLY on Mobile Portrait */
+            .modal-exp-bar-stacked {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                margin-top: 0.5rem !important;
+                width: 100% !important;
+                max-width: 220px !important;
+            }
+            .modal-header-wrapper {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
         }
     </style>
 </head>
@@ -771,27 +786,27 @@
                                 
                                 <button onClick={() => setSelectedKingdom(null)} className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/80 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-50 flex items-center justify-center border border-white/40 shadow-xl cursor-pointer">&times;</button>
                                 
-                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex flex-col items-start gap-2 max-w-[70%] sm:max-w-[80%] md:max-w-none">
-                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[50px] md:min-h-[100px] pl-[50px] sm:pl-[60px] md:pl-[130px] overflow-hidden">
+                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center modal-header-wrapper">
+                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[48px] md:min-h-[100px] pl-[45px] sm:pl-[55px] md:pl-[130px] overflow-hidden modal-landscape-header-box">
                                         <img 
                                             src={activeData.iconImg} 
                                             alt="logo" 
-                                            className="absolute left-[-12px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
+                                            className="absolute left-[-10px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none modal-landscape-logo-img" 
                                         />
                                         <div className="flex flex-col relative z-10 pt-0.5 truncate">
-                                            <span className="text-lg sm:text-2xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate">{activeData.nameEng}</span>
-                                            <span className="text-xs sm:text-sm md:text-xl font-sarabun text-gray-300 font-medium truncate">{activeData.nameThai}</span>
+                                            <span className="text-base sm:text-2xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate modal-landscape-title-text">{activeData.nameEng}</span>
+                                            <span className="text-[10px] sm:text-xs md:text-xl font-sarabun text-gray-300 font-medium truncate modal-landscape-sub-text">{activeData.nameThai}</span>
                                         </div>
                                     </div>
-                                    
-                                    <div className="w-36 sm:w-48 md:w-72 bg-black/70 p-2 md:p-3.5 rounded-xl border border-white/20 backdrop-blur-md shadow-xl">
-                                        <div className="flex justify-between text-[10px] sm:text-xs md:text-base text-[#f7e6c4] font-bold mb-1">
-                                            <span>Level {levelData.level}</span>
-                                            <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
-                                        </div>
-                                        <div className="w-full bg-black/80 h-2 md:h-3.5 rounded-full overflow-hidden border border-white/30 shadow-inner">
-                                            <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
-                                        </div>
+                                </div>
+                                
+                                <div className="absolute top-3 right-14 md:top-10 md:right-16 z-20 w-36 sm:w-48 md:w-72 bg-black/60 p-2 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl modal-exp-bar-stacked">
+                                    <div className="flex justify-between text-[10px] sm:text-xs md:text-base text-[#f7e6c4] font-bold mb-1 md:mb-2">
+                                        <span>Level {levelData.level}</span>
+                                        <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
+                                    </div>
+                                    <div className="w-full bg-black/80 h-2 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
+                                        <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
                                     </div>
                                 </div>
                                 
@@ -1034,15 +1049,11 @@
                                 {formData.imagePreview && <div className="mt-2 h-32 w-48 border-2 border-dashed border-[#8b5a2b] rounded-lg overflow-hidden"><img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover" /></div>}
                             </div>
                         </section>
-                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>{isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}</button>
-                    </form>
-
-                    {showConfirmModal && (
-                        <div className="fixed top-0 left-0 w-screen h-screen bg-black/85 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
-                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-[#ebdcb9] relative my-auto">
-                                <div className="text-5xl mb-3 animate-bounce">📜</div>
-                                <h3 className="text-xl md:text-2xl font-bold text-[#f7e6c4] font-cinzel mb-2">ยืนยันการยื่นสาส์นพัฒนา?</h3>
-                                <p className="text-xs md:text-sm text-gray-300 mb-6 leading-relaxed">
+                        {showConfirmModal ? (
+                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-5 md:p-6 rounded-2xl text-center shadow-2xl text-[#ebdcb9] animate-fade-in my-2">
+                                <div className="text-4xl mb-2 animate-bounce">📜</div>
+                                <h3 className="text-lg md:text-xl font-bold text-[#f7e6c4] font-cinzel mb-1">ยืนยันการยื่นสาส์นพัฒนา?</h3>
+                                <p className="text-xs text-gray-300 mb-4 leading-relaxed">
                                     กรุณาตรวจสอบรายละเอียดความถูกต้องของสาส์นก่อนส่งมอบเข้าสู่สภาเมืองนะคะ
                                 </p>
                                 <div className="flex gap-3">
@@ -1054,8 +1065,10 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>{isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}</button>
+                        )}
+                    </form>
                 </div>
             );
         }
@@ -1860,9 +1873,23 @@
                                             }
                                         }} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
                                         {targetImageFile && <p className="text-xs text-blue-800 font-bold">📎 ไฟล์ที่แนบ: {targetImageFile}</p>}
-                                        <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
-                                            {selectedQuest.status === 'Evidence' ? 'แก้ไขและอัปโหลดหลักฐานใหม่ (Update)' : 'ส่งมอบหลักฐาน (เปลี่ยนสถานะเป็น Evidence)'}
-                                        </button>
+                                        {showQuestConfirm ? (
+                                            <div className="bg-[#2c1d11] border-2 border-[#8b5a2b] p-3 rounded-lg text-center shadow-xl text-[#ebdcb9] animate-fade-in mt-2">
+                                                <p className="text-xs font-bold text-[#f7e6c4] mb-1">🛡️ ยืนยันการส่งมอบภารกิจนี้?</p>
+                                                <div className="flex gap-2 mt-2">
+                                                    <button type="button" onClick={() => setShowQuestConfirm(false)} className="flex-1 py-1.5 px-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-[11px] transition cursor-pointer border border-white/20">
+                                                        <i className="fa-solid fa-rotate-left mr-1"></i> ตรวจสอบซ้ำ
+                                                    </button>
+                                                    <button type="button" onClick={handleFinalTargetSubmit} className="flex-1 py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-[11px] transition cursor-pointer shadow border border-yellow-300">
+                                                        <i className="fa-solid fa-check mr-1"></i> ยืนยันส่งมอบงาน
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
+                                                {selectedQuest.status === 'Evidence' ? 'แก้ไขและอัปโหลดหลักฐานใหม่ (Update)' : 'ส่งมอบหลักฐาน (เปลี่ยนสถานะเป็น Evidence)'}
+                                            </button>
+                                        )}
                                     </div>
                                 )}
 
@@ -1898,25 +1925,6 @@
                         </div>
                     )}
 
-                    {showQuestConfirm && (
-                        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
-                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-[#ebdcb9] relative">
-                                <div className="text-5xl mb-3 animate-bounce">🛡️</div>
-                                <h3 className="text-xl md:text-2xl font-bold text-[#f7e6c4] font-cinzel mb-2">ยืนยันการส่งมอบภารกิจ?</h3>
-                                <p className="text-xs md:text-sm text-gray-300 mb-6 leading-relaxed">
-                                    กรุณาตรวจสอบหลักฐานและคำอธิบายก่อนส่งมอบเข้าสู่สภาเมืองกลางนะคะ
-                                </p>
-                                <div className="flex gap-3">
-                                    <button type="button" onClick={() => setShowQuestConfirm(false)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
-                                        <i className="fa-solid fa-rotate-left mr-1.5"></i> ตรวจสอบซ้ำ
-                                    </button>
-                                    <button type="button" onClick={handleFinalTargetSubmit} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300">
-                                        <i className="fa-solid fa-check mr-1.5"></i> ยืนยันส่งมอบงาน
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {zoomedImg && (
                         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
