@@ -118,6 +118,49 @@
         }
         .animate-toggle-icon { animation: toggle-icon 2.5s ease-in-out infinite; }
         .animate-toggle-badge { animation: toggle-badge 2.5s ease-in-out infinite; }
+
+        /* Mobile Portrait Map Pin adjustment so bottom pins float above bottom dock */
+        @media (max-width: 640px) and (orientation: portrait) {
+            .pin-bascentra { top: 68% !important; }
+            .pin-machinepolis { top: 80% !important; }
+            .pin-finalthron { top: 80% !important; }
+        }
+
+        /* Mobile Landscape Modal Layout (Short height screens: height <= 550px) */
+        @media (max-height: 550px) {
+            .modal-landscape-container {
+                display: flex !important;
+                flex-direction: column !important;
+                position: relative !important;
+                overflow-y: auto !important;
+                max-height: 94vh !important;
+                padding: 1rem !important;
+            }
+            .modal-landscape-header-left {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                margin-bottom: 0.75rem !important;
+                max-width: 85% !important;
+            }
+            .modal-landscape-exp-bar {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                width: 100% !important;
+                margin-bottom: 0.75rem !important;
+            }
+            .modal-landscape-body {
+                position: relative !important;
+                bottom: auto !important;
+                left: auto !important;
+                right: auto !important;
+                max-height: none !important;
+                margin-top: 0 !important;
+                margin-bottom: 1rem !important;
+            }
+        }
     </style>
 </head>
 <body class="font-sarabun overflow-x-hidden antialiased">
@@ -151,7 +194,7 @@
         function MapPin({ kingdomKey, kingdom, onClick }) {
             const [imgError, setImgError] = useState(false);
             return (
-                <div className="absolute z-20 pointer-events-auto" style={{ top: kingdom.position.top, left: kingdom.position.left }}>
+                <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
                     <div className="absolute transform -translate-x-1/2 -translate-y-1/2">
                         <div onClick={onClick} className="flex flex-col items-center group cursor-pointer animate-float">
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-1 border border-white/30 whitespace-nowrap shadow-lg pointer-events-none">
@@ -754,12 +797,12 @@
                     
                     {selectedKingdom && (
                         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] animate-fade-in p-4 md:p-8 pointer-events-auto" onClick={() => setSelectedKingdom(null)}>
-                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col modal-landscape-container" onClick={(e) => e.stopPropagation()}>
                                 <div className="absolute inset-0 z-0 opacity-80" style={{ backgroundImage: `url('${activeData.bgImage}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}></div>
                                 
                                 <button onClick={() => setSelectedKingdom(null)} className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/80 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-50 flex items-center justify-center border border-white/40 shadow-xl cursor-pointer">&times;</button>
                                 
-                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center max-w-[62%] md:max-w-none">
+                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center max-w-[62%] md:max-w-none modal-landscape-header-left">
                                     <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[56px] md:min-h-[100px] pl-[55px] md:pl-[130px] overflow-hidden">
                                         <img 
                                             src={activeData.iconImg} 
@@ -773,7 +816,7 @@
                                     </div>
                                 </div>
                                 
-                                <div className="absolute top-16 left-3 md:top-10 md:left-auto md:right-16 z-20 w-44 md:w-72 bg-black/60 p-2.5 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
+                                <div className="absolute top-16 left-3 md:top-10 md:left-auto md:right-16 z-20 w-44 md:w-72 bg-black/60 p-2.5 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl modal-landscape-exp-bar">
                                     <div className="flex justify-between text-xs md:text-base text-[#f7e6c4] font-bold mb-1 md:mb-2">
                                         <span>Level {levelData.level}</span>
                                         <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
@@ -783,7 +826,7 @@
                                     </div>
                                 </div>
                                 
-                                <div className="absolute bottom-24 left-4 right-4 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-4 md:gap-6 z-20 items-end pointer-events-none mt-auto max-h-[70vh] md:max-h-none overflow-y-auto pb-2 md:pb-0">
+                                <div className="absolute bottom-24 left-4 right-4 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-4 md:gap-6 z-20 items-end pointer-events-none mt-auto max-h-[70vh] md:max-h-none overflow-y-auto pb-2 md:pb-0 modal-landscape-body">
                                     <div className="flex-1 bg-black/80 p-5 md:p-6 rounded-xl border border-[#8b5a2b]/50 backdrop-blur-md shadow-2xl pointer-events-auto">
                                         <p className="text-gray-100 text-sm md:text-base leading-relaxed mb-4">{activeData.desc}</p>
                                         <div className="text-xs md:text-sm text-[#ebdcb9] bg-black/50 px-4 py-3 rounded-lg border border-white/10">
