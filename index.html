@@ -119,56 +119,62 @@
         .animate-toggle-icon { animation: toggle-icon 2.5s ease-in-out infinite; }
         .animate-toggle-badge { animation: toggle-badge 2.5s ease-in-out infinite; }
 
-        /* Mobile Portrait Map Pin adjustment so bottom pins float above bottom dock */
+        /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
         @media (max-width: 640px) and (orientation: portrait) {
-            .pin-bascentra { top: 68% !important; }
-            .pin-machinepolis { top: 80% !important; }
-            .pin-finalthron { top: 80% !important; }
+            .pin-blankheimgard { top: 38% !important; left: 28% !important; }
+            .pin-casteria { top: 38% !important; left: 74% !important; }
+            .pin-bascentra { top: 58% !important; left: 50% !important; }
+            .pin-machinepolis { top: 78% !important; left: 26% !important; }
+            .pin-finalthron { top: 78% !important; left: 74% !important; }
         }
 
         /* Mobile Landscape Modal Layout (Short height screens: height <= 550px) */
         @media (max-height: 550px) {
             .modal-landscape-container {
-                display: grid !important;
-                grid-template-columns: 1fr 1.2fr !important;
-                gap: 1rem !important;
+                display: flex !important;
+                flex-direction: row !important;
                 position: relative !important;
                 overflow-y: auto !important;
                 max-height: 94vh !important;
                 padding: 1rem !important;
-                align-items: start !important;
+                gap: 1rem !important;
+                align-items: flex-start !important;
             }
             .modal-landscape-header-left {
                 position: relative !important;
                 top: auto !important;
                 left: auto !important;
-                max-width: 100% !important;
-                grid-column: 1 !important;
+                width: 44% !important;
+                max-width: 44% !important;
+                margin-bottom: 0.5rem !important;
+                shrink: 0 !important;
             }
             .modal-landscape-exp-bar {
                 position: relative !important;
                 top: auto !important;
                 left: auto !important;
                 right: auto !important;
-                width: 100% !important;
-                grid-column: 1 !important;
+                width: 44% !important;
                 margin-top: 0.5rem !important;
+                shrink: 0 !important;
             }
             .modal-landscape-body {
                 position: relative !important;
                 bottom: auto !important;
                 left: auto !important;
                 right: auto !important;
+                width: 52% !important;
                 max-height: none !important;
                 margin-top: 0 !important;
-                width: 100% !important;
-                grid-column: 2 !important;
-                grid-row: 1 / span 3 !important;
+                margin-bottom: 0 !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                pointer-events: auto !important;
             }
         }
 
-        /* Hide mobile sidebar and dock when modal is open */
-        @media (max-width: 768px) {
+        /* Hide sidebar ONLY on mobile landscape when modal is open */
+        @media (max-width: 1024px) and (orientation: landscape) {
             .modal-open-hide-sidebar {
                 display: none !important;
             }
