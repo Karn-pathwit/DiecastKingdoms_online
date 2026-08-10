@@ -531,7 +531,7 @@
 
                     {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
                     <div className="md:hidden">
-                        {/* ↖️ Top Left Quick Buttons (📢 News & ⚡ PopBoss) */}
+                        {/* ↖️ Top Left Quick Buttons (📢 News, ⚡ PopBoss, 🎵 Music) */}
                         <div className="fixed top-3 left-3 z-50 flex flex-col gap-2">
                             <button
                                 onClick={() => onViewChange('news')}
@@ -555,18 +555,16 @@
                             >
                                 <i className="fa-solid fa-bolt text-lg animate-pulse"></i>
                             </button>
-                        </div>
-
-                        {/* ↗️ Top Right Compact Music Player (◀ 🎵 ▶) */}
-                        <div className="fixed top-3 right-3 z-50 flex items-center gap-1 glass-panel px-2 py-1.5 rounded-full border border-yellow-500/40 shadow-xl backdrop-blur-md bg-black/60 text-yellow-200">
-                            <button onClick={handlePrevTrack} className="w-8 h-8 rounded-full flex items-center justify-center hover:text-white transition active:scale-90 cursor-pointer">
-                                <i className="fa-solid fa-chevron-left text-xs"></i>
-                            </button>
-                            <button onClick={() => setIsPlaying(!isPlaying)} className={`w-9 h-9 rounded-full flex items-center justify-center transition active:scale-90 cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 text-black shadow-[0_0_10px_rgba(234,179,8,0.6)] font-bold' : 'bg-black/60 border border-gray-600 text-gray-400'}`}>
-                                <i className={`fa-solid ${isPlaying ? 'fa-pause text-xs' : 'fa-play text-xs ml-0.5'}`}></i>
-                            </button>
-                            <button onClick={handleNextTrack} className="w-8 h-8 rounded-full flex items-center justify-center hover:text-white transition active:scale-90 cursor-pointer">
-                                <i className="fa-solid fa-chevron-right text-xs"></i>
+                            <button
+                                onClick={() => setIsPlaying(!isPlaying)}
+                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
+                                    isPlaying
+                                        ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-black border-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.7)] scale-105 font-bold'
+                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
+                                }`}
+                                title={isPlaying ? "ปิดเพลงประกอบ" : "เปิดเพลงประกอบ"}
+                            >
+                                <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse text-base' : 'fa-play text-sm ml-0.5'}`}></i>
                             </button>
                         </div>
 
@@ -749,7 +747,7 @@
             if (activeData) levelData = calculateLevel(kingdomEXP[activeData.nameThai] || 0);
 
             return (
-                <div className="fixed inset-0 w-full h-full pointer-events-none z-10">
+                <div className="fixed inset-0 w-full h-full pointer-events-none z-10 pb-20 md:pb-0">
                     {!selectedKingdom && Object.keys(kingdomsData).map(key => {
                         return <MapPin key={key} kingdomKey={key} kingdom={kingdomsData[key]} onClick={() => setSelectedKingdom(key)} />
                     })}
@@ -785,7 +783,7 @@
                                     </div>
                                 </div>
                                 
-                                <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-6 z-20 items-end pointer-events-none mt-auto">
+                                <div className="absolute bottom-24 left-4 right-4 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-4 md:gap-6 z-20 items-end pointer-events-none mt-auto max-h-[70vh] md:max-h-none overflow-y-auto pb-2 md:pb-0">
                                     <div className="flex-1 bg-black/80 p-5 md:p-6 rounded-xl border border-[#8b5a2b]/50 backdrop-blur-md shadow-2xl pointer-events-auto">
                                         <p className="text-gray-100 text-sm md:text-base leading-relaxed mb-4">{activeData.desc}</p>
                                         <div className="text-xs md:text-sm text-[#ebdcb9] bg-black/50 px-4 py-3 rounded-lg border border-white/10">
@@ -930,9 +928,14 @@
             return (
                 <div className="parchment max-w-3xl mx-auto p-6 md:p-8 rounded-2xl relative animate-fade-in overflow-hidden mt-4">
                     <div className="absolute top-4 right-4 z-20">
-                        <button onClick={() => onViewChange('chronicles', 'rules')} className="bg-red-800 text-white flex flex-col items-center px-4 py-1.5 rounded-lg border-2 border-red-400 hover:bg-red-700 shadow-xl transition cursor-pointer">
+                        {/* Desktop FAQ Button */}
+                        <button onClick={() => onViewChange('chronicles', 'rules')} className="hidden md:flex flex-col items-center bg-red-800 text-white px-4 py-1.5 rounded-lg border-2 border-red-400 hover:bg-red-700 shadow-xl transition cursor-pointer">
                             <i className="fa-solid fa-circle-question text-xl mb-0.5"></i>
-                            <span className="text-[10px] md:text-xs font-bold tracking-wider">ปุจฉา-วิสัชนา (FAQ)</span>
+                            <span className="text-xs font-bold tracking-wider">ปุจฉา-วิสัชนา (FAQ)</span>
+                        </button>
+                        {/* Mobile Circular FAQ Button */}
+                        <button onClick={() => onViewChange('chronicles', 'rules')} className="md:hidden w-10 h-10 rounded-full bg-red-800 text-white border-2 border-red-300 flex items-center justify-center shadow-lg active:scale-95 transition-transform cursor-pointer" title="ปุจฉา-วิสัชนา (FAQ)">
+                            <i className="fa-solid fa-circle-question text-xl"></i>
                         </button>
                     </div>
 
