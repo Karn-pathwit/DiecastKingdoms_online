@@ -121,37 +121,11 @@
 
         /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
         @media (max-width: 640px) and (orientation: portrait) {
-            .pin-blankheimgard { top: 40% !important; left: 28% !important; }
+            .pin-blankheimgard { top: 42% !important; left: 28% !important; }
             .pin-casteria { top: 40% !important; left: 74% !important; }
             .pin-bascentra { top: 60% !important; left: 50% !important; }
             .pin-machinepolis { top: 80% !important; left: 26% !important; }
             .pin-finalthron { top: 80% !important; left: 74% !important; }
-        }
-
-        /* Mobile Landscape Modal Layout based on Image 2 Blueprint (height <= 550px) */
-        @media (max-height: 550px) {
-            .modal-action-buttons {
-                display: none !important;
-            }
-            .modal-landscape-container .modal-landscape-header-box {
-                min-height: 36px !important;
-                padding-left: 36px !important;
-                padding-right: 10px !important;
-                padding-top: 2px !important;
-                padding-bottom: 2px !important;
-            }
-            .modal-landscape-container .modal-landscape-logo-img {
-                width: 38px !important;
-                height: 38px !important;
-                left: -6px !important;
-            }
-            .modal-landscape-container .modal-landscape-title-text {
-                font-size: 0.875rem !important;
-                line-height: 1 !important;
-            }
-            .modal-landscape-container .modal-landscape-sub-text {
-                font-size: 0.65rem !important;
-            }
         }
     </style>
 </head>
@@ -797,27 +771,27 @@
                                 
                                 <button onClick={() => setSelectedKingdom(null)} className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/80 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-50 flex items-center justify-center border border-white/40 shadow-xl cursor-pointer">&times;</button>
                                 
-                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center max-w-[55%] sm:max-w-[65%] md:max-w-none">
-                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[48px] md:min-h-[100px] pl-[45px] sm:pl-[55px] md:pl-[130px] overflow-hidden">
+                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex flex-col items-start gap-2 max-w-[70%] sm:max-w-[80%] md:max-w-none">
+                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[50px] md:min-h-[100px] pl-[50px] sm:pl-[60px] md:pl-[130px] overflow-hidden">
                                         <img 
                                             src={activeData.iconImg} 
                                             alt="logo" 
-                                            className="absolute left-[-10px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
+                                            className="absolute left-[-12px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
                                         />
                                         <div className="flex flex-col relative z-10 pt-0.5 truncate">
-                                            <span className="text-base sm:text-2xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate">{activeData.nameEng}</span>
-                                            <span className="text-[10px] sm:text-xs md:text-xl font-sarabun text-gray-300 font-medium truncate">{activeData.nameThai}</span>
+                                            <span className="text-lg sm:text-2xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate">{activeData.nameEng}</span>
+                                            <span className="text-xs sm:text-sm md:text-xl font-sarabun text-gray-300 font-medium truncate">{activeData.nameThai}</span>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div className="absolute top-3 right-14 md:top-10 md:right-16 z-20 w-36 sm:w-48 md:w-72 bg-black/60 p-2 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
-                                    <div className="flex justify-between text-[10px] sm:text-xs md:text-base text-[#f7e6c4] font-bold mb-1 md:mb-2">
-                                        <span>Level {levelData.level}</span>
-                                        <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
-                                    </div>
-                                    <div className="w-full bg-black/80 h-2 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
-                                        <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
+                                    
+                                    <div className="w-36 sm:w-48 md:w-72 bg-black/70 p-2 md:p-3.5 rounded-xl border border-white/20 backdrop-blur-md shadow-xl">
+                                        <div className="flex justify-between text-[10px] sm:text-xs md:text-base text-[#f7e6c4] font-bold mb-1">
+                                            <span>Level {levelData.level}</span>
+                                            <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
+                                        </div>
+                                        <div className="w-full bg-black/80 h-2 md:h-3.5 rounded-full overflow-hidden border border-white/30 shadow-inner">
+                                            <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -1064,8 +1038,8 @@
                     </form>
 
                     {showConfirmModal && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
-                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-[#ebdcb9] relative">
+                        <div className="fixed top-0 left-0 w-screen h-screen bg-black/85 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
+                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-[#ebdcb9] relative my-auto">
                                 <div className="text-5xl mb-3 animate-bounce">📜</div>
                                 <h3 className="text-xl md:text-2xl font-bold text-[#f7e6c4] font-cinzel mb-2">ยืนยันการยื่นสาส์นพัฒนา?</h3>
                                 <p className="text-xs md:text-sm text-gray-300 mb-6 leading-relaxed">
