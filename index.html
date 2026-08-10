@@ -1176,18 +1176,6 @@
             return `${d.getFullYear()}_${String(d.getMonth() + 1).padStart(2, '0')}_${String(d.getDate()).padStart(2, '0')}`;
         };
 
-        const calculateLevel = (exp = 0) => {
-            let level = 1;
-            let requiredExp = 60;
-            let currentExp = exp;
-            while (currentExp >= requiredExp) {
-                currentExp -= requiredExp;
-                level += 1;
-                requiredExp = Math.floor(requiredExp * 1.5);
-            }
-            return { level, currentExp, requiredExp };
-        };
-
         // ==========================================
         // COMPONENT 5: Dashboard
         // ==========================================
