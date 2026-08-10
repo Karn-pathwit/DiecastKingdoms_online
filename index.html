@@ -129,19 +129,21 @@
         /* Mobile Landscape Modal Layout (Short height screens: height <= 550px) */
         @media (max-height: 550px) {
             .modal-landscape-container {
-                display: flex !important;
-                flex-direction: column !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1.2fr !important;
+                gap: 1rem !important;
                 position: relative !important;
                 overflow-y: auto !important;
                 max-height: 94vh !important;
                 padding: 1rem !important;
+                align-items: start !important;
             }
             .modal-landscape-header-left {
                 position: relative !important;
                 top: auto !important;
                 left: auto !important;
-                margin-bottom: 0.75rem !important;
-                max-width: 85% !important;
+                max-width: 100% !important;
+                grid-column: 1 !important;
             }
             .modal-landscape-exp-bar {
                 position: relative !important;
@@ -149,7 +151,8 @@
                 left: auto !important;
                 right: auto !important;
                 width: 100% !important;
-                margin-bottom: 0.75rem !important;
+                grid-column: 1 !important;
+                margin-top: 0.5rem !important;
             }
             .modal-landscape-body {
                 position: relative !important;
@@ -158,7 +161,16 @@
                 right: auto !important;
                 max-height: none !important;
                 margin-top: 0 !important;
-                margin-bottom: 1rem !important;
+                width: 100% !important;
+                grid-column: 2 !important;
+                grid-row: 1 / span 3 !important;
+            }
+        }
+
+        /* Hide mobile sidebar and dock when modal is open */
+        @media (max-width: 768px) {
+            .modal-open-hide-sidebar {
+                display: none !important;
             }
         }
     </style>
@@ -442,7 +454,7 @@
             currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
             musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
             isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack,
-            projects = []
+            projects = [], isModalOpen = false
         }) {
             const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
 
@@ -573,7 +585,7 @@
                     </div>
 
                     {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
-                    <div className="md:hidden">
+                    <div className={`md:hidden ${isModalOpen ? 'modal-open-hide-sidebar' : ''}`}>
                         {/* ↖️ Top Left Quick Buttons (📢 News, ⚡ PopBoss, 🎵 Music) */}
                         <div className="fixed top-3 left-3 z-50 flex flex-col gap-2">
                             <button
@@ -730,12 +742,15 @@
         // ==========================================
         // COMPONENT: WorldMap 
         // ==========================================
-        function WorldMap({ kingdomEXP, projects, onViewChange }) {
+        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle }) {
             const [selectedKingdom, setSelectedKingdom] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null); 
             const [expandedTab, setExpandedTab] = useState(null);
 
-            useEffect(() => { setExpandedTab(null); }, [selectedKingdom]);
+            useEffect(() => { 
+                setExpandedTab(null); 
+                if (onModalToggle) onModalToggle(!!selectedKingdom);
+            }, [selectedKingdom]);
 
             const kingdomsData = {
                 'Bascentra': {
@@ -2204,9 +2219,25 @@
             const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
             const [isPlaying, setIsPlaying] = useState(false);
             const [isLoopingOne, setIsLoopingOne] = useState(false);
+            const [isKingdomModalOpen, setIsKingdomModalOpen] = useState(false);
+            const [isMobilePortrait, setIsMobilePortrait] = useState(
+                window.innerWidth <= 640 && window.innerHeight > window.innerWidth
+            );
 
             const handleNextTrack = () => setCurrentTrackIndex((prev) => (prev + 1) % musicTracks.length);
             const handlePrevTrack = () => setCurrentTrackIndex((prev) => (prev - 1 + musicTracks.length) % musicTracks.length);
+
+            useEffect(() => {
+                const handleResize = () => {
+                    setIsMobilePortrait(window.innerWidth <= 640 && window.innerHeight > window.innerWidth);
+                };
+                window.addEventListener('resize', handleResize);
+                window.addEventListener('orientationchange', handleResize);
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    window.removeEventListener('orientationchange', handleResize);
+                };
+            }, []);
 
             useEffect(() => {
                 const authSession = sessionStorage.getItem('isAuthorized');
@@ -2463,8 +2494,15 @@
                     <audio ref={popbossMusicRef} loop id="popbossMusic"><source src="Assets/Audio/Special_event/Music/Music_popboss.mp3" type="audio/mpeg" /></audio>
                     <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
 
-                    <video autoPlay loop muted playsInline className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-                        <source src="Assets/video/Diecast_kingdoms_level_1.mp4" type="video/mp4" />
+                    <video 
+                        key={isMobilePortrait ? 'portrait' : 'horizontal'}
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    >
+                        <source src={isMobilePortrait ? "Assets/video/bg_portrait.mp4" : "Assets/video/bg_horizontal.mp4"} type="video/mp4" />
                     </video>
 
                     {!isAuthorized ? (
@@ -2482,10 +2520,11 @@
                                     isPlaying={isPlaying} setIsPlaying={setIsPlaying} isLoopingOne={isLoopingOne} setIsLoopingOne={setIsLoopingOne}
                                     handleNextTrack={handleNextTrack} handlePrevTrack={handlePrevTrack}
                                     projects={projects}
+                                    isModalOpen={isKingdomModalOpen}
                                 />
                             )}
 
-                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} />}
+                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} onModalToggle={(open) => setIsKingdomModalOpen(open)} />}
 
                             {currentView !== 'worldmap' && currentView !== 'popboss' && (
                                 <main className={`transition-all duration-500 flex-grow px-3 py-4 pt-16 pb-24 md:p-8 md:pt-8 md:pb-8 ${showSidebar ? (isSidebarCollapsed ? 'md:ml-24 ml-0' : 'md:ml-[18rem] ml-0') : 'ml-0'}`}>
