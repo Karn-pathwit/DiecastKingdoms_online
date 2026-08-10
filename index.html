@@ -415,91 +415,196 @@
                 { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
             ];
 
+            const mobileNavItems = [
+                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
+                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot', isCenter: true },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
+                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
+            ];
+
             return (
-                <div className={`fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
-                    
-                    <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
-                        <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
-                            {!isCollapsed && (
-                                <div className="flex flex-col">
-                                    <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
-                                    <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
-                                </div>
-                            )}
-                            {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
-                            <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
-                                <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
-                            </button>
-                        </div>
+                <>
+                    {/* ================= DESKTOP SIDEBAR (md:flex) ================= */}
+                    <div className={`hidden md:flex fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
                         
-                        <nav className="p-3 space-y-2 mt-2 shrink-0">
-                            <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
-                                <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
-                                {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
-                            </button>
-                            {menuItems.map((item) => {
-                                const isActive = currentView === item.id;
-                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
-                                return (
-                                    <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
-                                        <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
-                                            {hasBadge ? (
-                                                <>
-                                                    <i className={`${item.icon} absolute animate-toggle-icon`}></i>
-                                                    <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
-                                                        {item.badge}
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <i className={item.icon}></i>
-                                            )}
-                                        </div>
-                                        {!isCollapsed && (
-                                            <div className="flex items-center justify-between flex-1 truncate">
-                                                <span className="text-sm font-semibold truncate text-left">{item.label}</span>
-                                                {hasBadge && (
-                                                    <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
-                                                        {item.badge} เรื่องใหม่
-                                                    </span>
+                        <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
+                            <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
+                                {!isCollapsed && (
+                                    <div className="flex flex-col">
+                                        <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
+                                        <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
+                                    </div>
+                                )}
+                                {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
+                                <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
+                                    <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+                                </button>
+                            </div>
+                            
+                            <nav className="p-3 space-y-2 mt-2 shrink-0">
+                                <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
+                                    <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
+                                    {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
+                                </button>
+                                {menuItems.map((item) => {
+                                    const isActive = currentView === item.id;
+                                    const hasBadge = typeof item.badge === 'number' && item.badge > 0;
+                                    return (
+                                        <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
+                                            <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
+                                                {hasBadge ? (
+                                                    <>
+                                                        <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                        <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
+                                                            {item.badge}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <i className={item.icon}></i>
                                                 )}
                                             </div>
+                                            {!isCollapsed && (
+                                                <div className="flex items-center justify-between flex-1 truncate">
+                                                    <span className="text-sm font-semibold truncate text-left">{item.label}</span>
+                                                    {hasBadge && (
+                                                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
+                                                            {item.badge} เรื่องใหม่
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+
+                        <div className="mt-auto shrink-0 flex flex-col">
+                            {!isCollapsed ? (
+                                <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
+                                    <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
+                                        {musicTracks.map((t, idx) => (
+                                            <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
+                                                {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
+                                                {t.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div onClick={() => setIsPlaylistOpen(!isPlaylistOpen)} className="p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition select-none">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <i className="fa-solid fa-compact-disc text-yellow-500 animate-spin" style={{ animationDuration: '4s' }}></i>
+                                            <div className="music-marquee-container flex-1">
+                                                <span className="music-marquee-text text-xs text-yellow-200 font-medium">
+                                                    {musicTracks[currentTrackIndex].title}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
+                                    </div>
+                                    <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
+                                        <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
+                                            <i className="fa-solid fa-repeat"></i>
+                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
+                                            <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
+                                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
+                                            </button>
+                                            <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mx-3 mb-4 flex justify-center">
+                                    <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
+                                        <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
+                    <div className="md:hidden">
+                        {/* ↖️ Top Left Quick Buttons (📢 News & ⚡ PopBoss) */}
+                        <div className="fixed top-3 left-3 z-50 flex flex-col gap-2">
+                            <button
+                                onClick={() => onViewChange('news')}
+                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
+                                    currentView === 'news'
+                                        ? 'bg-blue-900/80 text-blue-200 border-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.6)] scale-105'
+                                        : 'bg-blue-950/60 text-blue-300 border-blue-500/40 hover:bg-blue-900/80'
+                                }`}
+                                title="ประกาศข่าวสาร"
+                            >
+                                <i className="fa-solid fa-bullhorn text-base"></i>
+                            </button>
+                            <button
+                                onClick={() => onViewChange('popboss')}
+                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
+                                    currentView === 'popboss'
+                                        ? 'bg-yellow-900/80 text-yellow-300 border-yellow-400 shadow-[0_0_12px_rgba(250,204,21,0.6)] scale-105'
+                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
+                                }`}
+                                title="⚡ เหตุการณ์พิเศษ POPBOSS"
+                            >
+                                <i className="fa-solid fa-bolt text-lg animate-pulse"></i>
+                            </button>
+                        </div>
+
+                        {/* ↗️ Top Right Compact Music Player (◀ 🎵 ▶) */}
+                        <div className="fixed top-3 right-3 z-50 flex items-center gap-1 glass-panel px-2 py-1.5 rounded-full border border-yellow-500/40 shadow-xl backdrop-blur-md bg-black/60 text-yellow-200">
+                            <button onClick={handlePrevTrack} className="w-8 h-8 rounded-full flex items-center justify-center hover:text-white transition active:scale-90 cursor-pointer">
+                                <i className="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <button onClick={() => setIsPlaying(!isPlaying)} className={`w-9 h-9 rounded-full flex items-center justify-center transition active:scale-90 cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 text-black shadow-[0_0_10px_rgba(234,179,8,0.6)] font-bold' : 'bg-black/60 border border-gray-600 text-gray-400'}`}>
+                                <i className={`fa-solid ${isPlaying ? 'fa-pause text-xs' : 'fa-play text-xs ml-0.5'}`}></i>
+                            </button>
+                            <button onClick={handleNextTrack} className="w-8 h-8 rounded-full flex items-center justify-center hover:text-white transition active:scale-90 cursor-pointer">
+                                <i className="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+
+                        {/* ⚓ Bottom Navigation Dock (5 Circular Buttons) */}
+                        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 glass-panel glow-border px-3.5 py-2 rounded-full flex items-center gap-3 shadow-[0_0_25px_rgba(0,0,0,0.85)] border border-[#ebdcb9]/40 backdrop-blur-xl bg-black/70">
+                            {mobileNavItems.map((item) => {
+                                const isActive = currentView === item.id;
+                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
+                                const isCenter = item.isCenter;
+
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => onViewChange(item.id)}
+                                        className={`relative rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                                            isCenter
+                                                ? 'w-12 h-12 text-xl border-2'
+                                                : 'w-10 h-10 text-base border'
+                                        } ${
+                                            isActive
+                                                ? 'bg-gradient-to-b from-[#8b5a2b] to-[#5d3a1a] text-[#f7e6c4] border-[#ebdcb9] shadow-[0_0_15px_rgba(247,230,196,0.6)] scale-110'
+                                                : 'bg-black/50 text-[#ebdcb9]/70 border-white/10 hover:bg-[#8b5a2b]/30 hover:text-[#ebdcb9]'
+                                        }`}
+                                        title={item.label}
+                                    >
+                                        {hasBadge ? (
+                                            <>
+                                                <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center border border-yellow-300 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-toggle-badge">
+                                                    {item.badge}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <i className={item.icon}></i>
                                         )}
                                     </button>
                                 );
                             })}
-                        </nav>
-                    </div>
-
-                    <div className="mt-auto shrink-0 flex flex-col">
-                        
-                        {!isCollapsed ? (
-                            <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
-                                <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
-                                    {musicTracks.map((t, idx) => (
-                                        <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
-                                            {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
-                                            {t.title}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="px-3 py-2 bg-[#8b5a2b]/20 flex justify-between items-center cursor-pointer border-t border-[#8b5a2b]/30" onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}>
-                                    <div className="flex flex-col w-[140px] overflow-hidden">
-                                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider mb-1">🎵 บทกวีแห่ง 5 ดินแดน</span>
-                                        <div className="music-marquee-container w-full">
-                                            <span className="music-marquee-text text-sm font-bold text-[#f7e6c4]">
-                                                {musicTracks[currentTrackIndex].title}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
-                                </div>
-                                <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
-                                    <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
-                                        <i className="fa-solid fa-repeat"></i>
-                                    </button>
-                                    <div className="flex items-center gap-3">
-                                        <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
-                                        <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
                                             <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
                                         </button>
                                         <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
@@ -2292,8 +2397,8 @@
                             {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} />}
 
                             {currentView !== 'worldmap' && currentView !== 'popboss' && (
-                                <main className={`transition-all duration-500 p-4 md:p-8 flex-grow ${showSidebar ? (isSidebarCollapsed ? 'ml-24' : 'ml-[18rem]') : 'ml-0'}`}>
-                                    <div className="max-w-6xl mx-auto py-4">
+                                <main className={`transition-all duration-500 flex-grow px-3 py-4 pt-16 pb-24 md:p-8 md:pt-8 md:pb-8 ${showSidebar ? (isSidebarCollapsed ? 'md:ml-24 ml-0' : 'md:ml-[18rem] ml-0') : 'ml-0'}`}>
+                                    <div className="max-w-6xl mx-auto py-2 md:py-4">
                                         {currentView === 'news' && <NewsView onViewChange={handleViewChange} />}
                                         {currentView === 'suggestion' && <SuggestionForm projects={projects} onAddProject={handleAddProject} onViewChange={handleViewChange} runningSeq={runningSeq} setRunningSeq={setRunningSeq} />}
                                         {currentView === 'dashboard' && <Dashboard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
