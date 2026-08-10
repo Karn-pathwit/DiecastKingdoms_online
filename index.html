@@ -907,10 +907,69 @@
                 }
             };
 
+            const handleMultiFileChange = (e) => {
+                if (e.target.files) {
+                    const files = Array.from(e.target.files);
+                    const currentCount = (formData.images || []).length;
+                    const availableSlots = 5 - currentCount;
+                    if (availableSlots <= 0) {
+                        alert('แนบรูปภาพได้สูงสุด 5 รูปเท่านั้นค่ะ');
+                        return;
+                    }
+                    const selectedFiles = files.slice(0, availableSlots);
+                    selectedFiles.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_WIDTH = 800;
+                                const MAX_HEIGHT = 800;
+                                let width = img.width;
+                                let height = img.height;
+                                if (width > height) {
+                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                                
+                                setFormData(prev => {
+                                    const newImages = [...(prev.images || []), compressedDataUrl];
+                                    return {
+                                        ...prev,
+                                        images: newImages,
+                                        imagePreview: newImages[0]
+                                    };
+                                });
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            };
+
+            const handleRemoveImage = (indexToRemove) => {
+                setFormData(prev => {
+                    const newImages = (prev.images || []).filter((_, idx) => idx !== indexToRemove);
+                    return {
+                        ...prev,
+                        images: newImages,
+                        imagePreview: newImages.length > 0 ? newImages[0] : null
+                    };
+                });
+            };
+
             const isAnonymous = formData.origin === 'เบสเซนตร้า';
             const isSecret = formData.category.includes('Secret');
 
             const [showConfirmModal, setShowConfirmModal] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
             const handleSubmit = (e) => {
                 e.preventDefault();
@@ -920,31 +979,44 @@
                 setShowConfirmModal(true);
             };
 
-            const handleFinalSubmit = () => {
-                setShowConfirmModal(false);
-                let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
-                let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
-                
-                const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
-                const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
-                
-                const newId = `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
-                setRunningSeq(prev => prev + 1); 
+            const handleFinalSubmit = async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
 
-                const newProject = {
-                    id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
-                    origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
-                    factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
-                    title: formData.title, problem: formData.problem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
-                    imageText: formData.image ? `📷 รูปแนบ: ${formData.image}` : '📷 รูปจำลองสาส์นปัญหา', imagePreview: formData.imagePreview, 
-                    status: isSecret ? 'Hidden' : 'Blueprint', comment: '', targetComment: '', imageAfterPreview: null,
-                    wasAbandoned: false, ideaApproved: false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality'), isSuperRising: false 
-                };
+                try {
+                    let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
+                    let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
+                    
+                    const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+                    const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
+                    
+                    const newId = `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
+                    setRunningSeq(prev => prev + 1); 
 
-                onAddProject(newProject);
-                setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
-                setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null });
-                setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                    const imageList = formData.images && formData.images.length > 0 ? formData.images : (formData.imagePreview ? [formData.imagePreview] : []);
+
+                    const newProject = {
+                        id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                        origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
+                        factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
+                        title: formData.title, problem: formData.problem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
+                        imageText: imageList.length > 0 ? `📷 รูปแนบ: (${imageList.length} รูป)` : '📷 รูปจำลองสาส์นปัญหา', 
+                        imagePreview: imageList[0] || null,
+                        images: imageList,
+                        status: isSecret ? 'Hidden' : 'Blueprint', comment: '', targetComment: '', imageAfterPreview: null,
+                        wasAbandoned: false, ideaApproved: false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality'), isSuperRising: false 
+                    };
+
+                    await onAddProject(newProject);
+                    setShowConfirmModal(false);
+                    setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
+                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                    setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการส่งสาส์น กรุณาลองใหม่อีกครั้งค่ะ');
+                } finally {
+                    setIsSubmitting(false);
+                }
             };
 
             const availableProcesses = formData.target ? processMap[formData.target] : [];
@@ -1033,10 +1105,45 @@
                             <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder="รายละเอียดปัญหาที่พบ / Problem Description" className="input-style h-24 font-sans" required></textarea>
                             <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder="วิธีแก้ไขที่ต้องการ (ถ้ามี) / Proposed Solution" className="input-style h-24 font-sans"></textarea>
                             <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder="ผลลัพธ์ที่คาดหวัง / Expected Benefits" className="input-style h-24 font-sans" required></textarea>
+                            
                             <div className="bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">
-                                <label className="block text-sm font-bold text-[#8b5a2b] mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
-                                <input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-[#5d3a1a] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#8b5a2b]/20 hover:file:bg-[#8b5a2b]/35 file:cursor-pointer" />
-                                {formData.imagePreview && <div className="mt-2 h-32 w-48 border-2 border-dashed border-[#8b5a2b] rounded-lg overflow-hidden"><img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover" /></div>}
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-bold text-[#8b5a2b]">
+                                        แนบรูปภาพประกอบ (สูงสุด 5 รูป):
+                                    </label>
+                                    <span className="text-xs font-bold text-amber-900 bg-amber-200 px-2.5 py-0.5 rounded-full border border-amber-400">
+                                        {(formData.images || []).length} / 5 รูป
+                                    </span>
+                                </div>
+                                
+                                {(formData.images || []).length < 5 && (
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        multiple 
+                                        onChange={handleMultiFileChange} 
+                                        className="w-full text-sm text-[#5d3a1a] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#8b5a2b]/20 hover:file:bg-[#8b5a2b]/35 file:cursor-pointer" 
+                                    />
+                                )}
+                                
+                                {(formData.images || []).length > 0 && (
+                                    <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                        {(formData.images || []).map((imgUrl, idx) => (
+                                            <div key={idx} className="relative h-24 border-2 border-[#8b5a2b] rounded-lg overflow-hidden group shadow-md bg-black/20">
+                                                <img src={imgUrl} alt={`Attachment ${idx+1}`} className="w-full h-full object-cover" />
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleRemoveImage(idx)} 
+                                                    className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shadow cursor-pointer transition" 
+                                                    title="ลบรูปนี้"
+                                                >
+                                                    &times;
+                                                </button>
+                                                <span className="absolute bottom-1 left-1 bg-black/70 text-white text-[9px] px-1 rounded">#{idx+1}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </section>
                         {showConfirmModal ? (
@@ -1047,11 +1154,11 @@
                                     กรุณาตรวจสอบรายละเอียดความถูกต้องของสาส์นก่อนส่งมอบเข้าสู่สภาเมืองนะคะ
                                 </p>
                                 <div className="flex gap-3">
-                                    <button type="button" onClick={() => setShowConfirmModal(false)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
+                                    <button type="button" onClick={() => setShowConfirmModal(false)} disabled={isSubmitting} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20 disabled:opacity-50">
                                         <i className="fa-solid fa-rotate-left mr-1.5"></i> ตรวจสอบซ้ำ
                                     </button>
-                                    <button type="button" onClick={handleFinalSubmit} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300">
-                                        <i className="fa-solid fa-paper-plane mr-1.5"></i> ยืนยันการส่งสาส์น
+                                    <button type="button" onClick={handleFinalSubmit} disabled={isSubmitting} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                                        {isSubmitting ? <><i className="fa-solid fa-spinner animate-spin"></i> ⏳ กำลังส่งมอบสาส์น...</> : <><i className="fa-solid fa-paper-plane"></i> ยืนยันการส่งสาส์น</>}
                                     </button>
                                 </div>
                             </div>
@@ -1163,12 +1270,11 @@
                 }
             };
 
+            const [deleteConfirmProject, setDeleteConfirmProject] = useState(null);
+
             const handleSecretAction = (actionType) => {
                 if (actionType === 'Delete') {
-                    if (window.confirm('⚠️ คำเตือน: คุณกำลังจะทำลายสาส์นฉบับนี้แบบถาวร! ข้อมูลจะหายไปจากระบบทั้งหมด ยืนยันการทำลายหรือไม่?')) {
-                        onUpdateProject({ ...selectedProject, status: 'Deleted' });
-                        alert('🔥 เผาทำลายสาส์นเรียบร้อยแล้ว!'); closeModal();
-                    }
+                    setDeleteConfirmProject(selectedProject);
                 } else if (actionType === 'Hide') {
                     if (window.confirm('🔒 ต้องการซ่อนสาส์นนี้จากกระดานสาธารณะหรือไม่? (จะมีแค่แอดมินที่มองเห็น)')) {
                         onUpdateProject({ ...selectedProject, status: 'Hidden' });
@@ -1432,7 +1538,18 @@
                                     </div>
                                     <div>
                                         <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> ภาพพิกัดปัญหา (Before):</p>
-                                        {selectedProject.imagePreview ? (
+                                        {(selectedProject.images && selectedProject.images.length > 0) ? (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
+                                                {selectedProject.images.map((imgUrl, idx) => (
+                                                    <div key={idx} className="bg-black/10 rounded-lg border border-gray-400 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
+                                                        <img src={imgUrl} alt={`Before ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                                            <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> คลิกขยาย
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : selectedProject.imagePreview ? (
                                             <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedProject.imagePreview)}>
                                                 <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
@@ -1503,6 +1620,34 @@
                         </div>
                     )}
 
+                    {deleteConfirmProject && (
+                        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in pointer-events-auto">
+                            <div className="bg-[#2a1215] border-4 border-red-700 p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-red-100 relative">
+                                <div className="text-5xl mb-3 animate-bounce">🔥</div>
+                                <h3 className="text-xl md:text-2xl font-bold text-red-400 font-cinzel mb-2">ยืนยันการเผาทำลายสาส์น?</h3>
+                                <p className="text-xs md:text-sm text-gray-300 mb-2 leading-relaxed">
+                                    อ้างอิงสาส์น: <strong className="text-white">{deleteConfirmProject.id}</strong> ({deleteConfirmProject.title})
+                                </p>
+                                <p className="text-xs text-red-300 font-bold mb-6">
+                                    ⚠️ ข้อมูลสาส์นฉบับนี้จะถูกทำลายถาวรจากระบบ ไม่สามารถกู้คืนกลับมาได้นะคะ!
+                                </p>
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setDeleteConfirmProject(null)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
+                                        <i className="fa-solid fa-xmark mr-1.5"></i> ยกเลิก
+                                    </button>
+                                    <button type="button" onClick={() => {
+                                        onUpdateProject({ ...deleteConfirmProject, status: 'Deleted' });
+                                        alert('🔥 เผาทำลายสาส์นเรียบร้อยแล้ว!');
+                                        setDeleteConfirmProject(null);
+                                        closeModal();
+                                    }} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-red-400">
+                                        <i className="fa-solid fa-trash-can mr-1.5"></i> ยืนยันทำลายสาส์น
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {zoomedImg && (
                         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
                             <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
@@ -1525,6 +1670,7 @@
             const [targetCommentText, setTargetCommentText] = useState('');
             const [targetImageFile, setTargetImageFile] = useState(null);
             const [targetImagePreview, setTargetImagePreview] = useState(null);
+            const [targetImages, setTargetImages] = useState([]);
             const [centralStatus, setCentralStatus] = useState('');
             const [centralComment, setCentralComment] = useState('');
 
@@ -1532,76 +1678,91 @@
             const [currentPage, setCurrentPage] = useState(1);
             const itemsPerPage = 5;
 
-            const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
-            useEffect(() => { setCurrentPage(1); }, [filters]);
-
-            const handleRoleLogin = (role) => {
-                if (role === 'target') {
-                    if (currentRole !== 'none' && currentRole !== 'central') { setCurrentRole('none'); alert('ออกจากระบบตัวแทนอาณาจักรเรียบร้อย'); return; }
-                    const pass = prompt('🔐 ใส่รหัสผ่านตัวแทนอาณาจักร:');
-                    if (pass === '1111') { setCurrentRole('เบสเซนตร้า'); alert("✅ ล็อกอินเป็นตัวแทน 'เบสเซนตร้า' เรียบร้อย"); }
-                    else if (pass === '2222') { setCurrentRole('แคสเทอเรีย'); alert("✅ ล็อกอินเป็นตัวแทน 'แคสเทอเรีย' เรียบร้อย"); }
-                    else if (pass === '3333') { setCurrentRole('แบลงค์ไฮม์การ์ด'); alert("✅ ล็อกอินเป็นตัวแทน 'แบลงค์ไฮม์การ์ด' เรียบร้อย"); }
-                    else if (pass === '4444') { setCurrentRole('แมคชีนโพลิส'); alert("✅ ล็อกอินเป็นตัวแทน 'แมคชีนโพลิส' เรียบร้อย"); }
-                    else if (pass === '5555') { setCurrentRole('ไฟนัลธรอน'); alert("✅ ล็อกอินเป็นตัวแทน 'ไฟนัลธรอน' เรียบร้อย"); }
-                    else if (pass) alert('❌ รหัสผ่านไม่ถูกต้อง!');
-                } else if (role === 'central') {
-                    if (currentRole === 'central') { setCurrentRole('none'); alert('ออกจากระบบสภาเมืองส่วนกลาง'); return; }
-                    const pass = prompt('🔐 ใส่รหัสผ่านสภาเมืองกลาง:');
-                    if (pass === '9999') { setCurrentRole('central'); alert("✅ ล็อกอินเป็น 'สภาเมืองส่วนกลาง' เรียบร้อย"); }
-                    else if (pass) alert('❌ รหัสผิด!');
+            const handleMultiEvidenceChange = (e) => {
+                if (e.target.files) {
+                    const files = Array.from(e.target.files);
+                    const currentCount = targetImages.length;
+                    const availableSlots = 5 - currentCount;
+                    if (availableSlots <= 0) {
+                        alert('แนบภาพหลักฐานได้สูงสุด 5 รูปเท่านั้นค่ะ');
+                        return;
+                    }
+                    const selectedFiles = files.slice(0, availableSlots);
+                    selectedFiles.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width, height = img.height;
+                                if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
+                                else { if (height > 800) { width *= 800 / height; height = 800; } }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                                setTargetImages(prev => [...prev, compressedDataUrl]);
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
                 }
             };
 
-            const getQuestStatusStr = (p) => {
-                if (p.status === 'Rising' && p.isSuperRising) return 'Super Rising';
-                return p.status;
+            const handleRemoveEvidence = (indexToRemove) => {
+                setTargetImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
             };
 
-            const handleExportCSV = () => {
-                const activeQuestsToExport = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-                
-                if (activeQuestsToExport.length === 0) { alert('ไม่มีข้อมูลให้เบิกบันทึกค่ะ'); return; }
-                
-                const headers = [
-                    'รหัสสาส์น', 'โรงงาน', 'กระบวนการ', 'พิกัดจุดเกิดเหตุ', 'ผู้เสนอ (Origin)', 
-                    'รายละเอียดปัญหา', 'วิธีแก้ไขที่เสนอ', 'รูปสาส์นตั้งต้น', 
-                    'ผู้รับผิดชอบ (Target)', 'ข้อความจากทีมงาน', 'รูปหลังการแก้ไข', 'สถานะภารกิจ'
-                ];
-                
-                const csvRows = activeQuestsToExport.map(p => [ 
-                    p.id, p.factory, p.location, p.pinpoint, p.origin, 
-                    p.problem, p.solution, p.imagePreview ? 'มี' : 'ไม่มี', 
-                    p.target, p.targetComment || '-', p.imageAfterPreview ? 'มี' : 'ไม่มี', getQuestStatusStr(p) 
-                ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
-                
-                const csvString = [headers.join(','), ...csvRows].join('\n');
-                const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `DK_Quest_report_${getFormattedDate()}.csv`; link.click();
+            const openQuestModal = (quest) => { 
+                setSelectedQuest(quest); 
+                setTargetCommentText(''); 
+                setTargetImageFile(null); 
+                setTargetImagePreview(null);
+                setTargetImages(quest.imagesAfter || (quest.imageAfterPreview ? [quest.imageAfterPreview] : []));
+                setCentralStatus(''); 
+                setCentralComment(''); 
             };
-
-            const openQuestModal = (quest) => { setSelectedQuest(quest); setTargetCommentText(''); setTargetImageFile(null); setTargetImagePreview(null); setCentralStatus(''); setCentralComment(''); };
             
             const closeModal = () => { 
                 setSelectedQuest(null); 
                 setTargetCommentText(''); 
                 setTargetImageFile(null); 
                 setTargetImagePreview(null); 
+                setTargetImages([]);
             };
 
             const [showQuestConfirm, setShowQuestConfirm] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
             const handleTargetSubmit = () => {
                 if (!targetCommentText) { alert('กรุณากรอกข้อความอธิบายด้วยค่ะ'); return; }
                 setShowQuestConfirm(true);
             };
 
-            const handleFinalTargetSubmit = () => {
-                setShowQuestConfirm(false);
-                const updatedQuest = { ...selectedQuest, status: 'Evidence', targetComment: targetCommentText, imageAfterText: targetImageFile ? `📸 ภาพหลักฐาน: ${targetImageFile}` : '📸 ภาพหลักฐานการแก้ไข (After)', imageAfterPreview: targetImagePreview, adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' };
-                onUpdateProject(updatedQuest);
-                alert("อัปโหลดหลักฐานสำเร็จ!");
-                closeModal();
+            const handleFinalTargetSubmit = async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
+                try {
+                    setShowQuestConfirm(false);
+                    const imageList = targetImages.length > 0 ? targetImages : (targetImagePreview ? [targetImagePreview] : []);
+                    const updatedQuest = { 
+                        ...selectedQuest, 
+                        status: 'Evidence', 
+                        targetComment: targetCommentText, 
+                        imageAfterText: imageList.length > 0 ? `📸 ภาพหลักฐาน: (${imageList.length} รูป)` : '📸 ภาพหลักฐานการแก้ไข (After)', 
+                        imageAfterPreview: imageList[0] || null,
+                        imagesAfter: imageList,
+                        adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' 
+                    };
+                    await onUpdateProject(updatedQuest);
+                    alert("อัปโหลดหลักฐานสำเร็จ!");
+                    closeModal();
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการส่งมอบหลักฐาน กรุณาลองใหม่อีกครั้งค่ะ');
+                } finally {
+                    setIsSubmitting(false);
+                }
             };
 
             const handleCentralSubmit = () => {
@@ -1826,7 +1987,18 @@
                                             <strong className="font-bold">ข้อความจากทีมงาน:</strong>
                                             <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
                                         </div>
-                                        {selectedQuest.imageAfterPreview ? (
+                                        {(selectedQuest.imagesAfter && selectedQuest.imagesAfter.length > 0) ? (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
+                                                {selectedQuest.imagesAfter.map((imgUrl, idx) => (
+                                                    <div key={idx} className="bg-black/10 rounded-lg border border-green-500 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
+                                                        <img src={imgUrl} alt={`After ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                                            <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> คลิกขยาย
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : selectedQuest.imageAfterPreview ? (
                                             <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imageAfterPreview)}>
                                                 <img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
@@ -1847,38 +2019,40 @@
                                     <div className="mt-6 p-4 target-panel space-y-3">
                                         <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-upload"></i> ส่งมอบ/แก้ไขหลักฐาน (สำหรับอาณาจักรเป้าหมาย)</p>
                                         <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="อธิบายสิ่งที่ได้ลงมือแก้ไขไปแล้ว..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
-                                        <input type="file" accept="image/*" onChange={(e) => { 
-                                            if(e.target.files && e.target.files[0]) { 
-                                                const file = e.target.files[0]; 
-                                                setTargetImageFile(file.name); 
-                                                const reader = new FileReader();
-                                                reader.onload = (event) => {
-                                                    const img = new Image();
-                                                    img.onload = () => {
-                                                        const canvas = document.createElement('canvas');
-                                                        let width = img.width, height = img.height;
-                                                        if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
-                                                        else { if (height > 800) { width *= 800 / height; height = 800; } }
-                                                        canvas.width = width; canvas.height = height;
-                                                        const ctx = canvas.getContext('2d');
-                                                        ctx.drawImage(img, 0, 0, width, height);
-                                                        setTargetImagePreview(canvas.toDataURL('image/jpeg', 0.7));
-                                                    };
-                                                    img.src = event.target.result;
-                                                };
-                                                reader.readAsDataURL(file);
-                                            }
-                                        }} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
-                                        {targetImageFile && <p className="text-xs text-blue-800 font-bold">📎 ไฟล์ที่แนบ: {targetImageFile}</p>}
+                                        
+                                        <div className="bg-white/80 p-3 rounded-lg border border-sky-300">
+                                            <div className="flex justify-between items-center mb-1.5">
+                                                <span className="text-xs font-bold text-sky-900">แนบภาพหลักฐานการแก้ไข (สูงสุด 5 รูป):</span>
+                                                <span className="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-300">
+                                                    {targetImages.length} / 5 รูป
+                                                </span>
+                                            </div>
+
+                                            {targetImages.length < 5 && (
+                                                <input type="file" accept="image/*" multiple onChange={handleMultiEvidenceChange} className="text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
+                                            )}
+
+                                            {targetImages.length > 0 && (
+                                                <div className="mt-2.5 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                                    {targetImages.map((imgUrl, idx) => (
+                                                        <div key={idx} className="relative h-20 border border-sky-400 rounded overflow-hidden group bg-black/20 shadow">
+                                                            <img src={imgUrl} alt={`Evidence ${idx+1}`} className="w-full h-full object-cover" />
+                                                            <button type="button" onClick={() => handleRemoveEvidence(idx)} className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shadow cursor-pointer">&times;</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
                                         {showQuestConfirm ? (
                                             <div className="bg-[#2c1d11] border-2 border-[#8b5a2b] p-3 rounded-lg text-center shadow-xl text-[#ebdcb9] animate-fade-in mt-2">
                                                 <p className="text-xs font-bold text-[#f7e6c4] mb-1">🛡️ ยืนยันการส่งมอบภารกิจนี้?</p>
                                                 <div className="flex gap-2 mt-2">
-                                                    <button type="button" onClick={() => setShowQuestConfirm(false)} className="flex-1 py-1.5 px-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-[11px] transition cursor-pointer border border-white/20">
+                                                    <button type="button" onClick={() => setShowQuestConfirm(false)} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-[11px] transition cursor-pointer border border-white/20 disabled:opacity-50">
                                                         <i className="fa-solid fa-rotate-left mr-1"></i> ตรวจสอบซ้ำ
                                                     </button>
-                                                    <button type="button" onClick={handleFinalTargetSubmit} className="flex-1 py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-[11px] transition cursor-pointer shadow border border-yellow-300">
-                                                        <i className="fa-solid fa-check mr-1"></i> ยืนยันส่งมอบงาน
+                                                    <button type="button" onClick={handleFinalTargetSubmit} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-[11px] transition cursor-pointer shadow border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1">
+                                                        {isSubmitting ? <><i className="fa-solid fa-spinner animate-spin"></i> ⏳ กำลังส่ง...</> : <><i className="fa-solid fa-check"></i> ยืนยันส่งมอบงาน</>}
                                                     </button>
                                                 </div>
                                             </div>
