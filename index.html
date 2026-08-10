@@ -626,6 +626,7 @@
             const [myScore, setMyScore] = useState(0);
             const [isPopping, setIsPopping] = useState(false);
             const [bossImgError, setBossImgError] = useState(false);
+            const lastPopTimeRef = useRef(0);
 
             const kingdomsList = [
                 { id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
@@ -635,7 +636,11 @@
             ];
 
             const handlePopStart = (e) => {
-                if(e && e.type === 'touchstart') e.preventDefault();
+                if (e && e.cancelable && e.type === 'touchstart') e.preventDefault();
+                const now = Date.now();
+                if (now - lastPopTimeRef.current < 60) return;
+                lastPopTimeRef.current = now;
+
                 setIsPopping(true); setMyScore(s => s + 1); updateGlobalScores(myKingdom); 
                 playHitSound();
             };
@@ -1326,7 +1331,14 @@
                         <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID, ชื่อ, รหัส..." className="w-full md:w-64 custom-select text-xs font-medium" />
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
+                    {/* Mobile Scroll Hint Badge */}
+                    <div className="md:hidden text-center mb-2">
+                        <span className="text-[11px] font-bold text-[#8b5a2b] bg-[#f4e4bc] px-3 py-1 rounded-full border border-[#8b5a2b]/30 shadow-sm animate-pulse inline-flex items-center gap-1.5">
+                            👈 ปัดนิ้วซ้าย-ขวาเพื่อดูตาราง 👉
+                        </span>
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                         <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
                             <thead>
                                 <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
