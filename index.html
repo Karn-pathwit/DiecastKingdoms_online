@@ -158,10 +158,13 @@
         }
 
         function maskEmpId(empId) {
-            if (!empId) return 'XXX';
+            if (!empId) return 'x';
             const str = String(empId).trim();
-            if (str.length <= 2) return 'XXX';
-            return str.slice(0, 2) + 'XXX';
+            if (str.includes('?')) return 'xxx';
+            if (str.length === 1) return 'x';
+            if (str.length === 2) return 'xx';
+            if (str.length === 3) return 'xxx';
+            return str.slice(0, str.length - 3) + 'xxx';
         }
 
         function isPopBossActive() {
@@ -1338,11 +1341,6 @@
             const [cardStatusFilter, setCardStatusFilter] = useState('Blueprint');
             const [currentPage, setCurrentPage] = useState(1);
             const itemsPerPage = 5; 
-
-            const maskEmpId = (id) => {
-                if (!id || id.length < 4) return id;
-                return id.substring(0, 2) + '***' + id.substring(id.length - 2);
-            };
 
             const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
             useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter]);
