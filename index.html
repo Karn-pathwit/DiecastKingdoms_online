@@ -158,12 +158,10 @@
         }
 
         function maskEmpId(empId) {
-            if (!empId) return 'x';
+            if (!empId) return 'xxx';
             const str = String(empId).trim();
             if (str.includes('?')) return 'xxx';
-            if (str.length === 1) return 'x';
-            if (str.length === 2) return 'xx';
-            if (str.length === 3) return 'xxx';
+            if (str.length <= 3) return 'xxx';
             return str.slice(0, str.length - 3) + 'xxx';
         }
 
@@ -1624,7 +1622,7 @@
                                                 {p.isSuperRising && <span className="ml-1 text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
                                             </td>
                                             <td className="py-3.5 px-2 font-semibold max-w-[200px] truncate">{p.title}</td>
-                                            <td className="py-3.5 px-2">{p.emp}</td>
+                                            <td className="py-3.5 px-2 font-mono font-bold text-gray-700">{maskEmpId(p.emp)}</td>
                                             <td className="py-3.5 px-2">{p.name}</td>
                                             <td className="py-3.5 px-2 font-bold">{p.origin}</td>
                                             <td className="py-3.5 px-2 font-bold">{p.target}</td>
