@@ -1496,11 +1496,16 @@
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
                 const csvString = [headers.join(','), ...csvRows].join('\n');
-                const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+                const encodedUri = "data:text/csv;charset=utf-8,%EF%BB%BF" + encodeURIComponent(csvString);
+                
                 const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `DK_Idea_report_${getFormattedDate()}.csv`;
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `DK_Idea_report_${getFormattedDate()}.csv`);
+                document.body.appendChild(link);
                 link.click();
+                setTimeout(() => {
+                    if (document.body.contains(link)) document.body.removeChild(link);
+                }, 200);
             };
 
             const openModal = (project) => { 
@@ -1982,6 +1987,8 @@
             const [selectedQuest, setSelectedQuest] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null);
             const [targetCommentText, setTargetCommentText] = useState('');
+            const [targetExpenseText, setTargetExpenseText] = useState('');
+            const [targetResultText, setTargetResultText] = useState('');
             const [targetImageFile, setTargetImageFile] = useState(null);
             const [targetImagePreview, setTargetImagePreview] = useState(null);
             const [targetImages, setTargetImages] = useState([]);
@@ -2037,21 +2044,36 @@
             };
 
             const handleExportCSV = () => {
-                const activeQuests = (projects || []).filter(p => p && p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-                const exportQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p && p.status !== 'Hall of fame');
-                if (exportQuests.length === 0) { alert('ไม่มีข้อมูลภารกิจให้เบิกบันทึกค่ะ'); return; }
+                const exportQuests = (filteredQuests && filteredQuests.length > 0) ? filteredQuests : visibleQuests;
+                if (!exportQuests || exportQuests.length === 0) { 
+                    alert('ไม่มีข้อมูลภารกิจให้เบิกบันทึกค่ะ'); 
+                    return; 
+                }
                 
-                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สถานะภารกิจ', 'ข้อความอธิบาย', 'ความคิดเห็นสภา'];
+                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สถานะภารกิจ', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'ความคิดเห็นสภาเมือง'];
                 const csvRows = exportQuests.map(q => [
-                    q.id, q.title, q.origin, q.target, q.status, q.targetComment || '', q.adminComment || ''
+                    q.id || '', 
+                    q.title || '', 
+                    q.origin || '', 
+                    q.target || '', 
+                    q.status || '', 
+                    q.targetComment || '', 
+                    q.expense || '0', 
+                    q.actualResult || '', 
+                    q.adminComment || ''
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
                 const csvString = [headers.join(','), ...csvRows].join('\n');
-                const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+                const encodedUri = "data:text/csv;charset=utf-8,%EF%BB%BF" + encodeURIComponent(csvString);
+                
                 const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `DK_Quest_report_${getFormattedDate()}.csv`;
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `DK_Quest_report_${getFormattedDate()}.csv`);
+                document.body.appendChild(link);
                 link.click();
+                setTimeout(() => {
+                    if (document.body.contains(link)) document.body.removeChild(link);
+                }, 200);
             };
 
             const handleMultiEvidenceChange = (e) => {
@@ -2138,6 +2160,8 @@
                         ...selectedQuest, 
                         status: 'Evidence', 
                         targetComment: targetCommentText, 
+                        expense: targetExpenseText,
+                        actualResult: targetResultText,
                         imageAfterText: imageList.length > 0 ? `📸 ภาพหลักฐาน: (${imageList.length} รูป)` : '📸 ภาพหลักฐานการแก้ไข (After)', 
                         imageAfterPreview: imageList[0] || null,
                         imagesAfter: imageList,
@@ -2362,17 +2386,17 @@
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
                                             <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> สาส์นตั้งต้น (สิ่งที่ต้องแก้ไข)</h3>
-                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> {selectedQuest.factory}</p>
-                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> {selectedQuest.location}</p>
-                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> {selectedQuest.pinpoint}</p>
-                                            <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">ผู้เสนอ (Origin):</strong> {selectedQuest.origin}</p>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.factory}</span></p>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.location}</span></p>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.pinpoint}</span></p>
+                                            <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">ผู้เสนอ (Origin):</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.origin}</span></p>
                                             <div className="mb-3 mt-3 text-[#3f2a14]">
                                                 <strong className="font-bold">รายละเอียดปัญหา:</strong>
-                                                <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.problem}</p>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.problem}</p>
                                             </div>
                                             <div className="mb-3 text-[#3f2a14]">
                                                 <p className="font-bold flex items-center justify-between">วิธีแก้ไข (ที่เสนอมา):</p>
-                                                <p className="text-[#8b5a2b] ml-4 bg-white p-2 mt-1 rounded-lg border border-[#8b5a2b]/20 italic">{selectedQuest.solution}</p>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.solution}</p>
                                             </div>
                                             {selectedQuest.imagePreview ? (
                                                 <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imagePreview)}>
@@ -2389,20 +2413,20 @@
                                         <div className="proof-box p-4 text-xs relative rounded-xl space-y-3">
                                             <div className="absolute top-2 right-2">{getStatusBadge(selectedQuest)}</div>
                                             <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-1 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> หลักฐานจากหน้างาน (ผลลัพธ์)</h3>
-                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> {selectedQuest.target}</p>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.target}</span></p>
                                             <div>
                                                 <strong className="font-bold text-[#3f2a14]">📝 สิ่งที่ได้ลงมือแก้ไข:</strong>
-                                                <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
                                             </div>
                                             <div>
                                                 <strong className="font-bold text-[#3f2a14]">💰 งบประมาณ/ค่าใช้จ่ายที่ใช้จริง:</strong>
-                                                <span className="font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 ml-2">
+                                                <span className="font-bold text-[#1e3a8a] bg-sky-100/90 px-2 py-0.5 rounded border border-sky-300 ml-2 shadow-sm">
                                                     {selectedQuest.expense ? `${selectedQuest.expense} บาท` : '0 บาท (ไม่เสียค่าใช้จ่าย)'}
                                                 </span>
                                             </div>
                                             <div>
                                                 <strong className="font-bold text-[#3f2a14]">📈 ผลลัพธ์ที่เกิดขึ้นจริงหลังปรับปรุง:</strong>
-                                                <p className="text-emerald-950 font-semibold italic ml-2 mt-1 bg-emerald-50/90 p-2 rounded-lg border border-emerald-300">{selectedQuest.actualResult || '-'}</p>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.actualResult || '-'}</p>
                                             </div>
                                             {(selectedQuest.imagesAfter && selectedQuest.imagesAfter.length > 0) ? (
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
@@ -2427,7 +2451,7 @@
                                             )}
                                             <div className="mt-2 bg-[#fff8e7] p-2.5 rounded-lg border border-gray-300 text-xs text-gray-600">
                                                 <strong className="text-amber-800">👑 สภาเมืองกลางคอมเมนต์:</strong>
-                                                <p className="italic mt-0.5">{selectedQuest.adminComment || '-'}</p>
+                                                <p className="text-[#1e3a8a] font-bold italic mt-0.5">{selectedQuest.adminComment || '-'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -2993,6 +3017,8 @@
                                 status: item.status,
                                 comment: item.comment,
                                 targetComment: item.target_comment,
+                                expense: item.expense || '',
+                                actualResult: item.actual_result || item.actualResult || '',
                                 imageAfterPreview: item.image_after_preview,
                                 wasAbandoned: item.was_abandoned,
                                 ideaApproved: item.idea_approved,
@@ -3073,6 +3099,8 @@
                         status: newProject.status,
                         comment: newProject.comment,
                         target_comment: newProject.targetComment,
+                        expense: newProject.expense,
+                        actual_result: newProject.actualResult,
                         image_after_preview: newProject.imageAfterPreview,
                         was_abandoned: newProject.wasAbandoned,
                         idea_approved: newProject.ideaApproved,
@@ -3125,6 +3153,8 @@
                         status: updatedProject.status,
                         comment: updatedProject.comment,
                         target_comment: updatedProject.targetComment,
+                        expense: updatedProject.expense,
+                        actual_result: updatedProject.actualResult,
                         image_after_preview: updatedProject.imageAfterPreview,
                         was_abandoned: updatedProject.wasAbandoned,
                         idea_approved: updatedProject.ideaApproved,
