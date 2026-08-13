@@ -157,6 +157,16 @@
             return { level, currentExp, requiredExp };
         }
 
+        function getKingdomBadgeStyle(kName) {
+            if (!kName) return 'bg-stone-700 text-stone-100 border border-stone-400 font-bold';
+            if (kName.includes('เบสเซนตร้า') || kName.includes('Bascentra')) return 'bg-purple-900 text-purple-100 border border-purple-400 font-bold';
+            if (kName.includes('แคสเทอเรีย') || kName.includes('Casteria')) return 'bg-red-800 text-red-100 border border-red-400 font-bold';
+            if (kName.includes('แบลงค์ไฮม์การ์ด') || kName.includes('Blankheimgard')) return 'bg-sky-800 text-sky-100 border border-sky-400 font-bold';
+            if (kName.includes('แมคชีนโพลิส') || kName.includes('Machinepolis')) return 'bg-emerald-800 text-emerald-100 border border-emerald-400 font-bold';
+            if (kName.includes('ไฟนัลธรอน') || kName.includes('Finalthron')) return 'bg-amber-700 text-amber-100 border border-amber-300 font-bold';
+            return 'bg-amber-900 text-amber-100 border border-amber-400 font-bold';
+        }
+
         function maskEmpId(empId) {
             if (!empId) return 'xxx';
             const str = String(empId).trim();
@@ -179,6 +189,15 @@
 
         function MapPin({ kingdomKey, kingdom, onClick }) {
             const [imgError, setImgError] = useState(false);
+            const glowFilterMap = {
+                'Bascentra': 'drop-shadow(0 0 12px rgba(168,85,247,0.95)) drop-shadow(0 0 25px rgba(147,51,234,0.85)) drop-shadow(0 0 40px rgba(126,34,206,0.7))',
+                'Blankheimgard': 'drop-shadow(0 0 12px rgba(56,189,248,0.95)) drop-shadow(0 0 25px rgba(2,132,199,0.85)) drop-shadow(0 0 40px rgba(3,105,161,0.7))',
+                'Casteria': 'drop-shadow(0 0 12px rgba(239,68,68,0.95)) drop-shadow(0 0 25px rgba(220,38,38,0.85)) drop-shadow(0 0 40px rgba(185,28,28,0.7))',
+                'Machinepolis': 'drop-shadow(0 0 12px rgba(16,185,129,0.95)) drop-shadow(0 0 25px rgba(5,150,105,0.85)) drop-shadow(0 0 40px rgba(4,120,87,0.7))',
+                'Finalthron': 'drop-shadow(0 0 12px rgba(250,204,21,0.95)) drop-shadow(0 0 25px rgba(217,119,6,0.85)) drop-shadow(0 0 40px rgba(180,83,9,0.7))'
+            };
+            const activeFilter = glowFilterMap[kingdomKey] || 'drop-shadow(0 0 20px rgba(255,255,255,0.8))';
+
             return (
                 <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
                     <div className="absolute transform -translate-x-1/2 -translate-y-1/2">
@@ -195,7 +214,8 @@
                                 <img 
                                     src={kingdom.iconImg} 
                                     alt={kingdomKey} 
-                                    className={`${kingdom.customSize} h-auto object-contain relative z-10 hover:brightness-125 transition-all drop-shadow-[0_5px_15px_rgba(0,0,0,0.6)]`}
+                                    style={{ filter: activeFilter }}
+                                    className={`${kingdom.customSize} h-auto object-contain relative z-10 hover:scale-110 transition-all duration-300`}
                                     onError={() => setImgError(true)}
                                 />
                             )}
@@ -1155,13 +1175,13 @@
             return (
                 <div className="parchment max-w-3xl mx-auto p-6 md:p-8 rounded-2xl relative animate-fade-in overflow-hidden mt-4">
                     <div className="absolute top-4 right-4 z-20">
-                        {/* Desktop FAQ Button */}
-                        <button onClick={() => onViewChange('chronicles', 'rules')} className="hidden md:flex flex-col items-center bg-red-800 text-white px-4 py-1.5 rounded-lg border-2 border-red-400 hover:bg-red-700 shadow-xl transition cursor-pointer">
-                            <i className="fa-solid fa-circle-question text-xl mb-0.5"></i>
-                            <span className="text-xs font-bold tracking-wider">ปุจฉา-วิสัชนา (FAQ)</span>
-                        </button>
-                        {/* Mobile Circular FAQ Button */}
-                        <button onClick={() => onViewChange('chronicles', 'rules')} className="md:hidden w-10 h-10 rounded-full bg-red-800 text-white border-2 border-red-300 flex items-center justify-center shadow-lg active:scale-95 transition-transform cursor-pointer" title="ปุจฉา-วิสัชนา (FAQ)">
+                        {/* Compact Circular Red FAQ Button */}
+                        <button 
+                            type="button"
+                            onClick={() => onViewChange('chronicles', 'rules')} 
+                            className="w-10 h-10 rounded-full bg-red-800 text-white border-2 border-red-300 flex items-center justify-center shadow-lg active:scale-95 hover:bg-red-700 transition cursor-pointer" 
+                            title="ปุจฉา-วิสัชนา (FAQ)"
+                        >
                             <i className="fa-solid fa-circle-question text-xl"></i>
                         </button>
                     </div>
@@ -1170,8 +1190,13 @@
                     
                     {formData.category.includes('Quality') && isQualityEventActive() && <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg animate-pulse border border-yellow-600 hidden md:block">💎 EVENT: Quality EXP x2</div>}
                     
+                    <h1 className="text-3xl font-bold text-center mb-6 text-[#5d3a1a] font-cinzel mt-4 md:mt-0">
+                        {editingProject ? '✏️ แก้ไขสาส์นพัฒนา' : 'สาส์นพัฒนาแด่อาณาจักร'}<br />
+                        <span className="text-lg italic font-normal font-sans">{editingProject ? 'Update Kingdom\'s Decree' : 'Kingdom\'s Decree for Improvement'}</span>
+                    </h1>
+
                     {editingProject && (
-                        <div className="bg-amber-100 border-2 border-amber-500 p-3.5 rounded-xl mb-4 flex justify-between items-center text-amber-900 shadow-md animate-fade-in mt-6 md:mt-0">
+                        <div className="bg-amber-100 border-2 border-amber-500 p-3.5 rounded-xl mb-6 flex justify-between items-center text-amber-900 shadow-md animate-fade-in">
                             <span className="font-bold text-xs md:text-sm flex items-center gap-2">
                                 <i className="fa-solid fa-pen-to-square text-amber-700 text-base"></i>
                                 กำลังอยู่ในโหมดแก้ไขสาส์น (รหัสสาส์น: <strong className="text-amber-950 font-mono">{editingProject.id}</strong>)
@@ -1188,11 +1213,7 @@
                             </button>
                         </div>
                     )}
-
-                    <h1 className="text-3xl font-bold text-center mb-6 text-[#5d3a1a] font-cinzel mt-4 md:mt-0">
-                        {editingProject ? '✏️ แก้ไขสาส์นพัฒนา' : 'สาส์นพัฒนาแด่อาณาจักร'}<br />
-                        <span className="text-lg italic font-normal font-sans">{editingProject ? 'Update Kingdom\'s Decree' : 'Kingdom\'s Decree for Improvement'}</span>
-                    </h1>
+                    
                     {isAnonymous && <div className="bg-gray-800 text-gray-200 border border-gray-600 p-4 rounded-lg mb-6 shadow-inner text-sm font-bold animate-pulse"><i className="fa-solid fa-user-secret mr-2"></i> โหมดสาส์นลับ: ซ่อนข้อมูลประจำตัวคุณแล้ว ส่งตรงถึง HR</div>}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -1299,30 +1320,133 @@
                                 )}
                             </div>
                         </section>
-                        {showConfirmModal ? (
-                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] p-5 md:p-6 rounded-2xl text-center shadow-2xl text-[#ebdcb9] animate-fade-in my-2">
-                                <div className="text-4xl mb-2 animate-bounce">📜</div>
-                                <h3 className="text-lg md:text-xl font-bold text-[#f7e6c4] font-cinzel mb-1">
-                                    {editingProject ? `ยืนยันการอัปเกรดสาส์น ${editingProject.id}?` : 'ยืนยันการยื่นสาส์นพัฒนา?'}
-                                </h3>
-                                <p className="text-xs text-gray-300 mb-4 leading-relaxed">
-                                    {editingProject ? 'สาส์นนี้จะถูกอัปเดตและส่งกลับเข้าสู่กระดานสภาเมืองในสถานะ Blueprint อีกครั้งค่ะ' : 'กรุณาตรวจสอบรายละเอียดความถูกต้องของสาส์นก่อนส่งมอบเข้าสู่สภาเมืองนะคะ'}
-                                </p>
-                                <div className="flex gap-3">
-                                    <button type="button" onClick={() => setShowConfirmModal(false)} disabled={isSubmitting} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20 disabled:opacity-50">
-                                        <i className="fa-solid fa-rotate-left mr-1.5"></i> ตรวจสอบซ้ำ
+
+                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>
+                            {editingProject ? <><i className="fa-solid fa-floppy-disk mr-2"></i> 💾 อัปเดตข้อมูลสาส์น</> : isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}
+                        </button>
+                    </form>
+
+                    {/* 📜 Decree Submission Preview Modal (หน้าต่าง Preview สาส์นฉบับเต็ม) */}
+                    {showConfirmModal && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[99] animate-fade-in overflow-y-auto" onClick={() => setShowConfirmModal(false)}>
+                            <div className="parchment max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto border-4 border-[#8b5a2b] shadow-2xl my-auto text-[#3d2511]" onClick={(e) => e.stopPropagation()}>
+                                <button onClick={() => setShowConfirmModal(false)} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
+
+                                <div className="text-center mb-5 border-b-2 border-[#8b5a2b]/30 pb-4">
+                                    <div className="text-3xl mb-1 animate-bounce">📜</div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-[#5d3a1a] font-cinzel">
+                                        {editingProject ? `ตัวอย่างสาส์นแก้ไข (Decree Update Preview)` : 'ตัวอย่างสาส์นพัฒนาแด่อาณาจักร (Decree Preview)'}
+                                    </h2>
+                                    <p className="text-xs text-[#8b5a2b] font-bold mt-1">
+                                        (โปรดตรวจสอบความถูกต้องของข้อมูลสาส์นก่อนยืนยันส่งเข้าสู่สภาเมือง)
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4 text-xs md:text-sm">
+                                    {/* 1. Identity & Kingdom route */}
+                                    <div className="bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30 space-y-2">
+                                        <div className="flex flex-wrap justify-between items-center gap-2">
+                                            <div>
+                                                <span className="font-bold text-[#5d3a1a]">👤 ผู้เสนอ: </span>
+                                                <span className="font-bold text-[#1e3a8a]">{isAnonymous ? 'นักผจญภัยนิรนาม (สาส์นลับ)' : (formData.name.trim() || 'ผู้เดินทางไร้นาม')}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-bold text-[#5d3a1a]">🪪 รหัสพนักงาน: </span>
+                                                <span className="font-mono font-bold text-[#1e3a8a]">{isAnonymous ? '???-????' : maskEmpId(formData.empId)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 pt-1">
+                                            <span className="font-bold text-[#5d3a1a]">🗺️ เส้นทางสาส์น: </span>
+                                            <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.origin)}`}>
+                                                {formData.origin || 'ไม่ระบุ'}
+                                            </span>
+                                            <i className="fa-solid fa-arrow-right text-[#8b5a2b] text-xs"></i>
+                                            <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.target)}`}>
+                                                {formData.target || 'ไม่ระบุ'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* 2. Location & Category */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30">
+                                        <div><span className="font-bold text-[#5d3a1a]">🏭 โรงงาน: </span><span className="font-medium text-[#1e3a8a]">{formData.factory || '-'}</span></div>
+                                        <div><span className="font-bold text-[#5d3a1a]">⚙️ กระบวนการ: </span><span className="font-medium text-[#1e3a8a]">{formData.process || '-'}</span></div>
+                                        <div><span className="font-bold text-[#5d3a1a]">📍 พิกัดปัญหา: </span><span className="font-medium text-[#1e3a8a]">{formData.pinpoint || 'ไม่ระบุ'}</span></div>
+                                        <div><span className="font-bold text-[#5d3a1a]">💎 หมวดหมู่พลัง: </span><span className="font-medium text-[#1e3a8a]">{formData.category || '-'}</span></div>
+                                    </div>
+
+                                    {/* 3. Title, Problem, Solution, Benefit */}
+                                    <div className="space-y-3 bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">📌 หัวข้อสาส์น (Title):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-bold text-[#1e3a8a] text-sm">
+                                                {formData.title || '-'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">⚠️ รายละเอียดปัญหาหน้างาน (Problem Description):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.problem || '-'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">💡 แนวทางแก้ไขเสนอแนะ (Proposed Solution):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.solution || 'ไม่มีคำอธิบายเสนอแก้'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">🏆 ประโยชน์ที่คาดว่าจะได้รับ (Expected Benefit):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.benefit || '-'}
+                                            </div>
+                                        </div>
+
+                                        {/* 4. Images grid (1-5) */}
+                                        {((formData.images && formData.images.length > 0) || formData.imagePreview) && (
+                                            <div>
+                                                <div className="font-bold text-[#5d3a1a] mb-1.5 flex items-center gap-1.5">
+                                                    <i className="fa-solid fa-camera text-red-700"></i>
+                                                    <span>ภาพแนบประกอบสาส์น ({(formData.images || [formData.imagePreview]).length} รูป):</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                                    {(formData.images && formData.images.length > 0 ? formData.images : [formData.imagePreview]).map((imgUrl, idx) => (
+                                                        <div key={idx} className="h-20 border border-[#8b5a2b]/50 rounded-lg overflow-hidden bg-black/20 shadow-inner">
+                                                            <img src={imgUrl} alt={`Preview ${idx+1}`} className="w-full h-full object-cover" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="flex gap-3 mt-6 pt-4 border-t border-[#8b5a2b]/30">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowConfirmModal(false)} 
+                                        disabled={isSubmitting} 
+                                        className="flex-1 py-3 px-3 rounded-xl bg-stone-700 hover:bg-stone-800 text-white font-bold text-xs md:text-sm transition cursor-pointer border border-stone-400 disabled:opacity-50 flex items-center justify-center gap-1.5 shadow"
+                                    >
+                                        <i className="fa-solid fa-pen"></i> ✏️ ย้อนกลับไปแก้ไขข้อมูล
                                     </button>
-                                    <button type="button" onClick={handleFinalSubmit} disabled={isSubmitting} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5">
-                                        {isSubmitting ? <><span className="inline-block animate-pulse text-base">🐎💨</span> ⏳ กำลังควบม้า{editingProject ? 'อัปเดตสาส์น' : 'ส่งสาส์นสู่สภา'}...</> : <><i className={`fa-solid ${editingProject ? 'fa-floppy-disk' : 'fa-paper-plane'}`}></i> {editingProject ? '💾 อัปเดตข้อมูลสาส์น' : 'ยืนยันการส่งสาส์น'}</>}
+                                    <button 
+                                        type="button" 
+                                        onClick={handleFinalSubmit} 
+                                        disabled={isSubmitting} 
+                                        className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                    >
+                                        {isSubmitting ? (
+                                            <><span className="inline-block animate-pulse text-base">🐎💨</span> ⏳ กำลังส่งสาส์น...</>
+                                        ) : (
+                                            <><i className="fa-solid fa-paper-plane"></i> 🐎💨 ยืนยันการส่งสาส์น</>
+                                        )}
                                     </button>
                                 </div>
                             </div>
-                        ) : (
-                            <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>
-                                {editingProject ? <><i className="fa-solid fa-floppy-disk mr-2"></i> 💾 อัปเดตข้อมูลสาส์น</> : isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}
-                            </button>
-                        )}
-                    </form>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1662,27 +1786,27 @@
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mb-6 text-[#5d3a1a] text-xs">
                                     {isAdminMode && <p><strong>รหัสพนักงาน (Admin Only):</strong> <span className="text-red-700 font-bold">{selectedProject.emp}</span></p>}
-                                    <p className={!isAdminMode ? "col-span-2" : ""}><strong>ผู้เสนอ (นามแฝง):</strong> {selectedProject.name}</p>
-                                    <p><strong>อาณาจักรต้นสังกัด:</strong> <span className="font-bold text-blue-700">{selectedProject.origin}</span></p>
-                                    <p><strong>อาณาจักรเป้าหมาย:</strong> <span className="font-bold text-red-700">{selectedProject.target}</span></p>
-                                    <p className="col-span-2"><strong>ประเภทพลังสาสน์:</strong> <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded font-bold border border-blue-300">{selectedProject.category}</span></p>
+                                    <p className={!isAdminMode ? "col-span-2" : ""}><strong>ผู้เสนอ (นามแฝง):</strong> <span className="font-bold text-[#1e3a8a]">{selectedProject.name}</span></p>
+                                    <p className="flex items-center gap-1.5"><strong>อาณาจักรต้นสังกัด:</strong> <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(selectedProject.origin)}`}>{selectedProject.origin}</span></p>
+                                    <p className="flex items-center gap-1.5"><strong>อาณาจักรเป้าหมาย:</strong> <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(selectedProject.target)}`}>{selectedProject.target}</span></p>
+                                    <p className="col-span-2 flex items-center gap-1.5"><strong>ประเภทพลังสาสน์:</strong> <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold border border-blue-300">{selectedProject.category}</span></p>
                                 </div>
                                 <div className="space-y-4 text-[#5d3a1a] bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
                                     <p><strong>โรงงาน / สถานที่:</strong> <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">{selectedProject.factory}</span></p>
-                                    <p><strong>กระบวนการที่พัฒนา:</strong> {selectedProject.location}</p>
-                                    <p><strong>พิกัดปัญหา:</strong> {selectedProject.pinpoint}</p>
-                                    <p><strong>ชื่อโครงการ:</strong> <span className="font-bold text-[#5d3a1a] text-base">{selectedProject.title}</span></p>
+                                    <p><strong>กระบวนการที่พัฒนา:</strong> <span className="font-bold text-[#1e3a8a]">{selectedProject.location}</span></p>
+                                    <p><strong>พิกัดปัญหา:</strong> <span className="font-bold text-[#1e3a8a]">{selectedProject.pinpoint}</span></p>
+                                    <p><strong>ชื่อโครงการ:</strong> <span className="font-bold text-[#1e3a8a] text-base">{selectedProject.title}</span></p>
                                     <div>
-                                        <p className="font-bold">รายละเอียดปัญหา/ข้อร้องเรียน:</p>
-                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.problem}</p>
+                                        <p className="font-bold text-[#5d3a1a] mb-1">รายละเอียดปัญหา/ข้อร้องเรียน:</p>
+                                        <p className="text-[#1e3a8a] font-medium bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 text-xs leading-relaxed whitespace-pre-wrap">{selectedProject.problem}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold">วิธีแก้ไข (ที่เสนอ):</p>
-                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.solution}</p>
+                                        <p className="font-bold text-[#5d3a1a] mb-1">วิธีแก้ไข (ที่เสนอ):</p>
+                                        <p className="text-[#1e3a8a] font-medium bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 text-xs leading-relaxed whitespace-pre-wrap">{selectedProject.solution}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold">ประโยชน์ที่คาดว่าจะได้รับ:</p>
-                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.benefit}</p>
+                                        <p className="font-bold text-[#5d3a1a] mb-1">ประโยชน์ที่คาดว่าจะได้รับ:</p>
+                                        <p className="text-[#1e3a8a] font-medium bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 text-xs leading-relaxed whitespace-pre-wrap">{selectedProject.benefit}</p>
                                     </div>
                                     <div>
                                         <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> ภาพพิกัดปัญหา (Before):</p>
@@ -1731,25 +1855,42 @@
 
                                 {(selectedProject.status === 'Blueprint' || (selectedProject.status === 'Founding' && !selectedProject.ideaApproved)) && (
                                     <div className="mt-4 p-3.5 bg-amber-100/90 border border-amber-400 rounded-xl text-center shadow-sm">
-                                        <p className="text-xs text-amber-900 font-bold mb-2">
-                                            ✏️ ต้องการเพิ่มเติม/แก้ไขข้อมูลสาส์นฉบับนี้ใช่ไหมคะ?
+                                        <p className="text-xs text-amber-900 font-bold mb-2.5">
+                                            ⚙️ ต้องการจัดการสาส์นพัฒนาฉบับนี้ใช่ไหมคะ?
                                         </p>
-                                        <button 
-                                            type="button"
-                                            onClick={() => {
-                                                const pass = prompt('🗝️ กรุณากรอกรหัสพนักงานฉบับเต็มเพื่อยืนยันสิทธิ์แก้ไขสาส์น:');
-                                                if (!pass) return;
-                                                if (pass.trim().toLowerCase() === String(selectedProject.emp).trim().toLowerCase()) {
-                                                    closeModal();
-                                                    if (onStartEdit) onStartEdit(selectedProject);
-                                                } else {
-                                                    alert('❌ รหัสพนักงานไม่ถูกต้อง คุณไม่มีสิทธิ์แก้ไขสาส์นนี้ค่ะ');
-                                                }
-                                            }} 
-                                            className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm rounded-lg shadow transition cursor-pointer border border-yellow-300 flex items-center justify-center gap-1.5"
-                                        >
-                                            <i className="fa-solid fa-pen-to-square"></i> ✏️ ขอแก้ไขสาส์น (ต้องยืนยันรหัสพนักงานฉบับเต็ม)
-                                        </button>
+                                        <div className="flex flex-col sm:flex-row gap-2.5">
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const pass = prompt('🗝️ กรุณากรอกรหัสพนักงานฉบับเต็มเพื่อยืนยันสิทธิ์แก้ไขสาส์น:');
+                                                    if (!pass) return;
+                                                    if (pass.trim().toLowerCase() === String(selectedProject.emp).trim().toLowerCase()) {
+                                                        closeModal();
+                                                        if (onStartEdit) onStartEdit(selectedProject);
+                                                    } else {
+                                                        alert('❌ รหัสพนักงานไม่ถูกต้อง คุณไม่มีสิทธิ์แก้ไขสาส์นนี้ค่ะ');
+                                                    }
+                                                }} 
+                                                className="flex-1 py-2.5 px-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm rounded-lg shadow transition cursor-pointer border border-yellow-300 flex items-center justify-center gap-1.5"
+                                            >
+                                                <i className="fa-solid fa-pen-to-square"></i> ✏️ ขอแก้ไขสาส์น
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const pass = prompt('🗝️ กรุณากรอกรหัสพนักงานฉบับเต็มเพื่อยืนยันสิทธิ์ขอยกเลิกสาส์น:');
+                                                    if (!pass) return;
+                                                    if (pass.trim().toLowerCase() === String(selectedProject.emp).trim().toLowerCase()) {
+                                                        setDeleteConfirmProject(selectedProject);
+                                                    } else {
+                                                        alert('❌ รหัสพนักงานไม่ถูกต้อง คุณไม่มีสิทธิ์ขอยกเลิกสาส์นนี้ค่ะ');
+                                                    }
+                                                }} 
+                                                className="flex-1 py-2.5 px-3 bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-600 hover:to-rose-600 text-white font-bold text-xs md:text-sm rounded-lg shadow transition cursor-pointer border border-red-300 flex items-center justify-center gap-1.5"
+                                            >
+                                                <i className="fa-solid fa-trash-can"></i> 🗑️ ขอยกเลิกสาส์น
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
@@ -2903,6 +3044,15 @@
             };
 
             const handleUpdateProject = async (updatedProject) => { 
+                if (updatedProject.status === 'Deleted') {
+                    setProjects(prev => prev.filter(p => p.id !== updatedProject.id));
+                    if (supabase) {
+                        const { error } = await supabase.from('projects').delete().eq('id', updatedProject.id);
+                        if (error) console.error("Supabase delete error:", error);
+                    }
+                    return;
+                }
+
                 setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); 
 
                 if (supabase) {
