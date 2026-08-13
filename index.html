@@ -1206,6 +1206,7 @@
                                 onClick={() => {
                                     setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
                                     if (onCancelEdit) onCancelEdit();
+                                    if (onViewChange) onViewChange('dashboard');
                                 }}
                                 className="bg-red-700 hover:bg-red-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-red-400 shadow transition cursor-pointer"
                             >
