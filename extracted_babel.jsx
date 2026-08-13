@@ -5,7 +5,7 @@
         // SUPABASE CONFIGURATION
         // ==========================================
         const SUPABASE_URL = 'https://eixcgphxqghadvabvleu.supabase.co';
-        // �泊 Anon public key 犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｹ犧癌ｸｷ犹謂ｸｭ犧｡犧歩ｹ謂ｸｭ Supabase Database
+        // 🔑 Anon public key สำหรับเชื่อมต่อ Supabase Database
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpeGNncGh4cWdoYWR2YWJ2bGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxNTc5MzgsImV4cCI6MjEwMTczMzkzOH0.g0EfjSa37R3ruOMb25ugFjg0cuMCm2rloSr1eDhPrYo';
         const supabase = (window.supabase && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') 
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
@@ -96,8 +96,8 @@
 
             const isTrophy = type === 'trophy';
             const emptyIcon = isTrophy ? "fa-award" : "fa-clock-rotate-left";
-            const emptyText = isTrophy ? "犧｢犧ｱ犧�ｹ�ｸ｡犹謂ｸ｡犧ｵ犧謂ｸｲ犧｣犧ｶ犧≒ｹ犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ" : "犧｢犧ｱ犧�ｹ�ｸ｡犹謂ｸ｡犧ｵ犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸｧ犧ｱ犧吭ｸｧ犧ｲ犧�";
-            const errorText = isTrophy ? "犧籾ｹ霞ｸｧ犧｢犧ｫ犧ｲ犧｢犹�ｸ巵ｹ�ｸｫ犧�" : "犧｣犧ｹ犧巵ｸｭ犧扉ｸｵ犧歩ｸｫ犧ｲ犧｢犹�ｸ巵ｹ�ｸｫ犧�";
+            const emptyText = isTrophy ? "ยังไม่มีจารึกเกียรติยศ" : "ยังไม่มีบันทึกวันวาน";
+            const errorText = isTrophy ? "ถ้วยหายไปไหน" : "รูปอดีตหายไปไหน";
             const glowColor = isTrophy ? "shadow-[0_0_20px_rgba(250,204,21,0.7)] border-yellow-400" : "shadow-[0_0_20px_rgba(56,189,248,0.5)] border-sky-400";
 
             if (items.length === 0) {
@@ -116,7 +116,7 @@
                 <div className="relative h-32 md:h-40 w-full flex items-center justify-center bg-black/30 group rounded-lg">
                     {!hasError && (
                         <span className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-xl border border-white/50 z-20 pointer-events-none shadow-lg max-w-[200px] text-center whitespace-normal">
-                            {isTrophy ? '�醇' : '�糖'} {currentItem.name} ({index + 1}/{items.length})
+                            {isTrophy ? '🏆' : '📜'} {currentItem.name} ({index + 1}/{items.length})
                         </span>
                     )}
 
@@ -172,7 +172,7 @@
                 
                 if (val.length - displayPassword.length > 1) {
                     setRealPassword(val);
-                    setDisplayPassword('笳�'.repeat(val.length - 1) + val.slice(-1));
+                    setDisplayPassword('●'.repeat(val.length - 1) + val.slice(-1));
                 } 
                 else if (val.length < displayPassword.length) { 
                     setRealPassword(realPassword.slice(0, val.length)); 
@@ -181,34 +181,37 @@
                 else { 
                     const addedChar = val.slice(-1); 
                     setRealPassword(realPassword + addedChar); 
-                    setDisplayPassword('笳�'.repeat(val.length - 1) + addedChar); 
+                    setDisplayPassword('●'.repeat(val.length - 1) + addedChar); 
                 }
             };
 
             useEffect(() => {
-                const timeout = setTimeout(() => { if(displayPassword.length > 0) setDisplayPassword('笳�'.repeat(displayPassword.length)); }, 800);
+                const timeout = setTimeout(() => { if(displayPassword.length > 0) setDisplayPassword('●'.repeat(displayPassword.length)); }, 800);
                 return () => clearTimeout(timeout);
             }, [displayPassword]);
 
-                        const handleSubmit = (e) => {
+            const handleSubmit = (e) => {
                 e.preventDefault();
-                if (!isAnonymous && !formData.empId.trim()) { alert('à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸£à¸«à¸±à¸ªà¸žà¸™à¸±à¸à¸‡à¸²à¸™à¸‚à¸­à¸‡à¸—à¹ˆà¸²à¸™à¸à¹ˆà¸­à¸™à¸ªà¹ˆà¸‡à¸ªà¸²à¸ªà¹Œà¸™à¸™à¸°à¸„à¸°'); return; }
-                setShowConfirmModal(true);
+                const trimmedPass = realPassword.trim();
+                if (trimmedPass === 'DCweare1' || trimmedPass === 'ฏฉไำฟพำๅ') {
+                    onLoginSuccess();
+                } else { 
+                    setError(true); setRealPassword(''); setDisplayPassword(''); 
+                }
             };
 
-            const availableProcesses = formData.target ? processMap[formData.target] : [];
             return (
                 <div className="fixed inset-0 flex items-center justify-center z-[100] bg-black/90 p-4">
                     <div className="parchment max-w-md w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl animate-fade-in">
                         <div className="text-[#5d3a1a] mb-4 text-5xl"><i className="fa-solid fa-dungeon"></i></div>
-                        <h1 className="text-2xl font-bold text-[#5d3a1a] mb-2 font-cinzel tracking-wide">犧巵ｸ｣犧ｰ犧歩ｸｹ犧ｪ犧ｹ犹� Diecast Kingdoms</h1>
-                        <p className="text-[#8b5a2b] text-sm mb-6 font-bold">犹もｸ巵ｸ｣犧扉ｹ≒ｸｪ犧扉ｸ�ｸ｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸ･犧ｱ犧壟ｸもｸｭ犧�ｸｭ犧�ｸ�ｹ呉ｸ≒ｸ｣犹犧樅ｸｷ犹謂ｸｭ犹犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣</p>
+                        <h1 className="text-2xl font-bold text-[#5d3a1a] mb-2 font-cinzel tracking-wide">ประตูสู่ Diecast Kingdoms</h1>
+                        <p className="text-[#8b5a2b] text-sm mb-6 font-bold">โปรดแสดงรหัสผ่านลับขององค์กรเพื่อเข้าสู่อาณาจักร</p>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <input type="text" value={displayPassword} onChange={handlePasswordChange} placeholder="犧≒ｸ｣犧ｭ犧≒ｸ｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸ･犧ｱ犧�..." className={`input-style text-center text-lg tracking-widest ${error ? 'border-red-600 bg-red-100 placeholder-red-400' : ''}`} required autoComplete="off" />
-                                {error && <p className="text-red-700 text-xs font-bold mt-2 animate-bounce">笶� 犧｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｹ�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧�! 犧憫ｸｹ犹霞ｸ壟ｸｸ犧≒ｸ｣犧ｸ犧≒ｸ謂ｸ�ｸ籾ｸｭ犧｢犹�ｸ�!</p>}
+                                <input type="text" value={displayPassword} onChange={handlePasswordChange} placeholder="กรอกรหัสผ่านลับ..." className={`input-style text-center text-lg tracking-widest ${error ? 'border-red-600 bg-red-100 placeholder-red-400' : ''}`} required autoComplete="off" />
+                                {error && <p className="text-red-700 text-xs font-bold mt-2 animate-bounce">❌ รหัสผ่านไม่ถูกต้อง! ผู้บุกรุกจงถอยไป!</p>}
                             </div>
-                            <button type="submit" className="w-full bg-[#5d3a1a] text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">犹犧巵ｸｴ犧扉ｸ巵ｸ｣犧ｰ犧歩ｸｹ犹犧｡犧ｷ犧ｭ犧� (Enter)</button>
+                            <button type="submit" className="w-full bg-[#5d3a1a] text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">เปิดประตูเมือง (Enter)</button>
                         </form>
                     </div>
                 </div>
@@ -236,14 +239,14 @@
             if (!isVisible) return null;
 
             return (
-                <div onClick={handleClose} className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                    <div onClick={(e) => e.stopPropagation()} className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
-                        <h1 className="text-3xl font-bold text-[#5d3a1a] mb-6 font-cinzel tracking-wide">犧｢犧ｴ犧吭ｸ扉ｸｵ犧歩ｹ霞ｸｭ犧吭ｸ｣犧ｱ犧壟ｸｪ犧ｹ犹� Diecast Kingdoms</h1>
+                <div className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                    <div className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
+                        <h1 className="text-3xl font-bold text-[#5d3a1a] mb-6 font-cinzel tracking-wide">ยินดีต้อนรับสู่ Diecast Kingdoms</h1>
                         <div className="text-[#8b5a2b] space-y-4 mb-8 text-sm md:text-base leading-relaxed">
-                            <p className="italic">"犧扉ｸｴ犧吭ｹ≒ｸ扉ｸ吭ｹ≒ｸｫ犹謂ｸ�ｸ�ｸｧ犧ｲ犧｡犧｣犹謂ｸｧ犧｡犧｡犧ｷ犧ｭ 犧伶ｸｵ犹謂ｸ伶ｸｸ犧≒ｹ�ｸｭ犹犧扉ｸｵ犧｢犧もｸｭ犧�ｸ伶ｹ謂ｸｲ犧吭ｸ�ｸｷ犧ｭ犧ｭ犧ｴ犧説ｸ壟ｸ･犹�ｸｭ犧≒ｸ伶ｸｵ犹謂ｸ癌ｹ謂ｸｧ犧｢犹犧ｪ犧｣犧ｴ犧｡犧ｪ犧｣犹霞ｸｲ犧�ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧もｸｭ犧�ｹ犧｣犧ｲ犹�ｸｫ犹霞ｹ≒ｸもｹ�ｸ�ｹ≒ｸ≒ｸ｣犹謂ｸ�ｸ｢犧ｴ犹謂ｸ�ｸもｸｶ犹霞ｸ�"</p>
-                            <p>"犧伶ｸｵ犹謂ｸ吭ｸｵ犹謂ｸ�ｸｷ犧ｭ犧樅ｸｷ犹霞ｸ吭ｸ伶ｸｵ犹謂ｹ犧巵ｸｴ犧扉ｸ≒ｸｧ犹霞ｸｲ犧�ｸｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸ樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧� Diecast 犧伶ｸｸ犧≒ｸ伶ｹ謂ｸｲ犧�... 犹�ｸ｡犹謂ｸｧ犹謂ｸｲ犧伶ｹ謂ｸｲ犧吭ｸ謂ｸｰ犹犧巵ｹ�ｸ吭ｹ�ｸ�ｸ｣ 犧｡犧ｲ犧謂ｸｲ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸ� 犧樅ｸ･犧ｱ犧�ｹ≒ｸｫ犹謂ｸ�ｸ≒ｸｲ犧｣犧ｪ犧｣犹霞ｸｲ犧�ｸｪ犧｣犧｣犧�ｹ呉ｸもｸｭ犧�ｸ伶ｹ謂ｸｲ犧吭ｸ｡犧ｵ犧�ｸｧ犧ｲ犧｡犧ｫ犧｡犧ｲ犧｢犹犧ｪ犧｡犧ｭ"</p>
+                            <p className="italic">"ดินแดนแห่งความร่วมมือ ที่ทุกไอเดียของท่านคืออิฐบล็อกที่ช่วยเสริมสร้างอาณาจักรของเราให้แข็งแกร่งยิ่งขึ้น"</p>
+                            <p>"ที่นี่คือพื้นที่เปิดกว้างสำหรับพนักงาน Diecast ทุกท่าน... ไม่ว่าท่านจะเป็นใคร มาจากอาณาจักรใด พลังแห่งการสร้างสรรค์ของท่านมีความหมายเสมอ"</p>
                         </div>
-                        <button onClick={handleClose} className="bg-[#5d3a1a] w-full text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">犹犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣</button>
+                        <button onClick={handleClose} className="bg-[#5d3a1a] w-full text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">เข้าสู่อาณาจักร</button>
                     </div>
                 </div>
             );
@@ -254,38 +257,37 @@
         // ==========================================
         function NewsView({ onViewChange }) {
             return (
-                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm" onClick={() => onViewChange('worldmap')}>
-                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm">
+                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto">
                         <button onClick={() => onViewChange('worldmap')} className="absolute top-4 right-5 text-4xl font-bold text-[#8b5a2b] hover:text-red-600 transition cursor-pointer">&times;</button>
                         <div className="text-center border-b-2 border-[#8b5a2b]/30 pb-4 mb-6 mt-4">
-                            <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> 犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸもｹ謂ｸｲ犧ｧ犧ｪ犧ｲ犧｣</h1>
-                            <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">犧ｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸ≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡犹≒ｸ･犧ｰ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧樅ｸｴ犹犧ｨ犧ｩ犧謂ｸｲ犧≒ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�</p>
+                            <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> ประกาศิตข่าวสาร</h1>
+                            <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">อัปเดตกิจกรรมและประกาศพิเศษจากสภาเมือง</p>
                         </div>
                         <div className="space-y-6">
                             <div className="bg-gradient-to-r from-amber-100 to-yellow-300 p-6 rounded-xl border-2 border-yellow-500 shadow-md flex flex-col md:flex-row items-center gap-6">
-                                <div className="text-6xl md:text-7xl animate-pulse">�虫</div>
+                                <div className="text-6xl md:text-7xl animate-pulse">💎</div>
                                 <div>
-                                    <h3 className="font-bold text-yellow-900 text-xl md:text-2xl mb-2">犧霞ｸ･犧ｭ犧�ｹ犧巵ｸｴ犧扉ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧吭ｹ�ｸｫ犧｡犹�: 犧ｭ犧ｵ犹犧ｧ犧吭ｸ歩ｹ� Quality x2!</h3>
+                                    <h3 className="font-bold text-yellow-900 text-xl md:text-2xl mb-2">ฉลองเปิดแผ่นดินใหม่: อีเวนต์ Quality x2!</h3>
                                     <p className="text-sm md:text-base text-yellow-800 leading-relaxed">
-                                        犧霞ｸ･犧ｭ犧�ｸ≒ｸｲ犧｣犹犧巵ｸｴ犧扉ｹ�ｸ癌ｹ霞ｸ�ｸｲ犧吭ｸ謂ｸ｣犧ｴ犧� 犹犧樅ｸｷ犹謂ｸｭ犹�ｸｫ犹霞ｸ�ｸｧ犧ｲ犧｡犧ｪ犧ｳ犧�ｸｱ犧財ｸ≒ｸｱ犧壟ｸ�ｸｸ犧内ｸ�犧ｲ犧�! 犧謂ｸｱ犧扉ｸ≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡ <b className="text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">EXP x2</b> 犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸ≒ｸｲ犧｣犧ｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ犧ｫ犧｡犧ｧ犧� Quality<br/>
-                                        �櫨 <b>犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸ�ｸ吭ｹ犧ｪ犧吭ｸｭ犹�ｸｭ犹犧扉ｸｵ犧｢:</b> 犧｣犧ｱ犧壟ｸ�ｸｰ犹≒ｸ吭ｸ吭ｹ犧樅ｸｴ犹謂ｸ｡犧謂ｸｲ犧≒ｸ巵ｸ≒ｸ歩ｸｴ 5 EXP 犹犧巵ｹ�ｸ� <b className="text-red-700 text-lg">10 EXP</b><br/>
-                                        �櫨 <b>犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸ�ｸ吭ｸ･犧�ｸ｡犧ｷ犧ｭ犧伶ｸｳ:</b> 犹�ｸ扉ｹ霞ｸ｣犧ｱ犧壟ｹ犧樅ｸｴ犹謂ｸ｡犧謂ｸｲ犧≒ｸ巵ｸ≒ｸ歩ｸｴ 15 EXP 犹犧巵ｹ�ｸ� <b className="text-red-700 text-lg">30 EXP</b><br/>
-                                        <span className="text-yellow-900 font-bold block mt-2 px-3 py-1 bg-yellow-400/40 rounded inline-block border border-yellow-500/50">竢ｳ 犧｣犧ｰ犧｢犧ｰ犹犧ｧ犧･犧ｲ犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡: 犧歩ｸｱ犹霞ｸ�ｹ≒ｸ歩ｹ謂ｸｧ犧ｱ犧吭ｸ吭ｸｵ犹霞ｸ籾ｸｶ犧� 31 犧倨ｸｱ犧吭ｸｧ犧ｲ犧�ｸ｡ 2026</span>
+                                        ฉลองการเปิดใช้งานจริง เพื่อให้ความสำคัญกับคุณภาพ! จัดกิจกรรม <b className="text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">EXP x2</b> สำหรับการส่งสาส์นพัฒนาหมวด Quality<br/>
+                                        🔥 <b>สำหรับคนเสนอไอเดีย:</b> รับคะแนนเพิ่มจากปกติ 5 EXP เป็น <b className="text-red-700 text-lg">10 EXP</b><br/>
+                                        🔥 <b>สำหรับคนลงมือทำ:</b> ได้รับเพิ่มจากปกติ 15 EXP เป็น <b className="text-red-700 text-lg">30 EXP</b><br/>
                                     </p>
                                 </div>
                             </div>
                             <div className="bg-gradient-to-r from-slate-800 to-indigo-900 p-6 rounded-xl border-2 border-indigo-400 shadow-lg flex flex-col md:flex-row items-center gap-6 text-white group relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-2 text-indigo-400 opacity-30 text-8xl transform rotate-12"><i className="fa-solid fa-bolt"></i></div>
-                                <div className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">�漕</div>
+                                <div className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">👆</div>
                                 <div className="relative z-10 flex-1">
-                                    <h3 className="font-bold text-indigo-200 text-xl md:text-2xl mb-2">犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡犧樅ｸｴ犹犧ｨ犧ｩ: 犧ｨ犧ｶ犧≒ｸ謂ｸｴ犹霞ｸ｡犧謂ｸｭ犧伶ｸ･犧ｲ犧｢犧謂ｹ霞ｸｲ犧ｧ (POPBOSS)</h3>
+                                    <h3 className="font-bold text-indigo-200 text-xl md:text-2xl mb-2">กิจกรรมพิเศษ: ศึกจิ้มจอทลายจ้าว (POPBOSS)</h3>
                                     <p className="text-sm md:text-base text-gray-300 mb-4 leading-relaxed">
-                                        犧｡犧ｴ犧吭ｸｴ犹犧≒ｸ｡犧ｪ犹呉ｸ伶ｸｵ犹謂ｹ≒ｸｪ犧扉ｸ�ｸ籾ｸｶ犧�ｸ≒ｸｲ犧｣犧｣犧ｧ犧｡犧｡犧ｷ犧ｭ犧≒ｸｱ犧吭ｸもｸｭ犧�ｸ伶ｸｸ犧≒ｸ�ｸ�! 犹犧･犧ｷ犧ｭ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧もｸｭ犧�ｸ�ｸｸ犧内ｹ≒ｸ･犹霞ｸｧ犧｣犧ｧ犧｡犧樅ｸ･犧ｱ犧� <b>犧謂ｸｴ犹霞ｸ｡ 犧謂ｸｴ犹霞ｸ｡ 犧謂ｸｴ犹霞ｸ｡</b> 犹犧樅ｸｷ犹謂ｸｭ犧巵ｸ｣犧ｲ犧壟ｸ壟ｸｭ犧ｪ <br/>
-                                        犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧伶ｸｵ犹謂ｸ癌ｸ吭ｸｰ 犧謂ｸｰ犹�ｸ扉ｹ霞ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｹ�ｸ吭ｸ≒ｸｲ犧｣犧謂ｸｱ犧扉ｹ犧伶ｸｨ犧≒ｸｲ犧･犧伶ｸｵ犹謂ｸｫ犧吭ｹ霞ｸｲ犹≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｹもｸ･犧� 犹�ｸ巵ｸ伶ｸｵ犹謂ｸ伶ｸｸ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧樅ｸｷ犹謂ｸｭ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｨ犧ｱ犧≒ｸ扉ｸｲ犧�ｸｧ犧ｲ犧｡犹犧謂ｹ金ｸ�ｹ≒ｸ謂ｹ金ｸｧ! 犧｣犧ｧ犧｡犧樅ｸ･犧ｱ犧�ｹ≒ｸ･犹霞ｸｧ犹�ｸ巵ｸ謂ｸｱ犧扉ｸ≒ｸｲ犧｣犧壟ｸｭ犧ｪ犧≒ｸｱ犧吭ｹ犧･犧｢!<br/>
-                                        <span className="text-yellow-400 font-bold block mt-2 px-3 py-1 bg-black/40 rounded inline-block">竢ｳ 犧｣犧ｰ犧｢犧ｰ犹犧ｧ犧･犧ｲ犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡: 犧歩ｸｱ犹霞ｸ�ｹ≒ｸ歩ｹ謂ｸｧ犧ｱ犧吭ｸ吭ｸｵ犹霞ｸ籾ｸｶ犧� 31 犧歩ｸｸ犧･犧ｲ犧�ｸ｡ 2026</span>
+                                        มินิเกมส์ที่แสดงถึงการรวมมือกันของทุกคน! เลือกอาณาจักรของคุณแล้วรวมพลัง <b>จิ้ม จิ้ม จิ้ม</b> เพื่อปราบบอส <br/>
+                                        สำหรับอาณาจักรที่ชนะ จะได้สิทธิ์ในการจัดเทศกาลที่หน้าแผนที่โลก ไปที่ทุกอาณาจักรเพื่อประกาศศักดาความเจ๋งแจ๋ว! รวมพลังแล้วไปจัดการบอสกันเลย!<br/>
+                                        <span className="text-yellow-400 font-bold block mt-2 px-3 py-1 bg-black/40 rounded inline-block">⏳ ระยะเวลากิจกรรม: ตั้งแต่วันนี้ถึง 31 ตุลาคม 2026</span>
                                     </p>
                                     <button onClick={() => onViewChange('popboss')} className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-400 shadow-md cursor-pointer transition w-full md:w-auto text-lg border border-indigo-300">
-                                        笞費ｸ� 犹犧もｹ霞ｸｲ犧｣犹謂ｸｧ犧｡犧ｨ犧ｶ犧≒ｸ謂ｸｴ犹霞ｸ｡犧謂ｸｭ犧歩ｸｭ犧吭ｸ吭ｸｵ犹�!
+                                        ⚔️ เข้าร่วมศึกจิ้มจอตอนนี้!
                                     </button>
                                 </div>
                             </div>
@@ -301,214 +303,118 @@
         function Sidebar({ 
             currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
             musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
-            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack,
-            projects = [], isModalOpen = false
+            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack, projects = []
         }) {
             const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
 
-            const blueprintCount = projects.filter(p => p.status === 'Blueprint').length;
+            const blueprintCount = projects.filter(p => (p.status === 'Blueprint' || !p.status) && p.status !== 'Hidden' && p.status !== 'Deleted' && p.status !== 'Hall of fame').length;
             const evidenceCount = projects.filter(p => p.status === 'Evidence').length;
 
             const menuItems = [
-                { id: 'worldmap', label: '犹≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�', icon: 'fa-solid fa-map-location-dot' },
-                { id: 'suggestion', label: '犧｢犧ｷ犹謂ｸ吭ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ', icon: 'fa-solid fa-pen-to-square' },
-                { id: 'dashboard', label: '犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
-                { id: 'quests', label: '犧･犧ｲ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸ�犧ｲ犧｣犧≒ｸｴ犧�', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
-                { id: 'chronicles', label: '犧歩ｸｳ犧吭ｸｲ犧吭ｹ≒ｸ･犧ｰ犧≒ｸ錫ｹ≒ｸｫ犹謂ｸ�ｸｪ犧�犧ｲ', icon: 'fa-solid fa-scroll' },
-                { id: 'popboss', label: '笞｡ 犹犧ｫ犧歩ｸｸ犧≒ｸｲ犧｣犧内ｹ呉ｸ樅ｸｴ犹犧ｨ犧ｩ', icon: 'fa-solid fa-bolt text-yellow-400' },
-            ];
-
-            const mobileNavItems = [
-                { id: 'suggestion', label: '犧｢犧ｷ犹謂ｸ吭ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ', icon: 'fa-solid fa-pen-to-square' },
-                { id: 'dashboard', label: '犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
-                { id: 'worldmap', label: '犹≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�', icon: 'fa-solid fa-map-location-dot', isCenter: true },
-                { id: 'quests', label: '犧･犧ｲ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸ�犧ｲ犧｣犧≒ｸｴ犧�', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
-                { id: 'chronicles', label: '犧歩ｸｳ犧吭ｸｲ犧吭ｹ≒ｸ･犧ｰ犧≒ｸ錫ｹ≒ｸｫ犹謂ｸ�ｸｪ犧�犧ｲ', icon: 'fa-solid fa-scroll' },
+                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot' },
+                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount, badgeBg: 'bg-blue-600' },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount, badgeBg: 'bg-purple-600' },
+                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
+                { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
             ];
 
             return (
-                <>
-                    {/* ================= DESKTOP SIDEBAR (md:flex) ================= */}
-                    <div className={`hidden md:flex fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
-                        
-                        <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
-                            <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
-                                {!isCollapsed && (
-                                    <div className="flex flex-col">
-                                        <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
-                                        <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">犧･犧ｳ犧吭ｸｳ犹≒ｸｫ犹謂ｸ� 5 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣</span>
-                                    </div>
-                                )}
-                                {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
-                                <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
-                                    <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
-                                </button>
-                            </div>
-                            
-                            <nav className="p-3 space-y-2 mt-2 shrink-0">
-                                <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
-                                    <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
-                                    {!isCollapsed && <span className="text-sm truncate text-left">犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧もｹ謂ｸｲ犧ｧ犧ｪ犧ｲ犧｣</span>}
-                                </button>
-                                {menuItems.map((item) => {
-                                    const isActive = currentView === item.id;
-                                    const hasBadge = typeof item.badge === 'number' && item.badge > 0;
-                                    return (
-                                        <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
-                                            <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
-                                                {hasBadge ? (
-                                                    <>
-                                                        <i className={`${item.icon} absolute animate-toggle-icon`}></i>
-                                                        <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`犧｡犧ｵ犹犧｣犧ｷ犹謂ｸｭ犧�ｸ｣犧ｭ犧ｭ犧｢犧ｹ犹� ${item.badge} 犹犧｣犧ｷ犹謂ｸｭ犧㌔}>
-                                                            {item.badge}
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <i className={item.icon}></i>
-                                                )}
-                                            </div>
-                                            {!isCollapsed && (
-                                                <div className="flex items-center justify-between flex-1 truncate">
-                                                    <span className="text-sm font-semibold truncate text-left">{item.label}</span>
-                                                    {hasBadge && (
-                                                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
-                                                            {item.badge} 犹犧｣犧ｷ犹謂ｸｭ犧�ｹ�ｸｫ犧｡犹�
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </nav>
-                        </div>
-
-                        <div className="mt-auto shrink-0 flex flex-col">
-                            {!isCollapsed ? (
-                                <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
-                                    <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
-                                        {musicTracks.map((t, idx) => (
-                                            <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
-                                                {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
-                                                {t.title}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div onClick={() => setIsPlaylistOpen(!isPlaylistOpen)} className="p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition select-none">
-                                        <div className="flex items-center gap-2 overflow-hidden">
-                                            <i className="fa-solid fa-compact-disc text-yellow-500 animate-spin" style={{ animationDuration: '4s' }}></i>
-                                            <div className="music-marquee-container flex-1">
-                                                <span className="music-marquee-text text-xs text-yellow-200 font-medium">
-                                                    {musicTracks[currentTrackIndex].title}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
-                                    </div>
-                                    <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
-                                        <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "犹犧･犹謂ｸ吭ｸｧ犧吭ｹ犧樅ｸ･犧�ｹ犧扉ｸｵ犧｢犧ｧ" : "犹犧･犹謂ｸ吭ｸ歩ｸｲ犧｡犧･犧ｳ犧扉ｸｱ犧�"}>
-                                            <i className="fa-solid fa-repeat"></i>
-                                        </button>
-                                        <div className="flex items-center gap-3">
-                                            <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
-                                            <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
-                                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
-                                            </button>
-                                            <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="mx-3 mb-4 flex justify-center">
-                                    <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
-                                        <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
-                                    </button>
+                <div className={`fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
+                    
+                    <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
+                        <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
+                            {!isCollapsed && (
+                                <div className="flex flex-col">
+                                    <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
+                                    <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
                                 </div>
                             )}
-
-                            <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
-                    <div className={`md:hidden ${isModalOpen ? 'modal-open-hide-sidebar' : ''}`}>
-                        {/* 竊厄ｸ� Top Left Quick Buttons (�討 News, 笞｡ PopBoss, �七 Music) */}
-                        <div className="fixed top-3 left-3 z-50 flex flex-col gap-2">
-                            <button
-                                onClick={() => onViewChange('news')}
-                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
-                                    currentView === 'news'
-                                        ? 'bg-blue-900/80 text-blue-200 border-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.6)] scale-105'
-                                        : 'bg-blue-950/60 text-blue-300 border-blue-500/40 hover:bg-blue-900/80'
-                                }`}
-                                title="犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧もｹ謂ｸｲ犧ｧ犧ｪ犧ｲ犧｣"
-                            >
-                                <i className="fa-solid fa-bullhorn text-base"></i>
-                            </button>
-                            <button
-                                onClick={() => onViewChange('popboss')}
-                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
-                                    currentView === 'popboss'
-                                        ? 'bg-yellow-900/80 text-yellow-300 border-yellow-400 shadow-[0_0_12px_rgba(250,204,21,0.6)] scale-105'
-                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
-                                }`}
-                                title={isPopBossActive() ? "笞｡ 犹犧ｫ犧歩ｸｸ犧≒ｸｲ犧｣犧内ｹ呉ｸ樅ｸｴ犹犧ｨ犧ｩ POPBOSS" : "�白 犧ｪ犧｣犧ｸ犧巵ｸ憫ｸ･ PopBoss Season 1 (犧謂ｸ壟ｸ､犧扉ｸｹ犧≒ｸｲ犧･)"}
-                            >
-                                <i className={`fa-solid ${isPopBossActive() ? 'fa-bolt text-lg animate-pulse' : 'fa-trophy text-base text-yellow-400'}`}></i>
-                            </button>
-                            <button
-                                onClick={() => setIsPlaying(!isPlaying)}
-                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
-                                    isPlaying
-                                        ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-black border-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.7)] scale-105 font-bold'
-                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
-                                }`}
-                                title={isPlaying ? "犧巵ｸｴ犧扉ｹ犧樅ｸ･犧�ｸ巵ｸ｣犧ｰ犧≒ｸｭ犧�" : "犹犧巵ｸｴ犧扉ｹ犧樅ｸ･犧�ｸ巵ｸ｣犧ｰ犧≒ｸｭ犧�"}
-                            >
-                                <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse text-base' : 'fa-play text-sm ml-0.5'}`}></i>
+                            {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
+                            <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
+                                <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
                             </button>
                         </div>
-
-                        {/* 笞� Bottom Navigation Dock (5 Circular Buttons) */}
-                        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 glass-panel glow-border px-3.5 py-2 rounded-full flex items-center gap-3 shadow-[0_0_25px_rgba(0,0,0,0.85)] border border-[#ebdcb9]/40 backdrop-blur-xl bg-black/70">
-                            {mobileNavItems.map((item) => {
+                        
+                        <nav className="p-3 space-y-2 mt-2 shrink-0">
+                            <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
+                                <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
+                                {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
+                            </button>
+                            {menuItems.map((item) => {
                                 const isActive = currentView === item.id;
-                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
-                                const isCenter = item.isCenter;
-
+                                const showBadge = item.badge !== undefined && item.badge > 0;
                                 return (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => onViewChange(item.id)}
-                                        className={`relative rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                                            isCenter
-                                                ? 'w-12 h-12 text-xl border-2'
-                                                : 'w-10 h-10 text-base border'
-                                        } ${
-                                            isActive
-                                                ? 'bg-gradient-to-b from-[#8b5a2b] to-[#5d3a1a] text-[#f7e6c4] border-[#ebdcb9] shadow-[0_0_15px_rgba(247,230,196,0.6)] scale-110'
-                                                : 'bg-black/50 text-[#ebdcb9]/70 border-white/10 hover:bg-[#8b5a2b]/30 hover:text-[#ebdcb9]'
-                                        }`}
-                                        title={item.label}
-                                    >
-                                        {hasBadge ? (
-                                            <>
-                                                <i className={`${item.icon} absolute animate-toggle-icon`}></i>
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center border border-yellow-300 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-toggle-badge">
-                                                    {item.badge}
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <i className={item.icon}></i>
+                                    <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center justify-between p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
+                                        <div className="flex items-center gap-3 truncate">
+                                            <div className="flex items-center justify-center w-8 text-center text-lg relative">
+                                                <i className={item.icon}></i>
+                                                {isCollapsed && showBadge && (
+                                                    <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${item.badgeBg} ring-2 ring-black animate-pulse`}></span>
+                                                )}
+                                            </div>
+                                            {!isCollapsed && <span className="text-sm font-semibold truncate text-left">{item.label}</span>}
+                                        </div>
+                                        {!isCollapsed && showBadge && (
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold text-white shadow animate-pulse ${item.badgeBg}`}>
+                                                {item.badge}
+                                            </span>
                                         )}
                                     </button>
                                 );
                             })}
+                        </nav>
+                    </div>
+
+                    <div className="mt-auto shrink-0 flex flex-col">
+                        
+                        {!isCollapsed ? (
+                            <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
+                                <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
+                                    {musicTracks.map((t, idx) => (
+                                        <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
+                                            {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
+                                            {t.title}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="px-3 py-2 bg-[#8b5a2b]/20 flex justify-between items-center cursor-pointer border-t border-[#8b5a2b]/30" onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}>
+                                    <div className="flex flex-col w-[140px] overflow-hidden">
+                                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider mb-1">🎵 บทกวีแห่ง 5 ดินแดน</span>
+                                        <div className="music-marquee-container w-full">
+                                            <span className="music-marquee-text text-sm font-bold text-[#f7e6c4]">
+                                                {musicTracks[currentTrackIndex].title}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
+                                </div>
+                                <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
+                                    <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
+                                        <i className="fa-solid fa-repeat"></i>
+                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
+                                        <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
+                                            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
+                                        </button>
+                                        <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mx-3 mb-4 flex justify-center">
+                                <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
+                                    <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
+                            {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
                         </div>
                     </div>
-                </>
+                </div>
             );
         }
 
@@ -520,69 +426,16 @@
             const [myScore, setMyScore] = useState(0);
             const [isPopping, setIsPopping] = useState(false);
             const [bossImgError, setBossImgError] = useState(false);
-            const lastPopTimeRef = useRef(0);
 
             const kingdomsList = [
-                { id: 'Blankheimgard', name: '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�', icon: '笶�ｸ�', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
-                { id: 'Casteria', name: '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢', icon: '�櫨', color: 'rgba(243, 156, 18, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_casteria_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_casteria_hit.png' },
-                { id: 'Machinepolis', name: '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ', icon: '笞呻ｸ�', color: 'rgba(46, 204, 113, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_hit.png' },
-                { id: 'Finalthron', name: '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�', icon: '笨ｨ', color: 'rgba(241, 196, 15, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_finalthron_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_finalthron_hit.png' }
+                { id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
+                { id: 'Casteria', name: 'แคสเทอเรีย', icon: '🔥', color: 'rgba(243, 156, 18, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_casteria_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_casteria_hit.png' },
+                { id: 'Machinepolis', name: 'แมคชีนโพลิส', icon: '⚙️', color: 'rgba(46, 204, 113, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_hit.png' },
+                { id: 'Finalthron', name: 'ไฟนัลธรอน', icon: '✨', color: 'rgba(241, 196, 15, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_finalthron_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_finalthron_hit.png' }
             ];
 
-            const isExpired = !isPopBossActive();
-
-            if (isExpired) {
-                const sortedScores = Object.entries(globalScores).sort((a, b) => b[1] - a[1]);
-                const winner = sortedScores[0] ? sortedScores[0][0] : '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ';
-                return (
-                    <div className="fixed inset-0 z-[60] popboss-bg flex flex-col items-center justify-center text-white animate-fade-in p-4 overflow-y-auto">
-                        <button onClick={onClose} className="absolute top-6 right-8 text-white text-4xl font-bold hover:text-red-500 cursor-pointer">&times;</button>
-                        <div className="parchment max-w-2xl w-full p-6 md:p-8 rounded-2xl text-center border-4 border-yellow-500 shadow-2xl bg-black/80 text-[#ebdcb9]">
-                            <div className="text-6xl mb-3 animate-bounce">�醇</div>
-                            <h1 className="text-2xl md:text-4xl font-bold text-yellow-400 font-cinzel mb-2">犧ｪ犧｣犧ｸ犧巵ｸ憫ｸ･犧ｨ犧ｶ犧� POP BOSS SEASON 1</h1>
-                            <p className="text-xs md:text-sm text-gray-300 mb-6 bg-red-950/80 px-4 py-1.5 rounded-full inline-block border border-red-500/50">
-                                �白 犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡犧ｪ犧ｴ犹霞ｸ吭ｸｪ犧ｸ犧扉ｸ･犧�ｹ≒ｸ･犹霞ｸｧ犹犧｡犧ｷ犹謂ｸｭ犧ｧ犧ｱ犧吭ｸ伶ｸｵ犹� 31 犧歩ｸｸ犧･犧ｲ犧�ｸ｡ 2026
-                            </p>
-                            
-                            <div className="bg-gradient-to-r from-amber-600/40 via-yellow-500/40 to-amber-600/40 border-2 border-yellow-400 p-4 rounded-xl mb-6 shadow-lg">
-                                <span className="text-xs font-bold text-yellow-300 uppercase tracking-widest block mb-1">�荘 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧憫ｸｹ犹霞ｸ樅ｸｴ犧癌ｸｴ犧歩ｸ癌ｸｱ犧｢犧癌ｸ吭ｸｰ犧､犧扉ｸｹ犧≒ｸｲ犧･犧伶ｸｵ犹� 1</span>
-                                <h2 className="text-2xl md:text-3xl font-bold text-yellow-200 font-cinzel">笨ｨ {winner} 笨ｨ</h2>
-                                <p className="text-xs text-yellow-100 mt-1">犹�ｸ扉ｹ霞ｸ｣犧ｱ犧壟ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｸ謂ｸｱ犧扉ｸ樅ｸｴ犧倨ｸｵ犧霞ｸ･犧ｭ犧�ｹ犧伶ｸｨ犧≒ｸｲ犧･犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ犧巵ｸ｣犧ｰ犧謂ｸｳ犧､犧扉ｸｹ犧≒ｸｲ犧･!</p>
-                            </div>
-
-                            <div className="space-y-2 mb-6 text-left text-xs md:text-sm">
-                                {kingdomsList.map(k => {
-                                    const score = globalScores[k.name] || 0;
-                                    const isWinner = k.name === winner;
-                                    return (
-                                        <div key={k.id} className={`p-3 rounded-lg flex items-center justify-between border ${isWinner ? 'bg-yellow-900/60 border-yellow-400 font-bold' : 'bg-black/40 border-white/10'}`}>
-                                            <span className="flex items-center gap-2">
-                                                <span>{k.icon}</span>
-                                                <span>{k.name}</span>
-                                                {isWinner && <span className="bg-yellow-400 text-yellow-950 text-[10px] px-2 py-0.5 rounded font-extrabold ml-2">WINNER �荘</span>}
-                                            </span>
-                                            <span className="font-mono text-yellow-300 font-bold text-base">{score.toLocaleString()} PTS</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <p className="text-xs text-gray-400 italic mb-6">"犧もｸｭ犧壟ｸ�ｸｸ犧内ｸ癌ｸｲ犧ｧ犹犧｡犧ｷ犧ｭ犧�ｸ伶ｸｸ犧≒ｸ�ｸ吭ｸ伶ｸｵ犹謂ｸ｣犹謂ｸｧ犧｡犹≒ｸ｣犧�ｸ｣犹謂ｸｧ犧｡犹�ｸ謂ｸ≒ｸｱ犧吭ｹ�ｸ� PopBoss Season 1! 犹もｸ巵ｸ｣犧扉ｸ歩ｸｴ犧扉ｸ歩ｸｲ犧｡犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡犹犧伶ｸｨ犧≒ｸｲ犧･犹�ｸｫ犧｡犹謂ｹ犧｣犹�ｸｧ犹� 犧吭ｸｵ犹�!"</p>
-                            
-                            <button onClick={onClose} className="bg-[#5d3a1a] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#8b5a2b] shadow-xl border border-yellow-400 transition cursor-pointer">
-                                <i className="fa-solid fa-arrow-left-to-line mr-2"></i> 犧≒ｸ･犧ｱ犧壟ｸｪ犧ｹ犹謂ｹ≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｹもｸ･犧� (World Map)
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
             const handlePopStart = (e) => {
-                if (e && e.cancelable && e.type === 'touchstart') e.preventDefault();
-                const now = Date.now();
-                if (now - lastPopTimeRef.current < 60) return;
-                lastPopTimeRef.current = now;
-
+                if(e && e.type === 'touchstart') e.preventDefault();
                 setIsPopping(true); setMyScore(s => s + 1); updateGlobalScores(myKingdom); 
                 playHitSound();
             };
@@ -592,8 +445,8 @@
                 return (
                     <div className="fixed inset-0 z-[60] popboss-bg flex flex-col items-center justify-center text-white animate-fade-in">
                         <button onClick={onClose} className="absolute top-6 right-8 text-white text-4xl font-bold hover:text-red-500 cursor-pointer">&times;</button>
-                        <h1 className="text-4xl md:text-6xl font-bold mb-4 font-cinzel drop-shadow-lg text-indigo-300">犹犧･犧ｷ犧ｭ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧伶ｸｵ犹謂ｸｪ犧ｱ犧�ｸ≒ｸｱ犧�</h1>
-                        <p className="text-lg md:text-xl text-gray-200 mb-10 drop-shadow font-bold">犹犧樅ｸｷ犹謂ｸｭ犹犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸｨ犧ｶ犧� POPBOSS EVENT!</p>
+                        <h1 className="text-4xl md:text-6xl font-bold mb-4 font-cinzel drop-shadow-lg text-indigo-300">เลือกอาณาจักรที่สังกัด</h1>
+                        <p className="text-lg md:text-xl text-gray-200 mb-10 drop-shadow font-bold">เพื่อเข้าสู่ศึก POPBOSS EVENT!</p>
                         <div className="grid grid-cols-2 gap-6 w-[90%] max-w-2xl">
                             {kingdomsList.map(k => (
                                 <button key={k.id} onClick={() => setMyKingdom(k.name)} className="kingdom-btn py-8 text-xl md:text-2xl border border-white/20" style={{backgroundColor: k.color.replace(', 0.95', ', 1')}}>
@@ -614,7 +467,7 @@
                     <div className="relative w-full h-full">
                         <div className="boss-box" onMouseDown={handlePopStart} onMouseUp={handlePopEnd} onMouseLeave={handlePopEnd} onTouchStart={handlePopStart} onTouchEnd={handlePopEnd}>
                             {bossImgError ? (
-                                <div className={`text-9xl bg-red-800 flex items-center justify-center transition-transform w-full h-full ${isPopping ? 'scale-95' : ''} select-none`}>�汰</div>
+                                <div className={`text-9xl bg-red-800 flex items-center justify-center transition-transform w-full h-full ${isPopping ? 'scale-95' : ''} select-none`}>👿</div>
                             ) : (
                                 <img src={isPopping ? activeKingdomData.imgHit : activeKingdomData.imgClose} className={isPopping ? 'popping' : ''} alt="BOSS" onError={() => setBossImgError(true)} />
                             )}
@@ -625,7 +478,7 @@
                             const positionClass = idx === 0 ? 'top-left' : idx === 1 ? 'top-right' : idx === 2 ? 'bottom-left' : 'bottom-right';
                             return (
                                 <div key={k.id} className={`corner-badge ${positionClass} ${isLeader ? 'leader-kingdom' : myKingdom === k.name ? 'selected-kingdom' : 'opponent-kingdom'}`} style={!isLeader ? {backgroundColor: k.color} : {}}>
-                                    {isLeader && <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-4xl animate-bounce">�荘</div>}
+                                    {isLeader && <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-4xl animate-bounce">👑</div>}
                                     {k.icon} {k.id} : {globalScores[k.name] || 0}
                                 </div>
                             );
@@ -633,7 +486,7 @@
 
                         <div className="score-container">{myScore}</div>
                         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4 z-20">
-                            <button onClick={() => {setMyKingdom(null); setMyScore(0); setBossImgError(false);}} className="bg-[rgba(83,53,74,0.9)] text-white px-8 py-3 rounded-lg border-2 border-white hover:bg-[rgba(83,53,74,1)] cursor-pointer font-bold shadow-xl text-lg transition">犹犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣</button>
+                            <button onClick={() => {setMyKingdom(null); setMyScore(0); setBossImgError(false);}} className="bg-[rgba(83,53,74,0.9)] text-white px-8 py-3 rounded-lg border-2 border-white hover:bg-[rgba(83,53,74,1)] cursor-pointer font-bold shadow-xl text-lg transition">เปลี่ยนอาณาจักร</button>
                         </div>
                     </div>
                 </div>
@@ -643,29 +496,26 @@
         // ==========================================
         // COMPONENT: WorldMap 
         // ==========================================
-        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle }) {
+        function WorldMap({ kingdomEXP, projects, onViewChange }) {
             const [selectedKingdom, setSelectedKingdom] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null); 
             const [expandedTab, setExpandedTab] = useState(null);
 
-            useEffect(() => { 
-                setExpandedTab(null); 
-                if (onModalToggle) onModalToggle(!!selectedKingdom);
-            }, [selectedKingdom]);
+            useEffect(() => { setExpandedTab(null); }, [selectedKingdom]);
 
             const kingdomsData = {
                 'Bascentra': {
-                    nameEng: 'BASCENTRA', nameThai: '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ', kingdomId: 'Bascentra',
-                    desc: '犧吭ｸ�ｸ｣犹犧ｧ犧伶ｸ｡犧吭ｸ歩ｸ｣犹呉ｹもｸ壟ｸ｣犧ｲ犧内ｸｭ犧ｱ犧吭ｸｭ犧壟ｸｭ犧ｸ犹謂ｸ� 犧伶ｸｳ犧ｫ犧吭ｹ霞ｸｲ犧伶ｸｵ犹謂ｹ犧巵ｹ�ｸ吭ｸｨ犧ｹ犧吭ｸ｢犹呉ｸ≒ｸ･犧ｲ犧�ｸ≒ｸｲ犧｣犧籾ｹ謂ｸｧ犧�ｸ扉ｸｸ犧･犧ｭ犧ｳ犧吭ｸｲ犧謂ｹ≒ｸ･犧ｰ犧≒ｸｲ犧｣犧｣犧ｱ犧≒ｸｩ犧ｲ犧｡犧ｲ犧歩ｸ｣犧説ｸｲ犧吭ｸもｸｭ犧�ｸ伶ｸｸ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣',
-                    duties: '犧もｹ霞ｸｭ犹犧ｪ犧吭ｸｭ犹≒ｸ吭ｸｰ犧伶ｸｱ犹謂ｸｧ犹�ｸ� / 犧ｪ犧ｧ犧ｱ犧ｪ犧扉ｸｴ犧≒ｸｲ犧｣犧ｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧� / 犧巵ｹ謂ｸｲ犧歩ｹ霞ｸｭ犧�ｸ｡犧吭ｸ歩ｸ｣犧ｲ犧･犧ｱ犧�',
+                    nameEng: 'BASCENTRA', nameThai: 'เบสเซนตร้า', kingdomId: 'Bascentra',
+                    desc: 'นครเวทมนตร์โบราณอันอบอุ่น ทำหน้าที่เป็นศูนย์กลางการถ่วงดุลอำนาจและการรักษามาตรฐานของทุกอาณาจักร',
+                    duties: 'ข้อเสนอแนะทั่วไป / สวัสดิการส่วนกลาง / ป่าต้องมนตราลับ',
                     iconImg: 'Assets/Images/Kingdoms/Bascentra_8bit.png', bgImage: 'Assets/Images/Kingdoms/Bascentra_bg.png',
                     barColor: 'bg-gradient-to-r from-emerald-500 to-teal-400',
-                    trophies: [], history: [], position: { top: '76%', left: '50%' },
+                    trophies: [], history: [], position: { top: '78%', left: '50%' },
                     customSize: 'w-[120px] md:w-[180px]'
                 },
                 'Blankheimgard': {
-                    nameEng: 'BLANKHEIMGARD', nameThai: '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�', kingdomId: 'Blankheimgard',
-                    desc: '犧巵ｸ｣犧ｲ犧≒ｸｲ犧｣犧吭ｹ霞ｸｳ犹≒ｸもｹ�ｸ�ｹ≒ｸ･犧ｰ犧樅ｸｲ犧｢犧ｸ犧ｫ犧ｴ犧｡犧ｰ犧ｭ犧ｱ犧吭ｸｫ犧吭ｸｲ犧ｧ犹犧ｫ犧吭ｹ�ｸ� 犧ｧ犧ｴ犧籾ｸｵ犧癌ｸｵ犧ｧ犧ｴ犧歩ｹ≒ｸ壟ｸ壟ｸｪ犹もｸ･犧ｧ犹呉ｹ�ｸ･犧游ｹ� 犧｣犧ｱ犧≒ｸ倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ犹≒ｸ･犧ｰ犧ｪ犧ｹ犹霞ｸ癌ｸｵ犧ｧ犧ｴ犧�',
+                    nameEng: 'BLANKHEIMGARD', nameThai: 'แบลงค์ไฮม์การ์ด', kingdomId: 'Blankheimgard',
+                    desc: 'ปราการน้ำแข็งและพายุหิมะอันหนาวเหน็บ วิถีชีวิตแบบสโลว์ไลฟ์ รักธรรมชาติและสู้ชีวิต',
                     duties: 'Deburr, Shot Blast, Pretreatment, E-coating, Inspect 2',
                     iconImg: 'Assets/Images/Kingdoms/Blankheimgard_8bit.png', bgImage: 'Assets/Images/Kingdoms/Blankheimgard_bg.png',
                     barColor: 'bg-gradient-to-r from-sky-400 to-blue-600',
@@ -673,8 +523,8 @@
                     customSize: 'w-[120px] md:w-[180px]' 
                 },
                 'Casteria': {
-                    nameEng: 'CASTERIA', nameThai: '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢', kingdomId: 'Casteria',
-                    desc: '犧扉ｸｴ犧吭ｹ≒ｸ扉ｸ吭ｹ≒ｸｫ犹謂ｸ�ｹ�ｸ游ｹ≒ｸ･犧ｰ犹犧ｫ犧･犹�ｸ≒ｸ≒ｸ･犹霞ｸｲ 犧癌ｹ謂ｸｲ犧�ｸ杳ｸｵ犧｡犧ｷ犧ｭ犧憫ｸｹ犹霞ｸ巵ｸ｣犧ｰ犧内ｸｵ犧歩ｹ≒ｸ･犧ｰ犹犧巵ｸｵ犹謂ｸ｢犧｡犧扉ｹ霞ｸｧ犧｢犧伶ｸｱ犧≒ｸｩ犧ｰ犧≒ｸｲ犧｣犧ｫ犧･犧ｭ犧｡犧ｪ犧｣犧｣犧�ｹ呉ｸｪ犧｣犹霞ｸｲ犧�ｸ｣犧ｰ犧扉ｸｱ犧壟ｸｪ犧ｹ犧�',
+                    nameEng: 'CASTERIA', nameThai: 'แคสเทอเรีย', kingdomId: 'Casteria',
+                    desc: 'ดินแดนแห่งไฟและเหล็กกล้า ช่างฝีมือผู้ประณีตและเปี่ยมด้วยทักษะการหลอมสรรค์สร้างระดับสูง',
                     duties: 'Diecast, QC Casting, Casting Engineer, Incoming',
                     iconImg: 'Assets/Images/Kingdoms/Casteria_8bit.png', bgImage: 'Assets/Images/Kingdoms/Casteria_bg.png',
                     barColor: 'bg-gradient-to-r from-red-500 to-orange-500',
@@ -682,8 +532,8 @@
                     customSize: 'w-[120px] md:w-[180px]' 
                 },
                 'Machinepolis': {
-                    nameEng: 'MACHINEPOLIS', nameThai: '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ', kingdomId: 'Machinepolis',
-                    desc: '犧｡犧ｫ犧ｲ犧吭ｸ�ｸ｣犧謂ｸｱ犧≒ｸ｣犧≒ｸ･犧･犹霞ｸｳ犧｢犧ｸ犧�ｸｪ犧ｸ犧扉ｹ�ｸｮ犹犧伶ｸ� 犧壟ｹ霞ｸｲ犧吭ｹ犧≒ｸｴ犧扉ｸもｸｭ犧�ｹ犧ｫ犧･犹謂ｸｲ犧吭ｸｱ犧≒ｸ巵ｸ｣犧ｰ犧扉ｸｴ犧ｩ犧説ｹ呉ｹ≒ｸ･犧ｰ犧吭ｸｱ犧≒ｸｧ犧ｴ犧伶ｸ｢犧ｲ犧ｨ犧ｲ犧ｪ犧歩ｸ｣犹呉ｸ憫ｸｹ犹霞ｸ�ｹ霞ｸ吭ｸｫ犧ｲ犧�ｸｧ犧ｲ犧｡犧謂ｸ｣犧ｴ犧�',
+                    nameEng: 'MACHINEPOLIS', nameThai: 'แมคชีนโพลิส', kingdomId: 'Machinepolis',
+                    desc: 'มหานครจักรกลล้ำยุคสุดไฮเทค บ้านเกิดของเหล่านักประดิษฐ์และนักวิทยาศาสตร์ผู้ค้นหาความจริง',
                     duties: 'Machining, QC Machining, Water Jet, Washing',
                     iconImg: 'Assets/Images/Kingdoms/Machinepolis_8bit.png', bgImage: 'Assets/Images/Kingdoms/Machinepolis_bg.png',
                     barColor: 'bg-gradient-to-r from-purple-500 to-indigo-500',
@@ -691,8 +541,8 @@
                     customSize: 'w-[120px] md:w-[180px]' 
                 },
                 'Finalthron': {
-                    nameEng: 'FINALTHRON', nameThai: '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�', kingdomId: 'Finalthron',
-                    desc: '犧ｧ犧ｴ犧ｫ犧ｲ犧｣犧ｨ犧ｱ犧≒ｸ扉ｸｴ犹呉ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｸ壟ｸ吭ｸ｢犧ｭ犧扉ｹ犧もｸｲ犧ｪ犧ｹ犧�ｹ犧ｪ犧ｵ犧｢犧扉ｸ游ｹ霞ｸｲ 犧｡犧ｸ犹謂ｸ�ｸｪ犧ｹ犹謂ｸ�ｸｧ犧ｲ犧｡犧ｪ犧｡犧壟ｸｹ犧｣犧内ｹ呉ｹ≒ｸ壟ｸ壟ｸｪ犧ｹ犧�ｸｪ犧ｸ犧� 犹犧≒ｸ･犧ｵ犧｢犧扉ｸ癌ｸｱ犧�ｸ�ｸｧ犧ｲ犧｡犧憫ｸｴ犧扉ｸ樅ｸ･犧ｲ犧�',
+                    nameEng: 'FINALTHRON', nameThai: 'ไฟนัลธรอน', kingdomId: 'Finalthron',
+                    desc: 'วิหารศักดิ์สิทธิ์บนยอดเขาสูงเสียดฟ้า มุ่งสู่ความสมบูรณ์แบบสูงสุด เกลียดชังความผิดพลาด',
                     duties: 'Oven 190C+, Helium Leak Test, Impregnation, Final Inspect, QA',
                     iconImg: 'Assets/Images/Kingdoms/Finalthron_8bit.png', bgImage: 'Assets/Images/Kingdoms/Finalthron_bg.png',
                     barColor: 'bg-gradient-to-r from-yellow-400 to-amber-600',
@@ -706,62 +556,62 @@
             if (activeData) levelData = calculateLevel(kingdomEXP[activeData.nameThai] || 0);
 
             return (
-                <div className="fixed inset-0 w-full h-full pointer-events-none z-10 pb-20 md:pb-0">
+                <div className="fixed inset-0 w-full h-full pointer-events-none z-10">
                     {!selectedKingdom && Object.keys(kingdomsData).map(key => {
                         return <MapPin key={key} kingdomKey={key} kingdom={kingdomsData[key]} onClick={() => setSelectedKingdom(key)} />
                     })}
                     
                     {selectedKingdom && (
                         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] animate-fade-in p-4 md:p-8 pointer-events-auto" onClick={() => setSelectedKingdom(null)}>
-                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col modal-landscape-container" onClick={(e) => e.stopPropagation()}>
+                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col" onClick={(e) => e.stopPropagation()}>
                                 <div className="absolute inset-0 z-0 opacity-80" style={{ backgroundImage: `url('${activeData.bgImage}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}></div>
                                 
-                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/80 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-50 flex items-center justify-center border border-white/40 shadow-xl cursor-pointer">&times;</button>
+                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-4 right-4 bg-black/70 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-30 flex items-center justify-center border border-white/30 shadow-lg cursor-pointer">&times;</button>
                                 
-                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center modal-header-wrapper">
-                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[48px] md:min-h-[100px] pl-[45px] sm:pl-[55px] md:pl-[130px] overflow-hidden modal-landscape-header-box">
+                                <div className="absolute top-6 left-6 md:top-10 md:left-10 z-40 flex items-center">
+                                    <div className="relative bg-black/50 pr-5 md:pr-8 py-2 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[70px] md:min-h-[100px] pl-[70px] md:pl-[130px]">
                                         <img 
                                             src={activeData.iconImg} 
                                             alt="logo" 
-                                            className="absolute left-[-10px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none modal-landscape-logo-img" 
+                                            className="absolute left-[-20px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-24 h-24 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
                                         />
-                                        <div className="flex flex-col relative z-10 pt-0.5 truncate">
-                                            <span className="text-base sm:text-2xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate modal-landscape-title-text">{activeData.nameEng}</span>
-                                            <span className="text-[10px] sm:text-xs md:text-xl font-sarabun text-gray-300 font-medium truncate modal-landscape-sub-text">{activeData.nameThai}</span>
+                                        <div className="flex flex-col relative z-10 pt-1">
+                                            <span className="text-3xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-1">{activeData.nameEng}</span>
+                                            <span className="text-sm md:text-xl font-sarabun text-gray-300 font-medium">{activeData.nameThai}</span>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div className="absolute top-3 right-14 md:top-10 md:right-16 z-20 w-36 sm:w-48 md:w-72 bg-black/60 p-2 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl modal-exp-bar-stacked">
-                                    <div className="flex justify-between text-[10px] sm:text-xs md:text-base text-[#f7e6c4] font-bold mb-1 md:mb-2">
+                                <div className="absolute top-6 right-16 md:top-10 md:right-10 z-20 w-56 md:w-72 bg-black/50 p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
+                                    <div className="flex justify-between text-sm md:text-base text-[#f7e6c4] font-bold mb-2">
                                         <span>Level {levelData.level}</span>
-                                        <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
+                                        <span>{levelData.currentExp} / {levelData.requiredExp} EXP</span>
                                     </div>
-                                    <div className="w-full bg-black/80 h-2 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
+                                    <div className="w-full bg-black/80 h-3 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
                                         <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
                                     </div>
                                 </div>
                                 
-                                <div className="absolute bottom-3 left-3 right-3 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-3 md:gap-6 z-20 items-end pointer-events-none mt-auto max-h-[60vh] md:max-h-none overflow-y-auto pb-1 md:pb-0">
+                                <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-6 z-20 items-end pointer-events-none mt-auto">
                                     <div className="flex-1 bg-black/80 p-5 md:p-6 rounded-xl border border-[#8b5a2b]/50 backdrop-blur-md shadow-2xl pointer-events-auto">
                                         <p className="text-gray-100 text-sm md:text-base leading-relaxed mb-4">{activeData.desc}</p>
                                         <div className="text-xs md:text-sm text-[#ebdcb9] bg-black/50 px-4 py-3 rounded-lg border border-white/10">
-                                            <span className="font-bold text-yellow-400 mr-2">犧≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣犧｣犧ｱ犧壟ｸ憫ｸｴ犧扉ｸ癌ｸｭ犧�:</span> {activeData.duties}
+                                            <span className="font-bold text-yellow-400 mr-2">กระบวนการรับผิดชอบ:</span> {activeData.duties}
                                         </div>
                                     </div>
 
-                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none modal-action-buttons">
+                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none">
                                         <button onClick={() => onViewChange('quests')} className="w-full bg-gradient-to-r from-[#8b5a2b] to-[#5d3a1a] hover:from-[#a06830] hover:to-[#6d4514] text-[#f7e6c4] py-3 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-[#ebdcb9]/40 transition text-sm cursor-pointer flex items-center justify-center gap-2 pointer-events-auto">
-                                            <i className="fa-solid fa-door-open text-lg"></i> 犹犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸ･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�
+                                            <i className="fa-solid fa-door-open text-lg"></i> เข้าสู่ลานภารกิจ
                                         </button>
 
                                         <div className="w-full bg-black/80 border border-[#8b5a2b]/50 rounded-xl p-3 md:p-4 backdrop-blur-md shadow-2xl pointer-events-auto flex flex-col transition-all duration-300">
                                             <div className="flex gap-2">
                                                 <button onClick={() => setExpandedTab(expandedTab === 'trophy' ? null : 'trophy')} className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition cursor-pointer ${expandedTab === 'trophy' ? 'bg-yellow-600 text-white shadow-inner border border-yellow-400' : 'bg-black/50 text-yellow-500 hover:bg-yellow-600/30 border border-yellow-500/30'}`}>
-                                                    <i className="fa-solid fa-trophy mr-1"></i> 犧ｫ犧ｭ犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ
+                                                    <i className="fa-solid fa-trophy mr-1"></i> หอเกียรติยศ
                                                 </button>
                                                 <button onClick={() => setExpandedTab(expandedTab === 'history' ? null : 'history')} className={`flex-1 py-2 text-xs md:text-sm font-bold rounded-lg transition cursor-pointer ${expandedTab === 'history' ? 'bg-sky-600 text-white shadow-inner border border-sky-400' : 'bg-black/50 text-sky-500 hover:bg-sky-600/30 border border-sky-500/30'}`}>
-                                                    <i className="fa-solid fa-clock-rotate-left mr-1"></i> 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸ吭ｸｧ犧ｱ犧吭ｸｧ犧ｲ犧�
+                                                    <i className="fa-solid fa-clock-rotate-left mr-1"></i> อาณาจักรในวันวาน
                                                 </button>
                                             </div>
                                             
@@ -781,30 +631,39 @@
                         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
                             <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
                             <img src={zoomedImg} alt="Zoomed" className="max-h-[80vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" onClick={(e) => e.stopPropagation()} />
-                            <p className="absolute bottom-10 text-gray-400 text-sm italic">犧�ｸ･犧ｴ犧≒ｸ伶ｸｵ犹謂ｹ�ｸ扉ｸ≒ｹ�ｹ�ｸ扉ｹ霞ｹ犧樅ｸｷ犹謂ｸｭ犧巵ｸｴ犧�</p>
+                            <p className="absolute bottom-10 text-gray-400 text-sm italic">คลิกที่ใดก็ได้เพื่อปิด</p>
                         </div>
                     )}
                 </div>
             );
         }
 
-        // ==========================================
-        // COMPONENT: SuggestionForm 
-        // ==========================================
-        function SuggestionForm({ projects, onAddProject, onUpdateProject, onViewChange, runningSeq, setRunningSeq, editingProject, onCancelEdit }) {
+        function SuggestionForm({ projects, onAddProject, onViewChange, runningSeq, setRunningSeq, editingProject, onUpdateProject, onCancelEdit }) {
             const [formData, setFormData] = useState({
                 name: '', empId: '', origin: '', target: '', category: '',
                 process: '', factory: '', pinpoint: '', title: '', problem: '',
                 solution: '', benefit: '', image: null, imagePreview: null, images: []
             });
             const [notification, setNotification] = useState('');
+            const [showConfirmModal, setShowConfirmModal] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+
+            const processMap = {
+                'แคสเทอเรีย': ['Incoming (อินคัมมิ่ง)', 'Casting (แคสติ้ง)'],
+                'แบลงค์ไฮม์การ์ด': ['Deburring (ดีเบอร์ริ่ง)', 'Shot blast (ช็อตบลาส)', 'Auto deburring (ออโต้ดีเบอร์ริ่ง)', 'Washing after Deburring (วอชชิ่งอาฟเตอร์ดีเบอร์ริ่ง)', 'Stress Relieve oven (สเตรสรีลีฟโอเว่น)', 'Pre treatment (พรีทรีทเม้นท์)', 'E-Coat (อีโค้ท)', 'Inspection-2 และ Flatness', 'Knocking (น็อคกิ้ง)'],
+                'แมคชีนโพลิส': ['Machine Pre cut (แมชชีนพรีคัท)', 'Washing after pre cut (วอชชิ่งอาฟเตอร์พรีคัท)', 'Machine Post cut (แมชชีนโพสต์คัท)', 'Water jet (วอเตอร์เจ็ท)', 'Washing after MC Post cut (วอชชิ่งอาฟเตอร์เอ็มซีโพสต์คัท)'],
+                'ไฟนัลธรอน': ['W Baking 190C (วอชเบคกิ้ง 190 องศา)', 'Helium leak check (ฮีเลียมลีคเช็ค)', 'Impregnation (อิมเพรกเนชั่น)', 'Oven A/F Imp (โอเว่น เอ/เอฟ อิมเพรก)', 'Washing A/F Imp (วอชชิ่ง เอ/เอฟ อิมเพรก)', 'Final Inspection (ไฟนอลอินสเปคชั่น)', 'OQA (โอคิวเอ)', 'Packing/Shipping (แพ็คกิ้ง/ชิปปิ้ง)'],
+                'เบสเซนตร้า': ['อื่นๆ / Other (ข้อเสนอแนะทั่วไป)']
+            };
+
+            const defaultNames = { 'เบสเซนตร้า': 'อัญมณีนักปราชญ์', 'แคสเทอเรีย': 'สิงโตเพลิง', 'แบลงค์ไฮม์การ์ด': 'กวางหิมะ', 'แมคชีนโพลิส': 'ม้าบินจักรกล', 'ไฟนัลธรอน': 'นกยูงขาว' };
 
             useEffect(() => {
                 if (editingProject) {
                     let catVal = editingProject.category || '';
-                    if (catVal.includes('Quality')) catVal = '�虫 Quality (EVENT x2 EXP!)';
-                    else if (catVal.includes('Safety')) catVal = '�孱�� Safety - 犧｡犧吭ｸ歩ｸ｣犧ｲ犹≒ｸｫ犹謂ｸ�ｹ犧≒ｸ｣犧ｲ犧ｰ犧�ｸｸ犹霞ｸ｡犧�犧ｱ犧｢';
-                    else if (catVal.includes('Culture')) catVal = '�糖 Culture - 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｹ≒ｸｫ犹謂ｸ�ｸ巵ｸｱ犧財ｸ財ｸｲ';
+                    if (catVal.includes('Quality')) catVal = '💎 Quality (EVENT x2 EXP!)';
+                    else if (catVal.includes('Safety')) catVal = '🛡️ Safety - มนตราแห่งเกราะคุ้มภัย';
+                    else if (catVal.includes('Culture')) catVal = '📜 Culture - คัมภีร์แห่งปัญญา';
                     
                     setFormData({
                         name: editingProject.name || '',
@@ -821,24 +680,14 @@
                         benefit: editingProject.benefit || '',
                         image: null,
                         imagePreview: editingProject.imagePreview || null,
-                        images: editingProject.images || (editingProject.imagePreview ? [editingProject.imagePreview] : [])
+                        images: editingProject.imagePreview ? [editingProject.imagePreview] : []
                     });
                 }
             }, [editingProject]);
 
-            const processMap = {
-                '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢': ['Incoming (犧ｭ犧ｴ犧吭ｸ�ｸｱ犧｡犧｡犧ｴ犹謂ｸ�)', 'Casting (犹≒ｸ�ｸｪ犧歩ｸｴ犹霞ｸ�)'],
-                '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�': ['Deburring (犧扉ｸｵ犹犧壟ｸｭ犧｣犹呉ｸ｣犧ｴ犹謂ｸ�)', 'Shot blast (犧癌ｹ�ｸｭ犧歩ｸ壟ｸ･犧ｲ犧ｪ)', 'Auto deburring (犧ｭ犧ｭ犹もｸ歩ｹ霞ｸ扉ｸｵ犹犧壟ｸｭ犧｣犹呉ｸ｣犧ｴ犹謂ｸ�)', 'Washing after Deburring (犧ｧ犧ｭ犧癌ｸ癌ｸｴ犹謂ｸ�ｸｭ犧ｲ犧游ｹ犧歩ｸｭ犧｣犹呉ｸ扉ｸｵ犹犧壟ｸｭ犧｣犹呉ｸ｣犧ｴ犹謂ｸ�)', 'Stress Relieve oven (犧ｪ犹犧歩ｸ｣犧ｪ犧｣犧ｵ犧･犧ｵ犧游ｹもｸｭ犹犧ｧ犹謂ｸ�)', 'Pre treatment (犧樅ｸ｣犧ｵ犧伶ｸ｣犧ｵ犧伶ｹ犧｡犹霞ｸ吭ｸ伶ｹ�)', 'E-Coat (犧ｭ犧ｵ犹もｸ�ｹ霞ｸ�)', 'Inspection-2 犹≒ｸ･犧ｰ Flatness', 'Knocking (犧吭ｹ�ｸｭ犧�ｸ≒ｸｴ犹霞ｸ�)'],
-                '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ': ['Machine Pre cut (犹≒ｸ｡犧癌ｸ癌ｸｵ犧吭ｸ樅ｸ｣犧ｵ犧�ｸｱ犧�)', 'Washing after pre cut (犧ｧ犧ｭ犧癌ｸ癌ｸｴ犹謂ｸ�ｸｭ犧ｲ犧游ｹ犧歩ｸｭ犧｣犹呉ｸ樅ｸ｣犧ｵ犧�ｸｱ犧�)', 'Machine Post cut (犹≒ｸ｡犧癌ｸ癌ｸｵ犧吭ｹもｸ樅ｸｪ犧歩ｹ呉ｸ�ｸｱ犧�)', 'Water jet (犧ｧ犧ｭ犹犧歩ｸｭ犧｣犹呉ｹ犧謂ｹ�ｸ�)', 'Washing after MC Post cut (犧ｧ犧ｭ犧癌ｸ癌ｸｴ犹謂ｸ�ｸｭ犧ｲ犧游ｹ犧歩ｸｭ犧｣犹呉ｹ犧ｭ犹�ｸ｡犧金ｸｵ犹もｸ樅ｸｪ犧歩ｹ呉ｸ�ｸｱ犧�)'],
-                '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�': ['W Baking 190C (犧ｧ犧ｭ犧癌ｹ犧壟ｸ�ｸ≒ｸｴ犹霞ｸ� 190 犧ｭ犧�ｸｨ犧ｲ)', 'Helium leak check (犧ｮ犧ｵ犹犧･犧ｵ犧｢犧｡犧･犧ｵ犧�ｹ犧癌ｹ�ｸ�)', 'Impregnation (犧ｭ犧ｴ犧｡犹犧樅ｸ｣犧≒ｹ犧吭ｸ癌ｸｱ犹謂ｸ�)', 'Oven A/F Imp (犹もｸｭ犹犧ｧ犹謂ｸ� 犹犧ｭ/犹犧ｭ犧� 犧ｭ犧ｴ犧｡犹犧樅ｸ｣犧�)', 'Washing A/F Imp (犧ｧ犧ｭ犧癌ｸ癌ｸｴ犹謂ｸ� 犹犧ｭ/犹犧ｭ犧� 犧ｭ犧ｴ犧｡犹犧樅ｸ｣犧�)', 'Final Inspection (犹�ｸ游ｸ吭ｸｭ犧･犧ｭ犧ｴ犧吭ｸｪ犹犧巵ｸ�ｸ癌ｸｱ犹謂ｸ�)', 'OQA (犹もｸｭ犧�ｸｴ犧ｧ犹犧ｭ)', 'Packing/Shipping (犹≒ｸ樅ｹ�ｸ�ｸ≒ｸｴ犹霞ｸ�/犧癌ｸｴ犧巵ｸ巵ｸｴ犹霞ｸ�)'],
-                '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ': ['犧ｭ犧ｷ犹謂ｸ吭ｹ� / Other (犧もｹ霞ｸｭ犹犧ｪ犧吭ｸｭ犹≒ｸ吭ｸｰ犧伶ｸｱ犹謂ｸｧ犹�ｸ�)']
-            };
-
-            const defaultNames = { '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ': '犧ｭ犧ｱ犧財ｸ｡犧内ｸｵ犧吭ｸｱ犧≒ｸ巵ｸ｣犧ｲ犧癌ｸ財ｹ�', '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢': '犧ｪ犧ｴ犧�ｹもｸ歩ｹ犧樅ｸ･犧ｴ犧�', '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�': '犧≒ｸｧ犧ｲ犧�ｸｫ犧ｴ犧｡犧ｰ', '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ': '犧｡犹霞ｸｲ犧壟ｸｴ犧吭ｸ謂ｸｱ犧≒ｸ｣犧≒ｸ･', '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�': '犧吭ｸ≒ｸ｢犧ｹ犧�ｸもｸｲ犧ｧ' };
-
             useEffect(() => {
                 if (!editingProject) {
-                    if (formData.origin === '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ') setFormData(prev => ({...prev, category: '�白 Secret - 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧壟ｹ≒ｸｫ犹謂ｸ�ｹ犧�ｸｲ (犹≒ｸ謂ｹ霞ｸ�ｹ犧｣犧ｷ犹謂ｸｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ歩ｸｱ犧ｧ/犧｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�)'}));
+                    if (formData.origin === 'เบสเซนตร้า') setFormData(prev => ({...prev, category: '🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)'}));
                     else if (formData.category.includes('Secret')) setFormData(prev => ({...prev, category: ''}));
                 }
             }, [formData.origin, editingProject]);
@@ -848,47 +697,14 @@
                 setFormData(prev => { const newData = { ...prev, [name]: value }; if (name === 'target') newData.process = ''; return newData; });
             };
 
-            const handleFileChange = (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 800;
-                            const MAX_HEIGHT = 800;
-                            let width = img.width;
-                            let height = img.height;
-                            if (width > height) {
-                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                            } else {
-                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                            }
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                            setFormData(prev => ({ ...prev, image: file.name, imagePreview: compressedDataUrl }));
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-
             const handleMultiFileChange = (e) => {
-                if (e.target.files) {
+                if (e.target.files && e.target.files.length > 0) {
                     const files = Array.from(e.target.files);
-                    const currentCount = (formData.images || []).length;
-                    const availableSlots = 5 - currentCount;
-                    if (availableSlots <= 0) {
-                        alert('犹≒ｸ吭ｸ壟ｸ｣犧ｹ犧巵ｸ�犧ｲ犧樅ｹ�ｸ扉ｹ霞ｸｪ犧ｹ犧�ｸｪ犧ｸ犧� 5 犧｣犧ｹ犧巵ｹ犧伶ｹ謂ｸｲ犧吭ｸｱ犹霞ｸ吭ｸ�ｹ謂ｸｰ');
-                        return;
-                    }
-                    const selectedFiles = files.slice(0, availableSlots);
-                    selectedFiles.forEach(file => {
+                    const currentImages = formData.images || [];
+                    const slotsLeft = 5 - currentImages.length;
+                    const filesToProcess = files.slice(0, slotsLeft);
+
+                    filesToProcess.forEach(file => {
                         const reader = new FileReader();
                         reader.onload = (event) => {
                             const img = new Image();
@@ -907,16 +723,12 @@
                                 canvas.height = height;
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, width, height);
-                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
-                                
-                                setFormData(prev => {
-                                    const newImages = [...(prev.images || []), compressedDataUrl];
-                                    return {
-                                        ...prev,
-                                        images: newImages,
-                                        imagePreview: newImages[0]
-                                    };
-                                });
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                                setFormData(prev => ({
+                                    ...prev,
+                                    images: [...(prev.images || []), compressedDataUrl],
+                                    imagePreview: compressedDataUrl
+                                }));
                             };
                             img.src = event.target.result;
                         };
@@ -927,36 +739,85 @@
 
             const handleRemoveImage = (indexToRemove) => {
                 setFormData(prev => {
-                    const newImages = (prev.images || []).filter((_, idx) => idx !== indexToRemove);
+                    const updated = (prev.images || []).filter((_, idx) => idx !== indexToRemove);
                     return {
                         ...prev,
-                        images: newImages,
-                        imagePreview: newImages.length > 0 ? newImages[0] : null
+                        images: updated,
+                        imagePreview: updated.length > 0 ? updated[0] : null
                     };
                 });
             };
 
-            const isAnonymous = formData.origin === '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ';
+            const isAnonymous = formData.origin === 'เบสเซนตร้า';
             const isSecret = formData.category.includes('Secret');
-
-            const [showConfirmModal, setShowConfirmModal] = useState(false);
-            const [isSubmitting, setIsSubmitting] = useState(false);
 
             const handleSubmit = (e) => {
                 e.preventDefault();
-                if (!isAnonymous && !formData.empId.trim()) { alert('Please enter Employee ID'); return; }
+                if (!isAnonymous && !formData.empId.trim()) { alert('กรุณากรอกรหัสพนักงานของท่านก่อนส่งสาส์นนะคะ'); return; }
                 setShowConfirmModal(true);
+            };
+
+            const handleFinalSubmit = async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
+
+                let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
+                let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
+                
+                const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+                const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
+                
+                const newId = editingProject ? editingProject.id : `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
+                if (!editingProject) setRunningSeq(prev => prev + 1); 
+
+                const projectObj = {
+                    id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                    origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
+                    factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
+                    title: formData.title, problem: formData.problem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
+                    imageText: (formData.images || []).length > 0 ? `📷 รูปแนบ: ${(formData.images || []).length} รูป` : '📷 รูปจำลองสาส์นปัญหา', 
+                    imagePreview: (formData.images || []).length > 0 ? formData.images[0] : null,
+                    images: formData.images || [],
+                    status: isSecret ? 'Hidden' : 'Blueprint', comment: editingProject ? (editingProject.comment || '') : '', targetComment: editingProject ? (editingProject.targetComment || '') : '', imageAfterPreview: editingProject ? (editingProject.imageAfterPreview || null) : null,
+                    wasAbandoned: editingProject ? (editingProject.wasAbandoned || false) : false, ideaApproved: editingProject ? (editingProject.ideaApproved || false) : false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality'), isSuperRising: editingProject ? (editingProject.isSuperRising || false) : false
+                };
+
+                if (editingProject) {
+                    if (onUpdateProject) await onUpdateProject(projectObj);
+                    setNotification(`💾 อัปเดตสาส์น ${editingProject.id} เรียบร้อยแล้วค่ะ!`);
+                } else {
+                    await onAddProject(projectObj);
+                    setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
+                }
+
+                setShowConfirmModal(false);
+                setIsSubmitting(false);
+                setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                
+                if (editingProject && onCancelEdit) onCancelEdit();
+
+                setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2000);
             };
 
             const availableProcesses = formData.target ? processMap[formData.target] : [];
 
+            const getKingdomBadgeStyle = (kName) => {
+                if (!kName) return 'text-stone-700 bg-stone-100 border-stone-300';
+                if (kName.includes('เบสเซนตร้า')) return 'text-purple-700 bg-purple-50 border-purple-300 font-bold';
+                if (kName.includes('แคสเทอเรีย')) return 'text-red-600 bg-red-50 border-red-300 font-bold';
+                if (kName.includes('แบลงค์ไฮม์การ์ด')) return 'text-sky-600 bg-sky-50 border-sky-300 font-bold';
+                if (kName.includes('แมคชีนโพลิส')) return 'text-emerald-700 bg-emerald-50 border-emerald-300 font-bold';
+                if (kName.includes('ไฟนัลธรอน')) return 'text-amber-600 bg-amber-50 border-amber-300 font-bold';
+                return 'text-amber-900 bg-amber-50 border-amber-300 font-bold';
+            };
+
             return (
-                <div className="parchment max-w-3xl mx-auto p-6 md:p-8 rounded-2xl relative animate-fade-in overflow-hidden mt-4">
+                <div className="parchment max-w-3xl mx-auto p-6 md:p-8 rounded-2xl relative animate-fade-in overflow-hidden mt-4 shadow-2xl">
                     <div className="absolute top-4 right-4 z-20">
                         <button 
                             onClick={() => onViewChange('chronicles', 'rules')} 
                             className="w-10 h-10 rounded-full bg-red-800 text-white border-2 border-red-300 flex items-center justify-center shadow-lg active:scale-95 hover:bg-red-700 transition cursor-pointer" 
-                            title="犧巵ｸｸ犧謂ｸ霞ｸｲ-犧ｧ犧ｴ犧ｪ犧ｱ犧癌ｸ吭ｸｲ (FAQ)"
+                            title="ปุจฉา-วิสัชนา (FAQ)"
                         >
                             <i className="fa-solid fa-circle-question text-xl"></i>
                         </button>
@@ -964,73 +825,71 @@
 
                     {notification && <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 bg-green-800 border-2 border-green-400 text-white font-bold px-6 py-3 rounded-xl shadow-2xl animate-bounce">{notification}</div>}
                     
-                    {formData.category.includes('Quality') && isQualityEventActive() && <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg animate-pulse border border-yellow-600 hidden md:block">�虫 EVENT: Quality EXP x2</div>}
+                    {formData.category.includes('Quality') && isQualityEventActive() && <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg animate-pulse border border-yellow-600 hidden md:block">💎 EVENT: Quality EXP x2</div>}
                     
-                    <h1 className="text-3xl font-bold text-center mb-4 text-[#5d3a1a] font-cinzel mt-2">
-                        {editingProject ? '笨擾ｸ� 犹≒ｸ≒ｹ霞ｹ�ｸもｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ' : '犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ犹≒ｸ扉ｹ謂ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣'}<br />
-                        <span className="text-lg italic font-normal font-sans">{editingProject ? 'Update Kingdom\'s Decree' : 'Kingdom\'s Decree for Improvement'}</span>
+                    <h1 className="text-3xl font-bold text-center mb-4 text-[#5d3a1a] font-cinzel mt-8 md:mt-0">
+                        {editingProject ? `แก้ไขสาส์นพัฒนา ${editingProject.id}` : 'สาส์นพัฒนาแด่อาณาจักร'}<br />
+                        <span className="text-lg italic font-normal font-sans">
+                            {editingProject ? 'Edit Kingdom Decree' : "Kingdom's Decree for Improvement"}
+                        </span>
                     </h1>
 
                     {editingProject && (
-                        <div className="bg-amber-100 border-2 border-amber-500 p-3.5 rounded-xl mb-6 flex justify-between items-center text-amber-900 shadow-md animate-fade-in">
-                            <span className="font-bold text-xs md:text-sm flex items-center gap-2">
-                                <i className="fa-solid fa-pen-to-square text-amber-700 text-base"></i>
-                                犧≒ｸｳ犧･犧ｱ犧�ｸｭ犧｢犧ｹ犹謂ｹ�ｸ吭ｹもｸｫ犧｡犧扉ｹ≒ｸ≒ｹ霞ｹ�ｸもｸｪ犧ｲ犧ｪ犹呉ｸ� (犧｣犧ｫ犧ｱ犧ｪ犧ｪ犧ｲ犧ｪ犹呉ｸ�: <strong className="text-amber-950 font-mono">{editingProject.id}</strong>)
+                        <div className="bg-amber-100 border-2 border-amber-500 text-amber-900 p-3 rounded-xl mb-6 flex justify-between items-center shadow-md animate-fade-in">
+                            <span className="font-bold text-sm">
+                                ✏️ กำลังอยู่ในโหมดแก้ไขสาส์น: <span className="underline font-extrabold">{editingProject.id}</span>
                             </span>
                             <button 
                                 type="button" 
-                                onClick={() => {
-                                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
-                                    if (onCancelEdit) onCancelEdit();
-                                }}
-                                className="bg-red-700 hover:bg-red-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-red-400 shadow transition cursor-pointer"
+                                onClick={onCancelEdit} 
+                                className="bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition cursor-pointer shadow"
                             >
-                                笨� 犧｢犧≒ｹ犧･犧ｴ犧≒ｸ≒ｸｲ犧｣犹≒ｸ≒ｹ霞ｹ�ｸ�
+                                ✕ ยกเลิกการแก้ไข
                             </button>
                         </div>
                     )}
 
-                    {isAnonymous && <div className="bg-gray-800 text-gray-200 border border-gray-600 p-4 rounded-lg mb-6 shadow-inner text-sm font-bold animate-pulse"><i className="fa-solid fa-user-secret mr-2"></i> 犹もｸｫ犧｡犧扉ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧�: 犧金ｹ謂ｸｭ犧吭ｸもｹ霞ｸｭ犧｡犧ｹ犧･犧巵ｸ｣犧ｰ犧謂ｸｳ犧歩ｸｱ犧ｧ犧�ｸｸ犧内ｹ≒ｸ･犹霞ｸｧ 犧ｪ犹謂ｸ�ｸ歩ｸ｣犧�ｸ籾ｸｶ犧� HR</div>}
+                    {isAnonymous && <div className="bg-gray-800 text-gray-200 border border-gray-600 p-4 rounded-lg mb-6 shadow-inner text-sm font-bold animate-pulse"><i className="fa-solid fa-user-secret mr-2"></i> โหมดสาส์นลับ: ซ่อนข้อมูลประจำตัวคุณแล้ว ส่งตรงถึง HR</div>}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <section className="space-y-4">
                             <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1 w-full flex justify-between items-center">
-                                <span>1. 犧もｹ霞ｸｭ犧｡犧ｹ犧･犹≒ｸｫ犹謂ｸ�ｸ憫ｸｹ犹霞ｸ吭ｸｳ犹犧ｪ犧吭ｸｭ <span className="text-sm font-normal">(Identity)</span></span>
+                                <span>1. ข้อมูลแห่งผู้นำเสนอ <span className="text-sm font-normal">(Identity)</span></span>
                             </h2>
                             
                             {!isAnonymous && (
                                 <div className="bg-[#e5d3a6]/40 p-4 rounded-lg border border-[#8b5a2b]/30 mb-4">
-                                    <p className="text-xs text-[#8b5a2b] font-bold mb-2"><i className="fa-solid fa-user-shield"></i> 犧もｹ霞ｸｭ犧｡犧ｹ犧･犧｣犧ｰ犧壟ｸｸ犧歩ｸｱ犧ｧ犧歩ｸ� (Identity)</p>
+                                    <p className="text-xs text-[#8b5a2b] font-bold mb-2"><i className="fa-solid fa-user-shield"></i> ข้อมูลระบุตัวตน (Identity)</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div><input type="text" name="empId" value={formData.empId} onChange={handleChange} placeholder="犧｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧� (犧壟ｸｱ犧�ｸ�ｸｱ犧�)" className="input-style font-medium text-sm" required /><p className="text-[9px] mt-1 text-red-600 font-bold">*犧｣犧ｫ犧ｱ犧ｪ犧謂ｸｰ犧籾ｸｹ犧≒ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犹�ｸ癌ｹ霞ｸ樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犹≒ｸ謂ｸ≒ｸ｣犧ｲ犧�ｸｧ犧ｱ犧･</p></div>
-                                        <div><input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="犧吭ｸｲ犧｡犹≒ｸ杳ｸ� / 犧霞ｸｲ犧｢犧ｲ犹�ｸ吭ｹ犧≒ｸ｡ (犹�ｸ｡犹謂ｸ壟ｸｱ犧�ｸ�ｸｱ犧�)" className="input-style font-medium text-sm" /><p className="text-[9px] mt-1 text-[#8b5a2b]">*犧ｫ犧ｲ犧≒ｹ犧ｧ犹霞ｸ吭ｸｧ犹謂ｸｲ犧� 犧｣犧ｰ犧壟ｸ壟ｸ謂ｸｰ犧歩ｸｱ犹霞ｸ�ｸ霞ｸｲ犧｢犧ｲ犹�ｸｫ犹�</p></div>
+                                        <div><input type="text" name="empId" value={formData.empId} onChange={handleChange} placeholder="รหัสพนักงาน (บังคับ)" className="input-style font-medium text-sm" required /><p className="text-[9px] mt-1 text-red-600 font-bold">*รหัสจะถูกบันทึกเพื่อใช้พิจารณาแจกรางวัล</p></div>
+                                        <div><input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="นามแฝง / ฉายาในเกม (ไม่บังคับ)" className="input-style font-medium text-sm" /><p className="text-[9px] mt-1 text-[#8b5a2b]">*หากเว้นว่าง ระบบจะตั้งฉายาให้</p></div>
                                     </div>
                                 </div>
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <select name="origin" value={formData.origin} onChange={handleChange} className="input-style font-semibold" required disabled={!!editingProject}>
-                                    <option value="">犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧歩ｹ霞ｸ吭ｸｪ犧ｱ犧�ｸ≒ｸｱ犧� / Origin Kingdom</option>
-                                    <option value="犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢">犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢ (犧ｪ犧ｴ犧�ｹもｸ歩ｸｭ犧ｱ犧�ｸ�ｸｵ) / Casteria</option>
-                                    <option value="犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�">犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ� (犧≒ｸｧ犧ｲ犧�ｸ吭ｹ霞ｸｳ犹≒ｸもｹ�ｸ�) / Blankheimgard</option>
-                                    <option value="犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ">犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ (犧謂ｸｱ犧≒ｸ｣犧≒ｸ･犧ｧ犧ｴ犧謂ｸｱ犧｢) / Machinepolis</option>
-                                    <option value="犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�">犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧� (犧吭ｸ≒ｸ｢犧ｹ犧�ｹ≒ｸｪ犧�) / Finalthron</option>
-                                    <option value="犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ" className="text-red-700 font-bold">�白 犧ｪ犹謂ｸ�ｹ≒ｸ壟ｸ壟ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧� (犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ)</option>
+                                    <option value="">อาณาจักรต้นสังกัด / Origin Kingdom</option>
+                                    <option value="แคสเทอเรีย">แคสเทอเรีย (สิงโตอัคคี) / Casteria</option>
+                                    <option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด (กวางน้ำแข็ง) / Blankheimgard</option>
+                                    <option value="แมคชีนโพลิส">แมคชีนโพลิส (จักรกลวิจัย) / Machinepolis</option>
+                                    <option value="ไฟนัลธรอน">ไฟนัลธรอน (นกยูงแสง) / Finalthron</option>
+                                    <option value="เบสเซนตร้า" className="text-red-700 font-bold">🔒 ส่งแบบสาส์นลับ (เบสเซนตร้า)</option>
                                 </select>
                                 <select name="target" value={formData.target} onChange={handleChange} className="input-style font-semibold text-red-900" required>
-                                    <option value="">犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧伶ｸｵ犹謂ｹ犧≒ｸｴ犧扉ｹ犧ｫ犧歩ｸｸ / Target</option>
-                                    <option value="犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ">犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ / Bascentra</option>
-                                    <option value="犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢">犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢ / Casteria</option>
-                                    <option value="犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�">犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ� / Blankheimgard</option>
-                                    <option value="犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ">犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ / Machinepolis</option>
-                                    <option value="犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�">犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧� / Finalthron</option>
+                                    <option value="">อาณาจักรเป้าหมายที่เกิดเหตุ / Target</option>
+                                    <option value="เบสเซนตร้า">เบสเซนตร้า / Bascentra</option>
+                                    <option value="แคสเทอเรีย">แคสเทอเรีย / Casteria</option>
+                                    <option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด / Blankheimgard</option>
+                                    <option value="แมคชีนโพลิส">แมคชีนโพลิส / Machinepolis</option>
+                                    <option value="ไฟนัลธรอน">ไฟนัลธรอน / Finalthron</option>
                                 </select>
                             </div>
                             
                             <div className="w-full">
                                 <select name="category" value={formData.category} onChange={handleChange} className={`w-full input-style font-bold ${isAnonymous ? 'bg-gray-800 text-white' : ''}`} required>
-                                    {isAnonymous ? <option value="�白 Secret - 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧壟ｹ≒ｸｫ犹謂ｸ�ｹ犧�ｸｲ (犹≒ｸ謂ｹ霞ｸ�ｹ犧｣犧ｷ犹謂ｸｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ歩ｸｱ犧ｧ/犧｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�)">�白 Secret - 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧壟ｹ≒ｸｫ犹謂ｸ�ｹ犧�ｸｲ (犹≒ｸ謂ｹ霞ｸ�ｹ犧｣犧ｷ犹謂ｸｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ歩ｸｱ犧ｧ/犧｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�)</option> : (
-                                        <><option value="">犹犧･犧ｷ犧ｭ犧≒ｸ樅ｸ･犧ｱ犧�ｸもｸｭ犧�ｸｪ犧ｲ犧ｪ犹呉ｸ� / Select Category</option><option value="�虫 Quality (EVENT x2 EXP!)">{isQualityEventActive() ? "�虫 Quality (犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡犧樅ｸｴ犹犧ｨ犧ｩ x2 EXP!)" : "�虫 Quality - 犧｡犧吭ｸ歩ｸ｣犧ｲ犹≒ｸｫ犹謂ｸ�ｸ�ｸｸ犧内ｸ�犧ｲ犧�"}</option><option value="�孱�� Safety - 犧｡犧吭ｸ歩ｸ｣犧ｲ犹≒ｸｫ犹謂ｸ�ｹ犧≒ｸ｣犧ｲ犧ｰ犧�ｸｸ犹霞ｸ｡犧�犧ｱ犧｢">�孱�� Safety</option><option value="�糖 Culture - 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｹ≒ｸｫ犹謂ｸ�ｸ巵ｸｱ犧財ｸ財ｸｲ">�糖 Culture</option></>
+                                    {isAnonymous ? <option value="🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)">🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)</option> : (
+                                        <><option value="">เลือกพลังของสาส์น / Select Category</option><option value="💎 Quality (EVENT x2 EXP!)">{isQualityEventActive() ? "💎 Quality (กิจกรรมพิเศษ x2 EXP!)" : "💎 Quality - มนตราแห่งคุณภาพ"}</option><option value="🛡️ Safety - มนตราแห่งเกราะคุ้มภัย">🛡️ Safety</option><option value="📜 Culture - คัมภีร์แห่งปัญญา">📜 Culture</option></>
                                     )}
                                 </select>
                                 
@@ -1041,28 +900,30 @@
                                 )}
                             </div>
                         </section>
+
                         <section className="space-y-4">
-                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">2. 犧樅ｸｴ犧≒ｸｱ犧扉ｸもｸｭ犧�ｹ犧｣犧ｷ犹謂ｸｭ犧�ｸ｣犧ｲ犧ｧ <span className="text-sm font-normal">(Location Point)</span></h2>
+                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">2. พิกัดของเรื่องราว <span className="text-sm font-normal">(Location Point)</span></h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <select name="process" value={formData.process} onChange={handleChange} className="input-style font-bold text-blue-900" required disabled={!formData.target}><option value="">{formData.target ? '犹犧･犧ｷ犧ｭ犧≒ｸ≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣ / Select Process' : '犧≒ｸ｣犧ｸ犧内ｸｲ犹犧･犧ｷ犧ｭ犧≒ｹ犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧≒ｹ謂ｸｭ犧�'}</option>{availableProcesses.map((p, idx) => <option key={idx} value={p}>{p}</option>)}</select>
-                                <select name="factory" value={formData.factory} onChange={handleChange} className="input-style" required><option value="">犹犧･犧ｷ犧ｭ犧≒ｹもｸ｣犧�ｸ�ｸｲ犧� / Select Location</option><option value="犹もｸ｣犧謂ｸ吭ｸｰ">犹もｸ｣犧謂ｸ吭ｸｰ / Rojana</option><option value="犧壟ｸｲ犧�ｸ巵ｸｰ犧ｭ犧ｴ犧�">犧壟ｸｲ犧�ｸ巵ｸｰ犧ｭ犧ｴ犧� / Bang Pa-in</option><option value="犧壟ｹ霞ｸｲ犧吭ｸｫ犧ｧ犹霞ｸｲ 2">犧壟ｹ霞ｸｲ犧吭ｸｫ犧ｧ犹霞ｸｲ 2 / Baan Wa 2</option></select>
+                                <select name="process" value={formData.process} onChange={handleChange} className="input-style font-bold text-blue-900" required disabled={!formData.target}><option value="">{formData.target ? 'เลือกกระบวนการ / Select Process' : 'กรุณาเลือกเป้าหมายก่อน'}</option>{availableProcesses.map((p, idx) => <option key={idx} value={p}>{p}</option>)}</select>
+                                <select name="factory" value={formData.factory} onChange={handleChange} className="input-style" required><option value="">เลือกโรงงาน / Select Location</option><option value="โรจนะ">โรจนะ / Rojana</option><option value="บางปะอิน">บางปะอิน / Bang Pa-in</option><option value="บ้านหว้า 2">บ้านหว้า 2 / Baan Wa 2</option></select>
                             </div>
-                            <input type="text" name="pinpoint" value={formData.pinpoint} onChange={handleChange} placeholder="犧｣犧ｰ犧壟ｸｸ犧樅ｸｴ犧≒ｸｱ犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ / Specific Point (e.g. Casting Machine 31)" className="input-style" />
+                            <input type="text" name="pinpoint" value={formData.pinpoint} onChange={handleChange} placeholder="ระบุพิกัดปัญหา / Specific Point (e.g. Casting Machine 31)" className="input-style" />
                         </section>
+
                         <section className="space-y-4">
-                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">3. 犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｹ≒ｸｫ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ� <span className="text-sm font-normal">(Content)</span></h2>
-                            <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder={isSecret ? "犧ｫ犧ｱ犧ｧ犧もｹ霞ｸｭ犹犧｣犧ｷ犹謂ｸｭ犧�ｸ｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�" : "犧癌ｸｷ犹謂ｸｭ犹もｸ�ｸ｣犧�ｸ≒ｸｲ犧｣ / Project Name"} className="input-style font-bold" required />
-                            <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder="犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ犧伶ｸｵ犹謂ｸ樅ｸ� / Problem Description" className="input-style h-24 font-sans" required></textarea>
-                            <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder="犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ霞ｹ�ｸもｸ伶ｸｵ犹謂ｸ歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣ (犧籾ｹ霞ｸｲ犧｡犧ｵ) / Proposed Solution" className="input-style h-24 font-sans"></textarea>
-                            <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder="犧憫ｸ･犧･犧ｱ犧樅ｸ倨ｹ呉ｸ伶ｸｵ犹謂ｸ�ｸｲ犧扉ｸｫ犧ｧ犧ｱ犧� / Expected Benefits" className="input-style h-24 font-sans" required></textarea>
+                            <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">3. รายละเอียดแห่งสาส์น <span className="text-sm font-normal">(Content)</span></h2>
+                            <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder={isSecret ? "หัวข้อเรื่องร้องเรียน" : "ชื่อโครงการ / Project Name"} className="input-style font-bold" required />
+                            <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder="รายละเอียดปัญหาที่พบ / Problem Description" className="input-style h-24 font-sans" required></textarea>
+                            <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder="วิธีแก้ไขที่ต้องการ (ถ้ามี) / Proposed Solution" className="input-style h-24 font-sans"></textarea>
+                            <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder="ผลลัพธ์ที่คาดหวัง / Expected Benefits" className="input-style h-24 font-sans" required></textarea>
                             
                             <div className="bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">
                                 <div className="flex justify-between items-center mb-2">
                                     <label className="block text-sm font-bold text-[#8b5a2b]">
-                                        犹≒ｸ吭ｸ壟ｸ｣犧ｹ犧巵ｸ�犧ｲ犧樅ｸ巵ｸ｣犧ｰ犧≒ｸｭ犧� (犧ｪ犧ｹ犧�ｸｪ犧ｸ犧� 5 犧｣犧ｹ犧�):
+                                        แนบรูปภาพประกอบ (สูงสุด 5 รูป):
                                     </label>
                                     <span className="text-xs font-bold text-amber-900 bg-amber-200 px-2.5 py-0.5 rounded-full border border-amber-400">
-                                        {(formData.images || []).length} / 5 犧｣犧ｹ犧�
+                                        {(formData.images || []).length} / 5 รูป
                                     </span>
                                 </div>
                                 
@@ -1085,7 +946,7 @@
                                                     type="button" 
                                                     onClick={() => handleRemoveImage(idx)} 
                                                     className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shadow cursor-pointer transition" 
-                                                    title="犧･犧壟ｸ｣犧ｹ犧巵ｸ吭ｸｵ犹�"
+                                                    title="ลบรูปนี้"
                                                 >
                                                     &times;
                                                 </button>
@@ -1097,55 +958,108 @@
                             </div>
                         </section>
 
-                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>
-                            {editingProject ? <><i className="fa-solid fa-floppy-disk mr-2"></i> �沈 犧ｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸもｹ霞ｸｭ犧｡犧ｹ犧･犧ｪ犧ｲ犧ｪ犹呉ｸ�</> : isSecret ? <><i className="fa-solid fa-lock mr-2"></i> 犧巵ｸｴ犧扉ｸ憫ｸ吭ｸｶ犧≒ｹ≒ｸ･犧ｰ犧ｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧�</> : '犧ｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸｪ犧ｹ犹謂ｸｪ犧�犧ｲ / Submit to the Council'}
+                        <button 
+                            type="submit" 
+                            className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer flex items-center justify-center gap-2 ${isSecret ? 'bg-gray-800 hover:bg-gray-900' : 'bg-[#8b5a2b] hover:bg-[#6d441f]'}`}
+                        >
+                            {editingProject ? (
+                                <><i className="fa-solid fa-eye text-yellow-400"></i> 📜 ตรวจสอบพรีวิวก่อนอัปเดตสาส์น</>
+                            ) : isSecret ? (
+                                <><i className="fa-solid fa-lock text-yellow-400"></i> 🔒 ตรวจสอบและปิดผนึกสาส์นลับ</>
+                            ) : (
+                                <><i className="fa-solid fa-scroll text-yellow-400"></i> 📜 ตรวจสอบรายละเอียดสาส์นก่อนส่งมอบ</>
+                            )}
                         </button>
                     </form>
 
+                    {/* 📜 Full Decree Submission Preview Modal Overlay */}
                     {showConfirmModal && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => !isSubmitting && setShowConfirmModal(false)}>
-                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                                <div className="text-center mb-4 border-b border-[#8b5a2b]/30 pb-3">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel flex items-center justify-center gap-2">
-                                        <span>�糖 犧歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧壟ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ≒ｹ謂ｸｭ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧� �糖</span>
-                                    </h2>
-                                    <p className="text-xs text-[#8b5a2b] font-bold mt-1">
-                                        {editingProject ? `犹もｸｫ犧｡犧扉ｸｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸｪ犧ｲ犧ｪ犹呉ｸ�: ${editingProject.id}` : '犧≒ｸ｣犧ｸ犧内ｸｲ犧歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧壟ｸ�ｸｧ犧ｲ犧｡犧籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧�ｸもｸｭ犧�ｹ犧吭ｸｷ犹霞ｸｭ犧ｫ犧ｲ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ≒ｹ謂ｸｭ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｹ犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ�ｹ謂ｸｰ'}
+                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                            <div className="bg-[#2c1d11] border-4 border-[#8b5a2b] w-full max-w-2xl rounded-2xl p-5 md:p-6 text-[#ebdcb9] shadow-2xl overflow-y-auto max-h-[90vh] space-y-4">
+                                <div className="text-center border-b border-[#8b5a2b]/60 pb-3">
+                                    <div className="text-4xl mb-1 animate-bounce">📜</div>
+                                    <h3 className="text-xl md:text-2xl font-bold text-[#f7e6c4] font-cinzel">
+                                        {editingProject ? `ตรวจสอบการอัปเดตสาส์น ${editingProject.id}` : 'ตรวจสอบสาส์นพัฒนาก่อนส่งมอบ'}
+                                    </h3>
+                                    <p className="text-xs text-amber-200/80">
+                                        {editingProject ? 'โปรดตรวจสอบรายละเอียดสาส์นฉบับปรับปรุงก่อนยืนยันส่งกลับสู่สภาเมืองค่ะ' : 'สาส์นของท่านจะถูกจารึกลงในกระดานสภาเมืองด้วยรูปแบบรายละเอียดดังต่อไปนี้ค่ะ'}
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 mb-4 text-[#5d3a1a] text-xs">
-                                    <p className="col-span-2"><strong className="font-bold text-[#5d3a1a]">犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ:</strong> <span className="text-[#1e3a8a] font-medium ml-1">{formData.name || '犧謂ｸｭ犧｡犧｢犧ｸ犧伶ｸ倨ｹ呉ｹ�ｸ｣犹霞ｸ吭ｸｲ犧｡'}</span> <span className="text-gray-500 text-[10px] ml-1">(犧｣犧ｫ犧ｱ犧ｪ: {maskEmpId(formData.empId)})</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧歩ｹ霞ｸ吭ｸｪ犧ｱ犧�ｸ≒ｸｱ犧�:</strong> <span className={`ml-1 ${formData.origin.includes('犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ') ? 'text-purple-700 font-bold' : formData.origin.includes('犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢') ? 'text-red-600 font-bold' : formData.origin.includes('犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�') ? 'text-sky-600 font-bold' : formData.origin.includes('犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ') ? 'text-emerald-700 font-bold' : 'text-amber-600 font-bold'}`}>{formData.origin || '-'}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢:</strong> <span className={`ml-1 ${formData.target.includes('犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ') ? 'text-purple-700 font-bold' : formData.target.includes('犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢') ? 'text-red-600 font-bold' : formData.target.includes('犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�') ? 'text-sky-600 font-bold' : formData.target.includes('犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ') ? 'text-emerald-700 font-bold' : 'text-amber-600 font-bold'}`}>{formData.target || '-'}</span></p>
-                                    <p className="col-span-2"><strong className="font-bold text-[#5d3a1a]">犧巵ｸ｣犧ｰ犹犧�犧伶ｸ樅ｸ･犧ｱ犧�ｸｪ犧ｲ犧ｪ犧吭ｹ�:</strong> <span className="bg-blue-100 text-blue-900 px-2.5 py-1 rounded font-bold border border-blue-300 ml-1">{formData.category || '-'}</span></p>
-                                </div>
-
-                                <div className="space-y-3 text-[#5d3a1a] bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30 text-xs mb-6">
-                                    <p><strong className="font-bold text-[#5d3a1a]">犹もｸ｣犧�ｸ�ｸｲ犧� / 犧ｪ犧籾ｸｲ犧吭ｸ伶ｸｵ犹�:</strong> <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 ml-1">{formData.factory || '-'}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣犧伶ｸｵ犹謂ｸ樅ｸｱ犧亭ｸ吭ｸｲ:</strong> <span className="text-[#1e3a8a] font-medium ml-1">{formData.process || '-'}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧樅ｸｴ犧≒ｸｱ犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ:</strong> <span className="text-[#1e3a8a] font-medium ml-1">{formData.pinpoint || '-'}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧癌ｸｷ犹謂ｸｭ犹もｸ�ｸ｣犧�ｸ≒ｸｲ犧｣:</strong> <span className="font-bold text-[#1e3a8a] text-base ml-1">{formData.title || '-'}</span></p>
-                                    
-                                    <div>
-                                        <p className="font-bold text-[#5d3a1a]">犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ/犧もｹ霞ｸｭ犧｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�:</p>
-                                        <p className="text-[#1e3a8a] font-medium leading-relaxed bg-white p-3 rounded-lg border border-[#8b5a2b]/20 shadow-inner mt-1">{formData.problem || '-'}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-[#5d3a1a]">犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ霞ｹ�ｸ� (犧伶ｸｵ犹謂ｹ犧ｪ犧吭ｸｭ):</p>
-                                        <p className="text-[#1e3a8a] font-medium leading-relaxed bg-white p-3 rounded-lg border border-[#8b5a2b]/20 shadow-inner mt-1">{formData.solution || '-'}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-[#5d3a1a]">犧巵ｸ｣犧ｰ犹もｸ｢犧癌ｸ吭ｹ呉ｸ伶ｸｵ犹謂ｸ�ｸｲ犧扉ｸｧ犹謂ｸｲ犧謂ｸｰ犹�ｸ扉ｹ霞ｸ｣犧ｱ犧�:</p>
-                                        <p className="text-[#1e3a8a] font-medium leading-relaxed bg-white p-3 rounded-lg border border-[#8b5a2b]/20 shadow-inner mt-1">{formData.benefit || '-'}</p>
-                                    </div>
-
-                                    {(formData.images && formData.images.length > 0) && (
+                                <div className="bg-[#1a110a] p-4 rounded-xl border border-[#8b5a2b]/40 space-y-3 text-xs md:text-sm">
+                                    <div className="grid grid-cols-2 gap-2 border-b border-[#8b5a2b]/30 pb-2">
                                         <div>
-                                            <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> 犧�犧ｲ犧樅ｹ≒ｸ吭ｸ壟ｸ巵ｸ｣犧ｰ犧≒ｸｭ犧� ({formData.images.length} 犧｣犧ｹ犧�):</p>
-                                            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-1.5">
+                                            <span className="font-bold text-[#5d3a1a]">👤 ผู้เสนอสาส์น:</span>{' '}
+                                            <span className="text-[#1e3a8a] font-medium">{formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">🆔 รหัสพนักงาน:</span>{' '}
+                                            <span className="text-[#1e3a8a] font-medium">{maskEmpId(formData.empId)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 border-b border-[#8b5a2b]/30 pb-2">
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">🏰 สังกัด:</span>{' '}
+                                            <span className={`px-2 py-0.5 rounded text-[11px] border ${getKingdomBadgeStyle(formData.origin)}`}>
+                                                {formData.origin || 'ไม่ระบุ'}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">🎯 เป้าหมาย:</span>{' '}
+                                            <span className={`px-2 py-0.5 rounded text-[11px] border ${getKingdomBadgeStyle(formData.target)}`}>
+                                                {formData.target || 'ไม่ระบุ'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 border-b border-[#8b5a2b]/30 pb-2">
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">⚡ พลังสาส์น:</span>{' '}
+                                            <span className="text-[#1e3a8a] font-medium">{formData.category.split(' - ')[0]}</span>
+                                        </div>
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">🏭 โรงงาน/พิกัด:</span>{' '}
+                                            <span className="text-[#1e3a8a] font-medium">{formData.factory} - {formData.process} ({formData.pinpoint || 'ไม่ระบุ'})</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span className="font-bold text-[#5d3a1a]">📌 ชื่อโครงการ:</span>{' '}
+                                        <div className="mt-1 text-[#1e3a8a] font-medium bg-white p-2.5 rounded-lg border border-[#8b5a2b]/30">
+                                            {formData.title}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span className="font-bold text-[#5d3a1a]">⚠️ รายละเอียดปัญหา:</span>{' '}
+                                        <div className="mt-1 text-[#1e3a8a] font-medium bg-white p-2.5 rounded-lg border border-[#8b5a2b]/30 whitespace-pre-wrap">
+                                            {formData.problem}
+                                        </div>
+                                    </div>
+
+                                    {formData.solution && (
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">💡 แนวทางแก้ไขที่เสนอ:</span>{' '}
+                                            <div className="mt-1 text-[#1e3a8a] font-medium bg-white p-2.5 rounded-lg border border-[#8b5a2b]/30 whitespace-pre-wrap">
+                                                {formData.solution}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <span className="font-bold text-[#5d3a1a]">🎁 ผลลัพธ์ที่คาดหวัง:</span>{' '}
+                                        <div className="mt-1 text-[#1e3a8a] font-medium bg-white p-2.5 rounded-lg border border-[#8b5a2b]/30 whitespace-pre-wrap">
+                                            {formData.benefit}
+                                        </div>
+                                    </div>
+
+                                    {(formData.images || []).length > 0 && (
+                                        <div>
+                                            <span className="font-bold text-[#5d3a1a]">📷 รูปแนบประกอบ ({formData.images.length} รูป):</span>
+                                            <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-2">
                                                 {formData.images.map((imgUrl, idx) => (
-                                                    <div key={idx} className="bg-black/10 rounded-lg border border-gray-400 overflow-hidden h-20 shadow">
+                                                    <div key={idx} className="h-16 border border-[#8b5a2b] rounded-md overflow-hidden shadow">
                                                         <img src={imgUrl} alt={`Preview ${idx+1}`} className="w-full h-full object-cover" />
                                                     </div>
                                                 ))}
@@ -1154,14 +1068,14 @@
                                     )}
                                 </div>
 
-                                <div className="flex gap-3">
+                                <div className="flex gap-3 pt-2">
                                     <button 
                                         type="button" 
                                         onClick={() => setShowConfirmModal(false)} 
                                         disabled={isSubmitting} 
                                         className="flex-1 py-3 px-4 rounded-xl bg-stone-700 hover:bg-stone-800 text-white font-bold text-xs md:text-sm transition cursor-pointer border border-white/20 disabled:opacity-50 shadow-md flex items-center justify-center gap-1.5"
                                     >
-                                        <i className="fa-solid fa-pen-to-square"></i> 笨擾ｸ� 犧｢犹霞ｸｭ犧吭ｸ≒ｸ･犧ｱ犧壟ｹ�ｸ巵ｹ≒ｸ≒ｹ霞ｹ�ｸもｸもｹ霞ｸｭ犧｡犧ｹ犧･
+                                        <i className="fa-solid fa-pen-to-square"></i> ✏️ ย้อนกลับไปแก้ไขข้อมูล
                                     </button>
                                     <button 
                                         type="button" 
@@ -1169,21 +1083,27 @@
                                         disabled={isSubmitting} 
                                         className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5"
                                     >
-                                        {isSubmitting ? <><span className="inline-block animate-pulse text-base">�錘�暢</span> 竢ｳ 犧≒ｸｳ犧･犧ｱ犧�ｸ�ｸｧ犧壟ｸ｡犹霞ｸｲ{editingProject ? '犧ｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸｪ犧ｲ犧ｪ犹呉ｸ�' : '犧ｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸｪ犧ｹ犹謂ｸｪ犧�犧ｲ'}...</> : <><i className={`fa-solid ${editingProject ? 'fa-floppy-disk' : 'fa-paper-plane'}`}></i> {editingProject ? '�沈 犧ｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸもｹ霞ｸｭ犧｡犧ｹ犧･犧ｪ犧ｲ犧ｪ犹呉ｸ�' : '�錘�暢 犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸ≒ｸｲ犧｣犧ｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ�'}</>}
+                                        {isSubmitting ? <><span className="inline-block animate-pulse text-base">🐎💨</span> ⏳ กำลังควบม้า{editingProject ? 'อัปเดตสาส์น' : 'ส่งสาส์นสู่สภา'}...</> : <><i className={`fa-solid ${editingProject ? 'fa-floppy-disk' : 'fa-paper-plane'}`}></i> {editingProject ? '💾 อัปเดตข้อมูลสาส์น' : '🐎💨 ยืนยันการส่งสาส์น'}</>}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
-
             );
         }
+
+        const getFormattedDate = () => {
+            const d = new Date();
+            return `${d.getFullYear()}_${String(d.getMonth() + 1).padStart(2, '0')}_${String(d.getDate()).padStart(2, '0')}`;
+        };
+
+        // ==========================================
+        // COMPONENT 5: Dashboard
+        // ==========================================
         function Dashboard({ projects, onUpdateProject, kingdomEXP, onStartEdit }) {
             const [isAdminMode, setIsAdminMode] = useState(false);
-            const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedProject, setSelectedProject] = useState(null);
-            const [zoomedImg, setZoomedImg] = useState(null);
             const [adminStatus, setAdminStatus] = useState('');
             const [adminFeedback, setAdminFeedback] = useState('');
             const [adminCategory, setAdminCategory] = useState(''); 
@@ -1197,10 +1117,10 @@
             useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter]);
 
             const handleAdminLogin = () => {
-                if (isAdminMode) { setIsAdminMode(false); alert('犧ｭ犧ｭ犧≒ｸ謂ｸｲ犧≒ｹもｸｫ犧｡犧扉ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｹ犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ'); return; }
-                const pass = prompt('�柏 犧≒ｸ｣犧ｸ犧内ｸｲ犹�ｸｪ犹謂ｸ｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�:');
-                if (pass === '9999' || pass === '1234') { setIsAdminMode(true); alert('笨� 犧｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸ籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧� 犹犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｹもｸｫ犧｡犧扉ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�'); } 
-                else if (pass !== null) alert('笶� 犧｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｹ�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧�!');
+                if (isAdminMode) { setIsAdminMode(false); alert('ออกจากโหมดสภาเมืองเรียบร้อยแล้ว'); return; }
+                const pass = prompt('🔐 กรุณาใส่รหัสผ่านสภาเมือง:');
+                if (pass === '1234') { setIsAdminMode(true); alert('✅ รหัสผ่านถูกต้อง เข้าสู่โหมดสภาเมือง'); } 
+                else if (pass !== null) alert('❌ รหัสผ่านไม่ถูกต้อง!');
             };
 
             const getDashboardStatusStr = (p) => {
@@ -1216,11 +1136,11 @@
             const handleExportCSV = () => {
                 const exportProjects = isAdminMode ? activeProjects : activeProjects.filter(p => p.status !== 'Hidden');
                 
-                if (exportProjects.length === 0) { alert('犹�ｸ｡犹謂ｸ｡犧ｵ犧もｹ霞ｸｭ犧｡犧ｹ犧･犹�ｸｫ犹霞ｹ犧壟ｸｴ犧≒ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｹ謂ｸｰ'); return; }
+                if (exportProjects.length === 0) { alert('ไม่มีข้อมูลให้เบิกบันทึกค่ะ'); return; }
                 
-                const headers = ['犧｣犧ｫ犧ｱ犧ｪ犹≒ｸ壟ｸ壟ｹ≒ｸ巵ｸ･犧�', '犧｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧�', '犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ', '犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧歩ｹ霞ｸ吭ｸｪ犧ｱ犧�ｸ≒ｸｱ犧�', '犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢', '犧巵ｸ｣犧ｰ犹犧�犧伶ｸ樅ｸ･犧ｱ犧�ｸｪ犧ｲ犧ｪ犹呉ｸ�', '犹もｸ｣犧�ｸ�ｸｲ犧�/犧ｪ犧籾ｸｲ犧吭ｸ伶ｸｵ犹�', '犧≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣犧伶ｸｵ犹謂ｸ樅ｸｱ犧亭ｸ吭ｸｲ', '犧樅ｸｴ犧≒ｸｱ犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ', '犧癌ｸｷ犹謂ｸｭ犹もｸ�ｸ｣犧�ｸ≒ｸｲ犧｣', '犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ/犧もｹ霞ｸｭ犧｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�', '犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ霞ｹ�ｸ�(犧伶ｸｵ犹謂ｹ犧ｪ犧吭ｸｭ)', '犧巵ｸ｣犧ｰ犹もｸ｢犧癌ｸ吭ｹ呉ｸ伶ｸｵ犹謂ｸ�ｸｲ犧扉ｸｧ犹謂ｸｲ犧謂ｸｰ犹�ｸ扉ｹ霞ｸ｣犧ｱ犧�', '犧｣犧ｹ犧巵ｸ�犧ｲ犧樅ｹ≒ｸ吭ｸ�', '犧ｪ犧籾ｸｲ犧吭ｸｰ'];
+                const headers = ['รหัสแบบแปลน', 'รหัสพนักงาน', 'ผู้เสนอ', 'อาณาจักรต้นสังกัด', 'อาณาจักรเป้าหมาย', 'ประเภทพลังสาส์น', 'โรงงาน/สถานที่', 'กระบวนการที่พัฒนา', 'พิกัดปัญหา', 'ชื่อโครงการ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'วิธีแก้ไข(ที่เสนอ)', 'ประโยชน์ที่คาดว่าจะได้รับ', 'รูปภาพแนบ', 'สถานะ'];
                 const csvRows = exportProjects.map(p => [
-                    p.id, p.emp, p.name, p.origin, p.target, p.category, p.factory, p.location, p.pinpoint, p.title, p.problem, p.solution, p.benefit, p.imagePreview ? '犧｡犧ｵ' : '犹�ｸ｡犹謂ｸ｡犧ｵ', getDashboardStatusStr(p)
+                    p.id, p.emp, p.name, p.origin, p.target, p.category, p.factory, p.location, p.pinpoint, p.title, p.problem, p.solution, p.benefit, p.imagePreview ? 'มี' : 'ไม่มี', getDashboardStatusStr(p)
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
                 const csvString = [headers.join(','), ...csvRows].join('\n');
@@ -1238,66 +1158,67 @@
             const closeModal = () => { setSelectedProject(null); };
 
             const handleAdminSubmit = () => {
-                if (!adminStatus) { alert('犧≒ｸ｣犧ｸ犧内ｸｲ犹犧･犧ｷ犧ｭ犧≒ｸｪ犧籾ｸｲ犧吭ｸｰ犧≒ｹ謂ｸｭ犧吭ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｹ謂ｸｰ'); return; }
+                if (!adminStatus) { alert('กรุณาเลือกสถานะก่อนบันทึกค่ะ'); return; }
                 let updatedProject = { ...selectedProject };
                 updatedProject.category = adminCategory;
                 updatedProject.isQualityEvent = adminCategory === 'Quality';
 
                 if (adminStatus === 'Rising') {
                     updatedProject.status = 'Founding'; updatedProject.ideaApproved = true; updatedProject.isSuperRising = false;
-                    const qBonus = updatedProject.isQualityEvent ? ' (+10 EXP 犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡ Quality)' : ' (+5 EXP)';
-                    updatedProject.comment = adminFeedback || `犧｢犧ｭ犧扉ｹ犧｢犧ｵ犹謂ｸ｢犧｡! 犧ｪ犧�犧ｲ犹≒ｸ･犧ｰ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧ｫ犹�ｸ吭ｸ癌ｸｭ犧� 犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹�ｸｭ犹犧扉ｸｵ犧｢犹�ｸｫ犹霞ｹ犧巵ｹ�ｸ吭ｹ≒ｸ憫ｸ吭ｹ≒ｸ｡犹謂ｹ≒ｸ壟ｸ�${qBonus} 犹もｸ巵ｸ｣犧扉ｸ歩ｸｴ犧扉ｸ歩ｸｲ犧｡犧憫ｸ･犧伶ｸｵ犹謂ｸ･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧謂ｸ歩ｹ謂ｸｭ犹�ｸ嫣;
+                    const qBonus = updatedProject.isQualityEvent ? ' (+10 EXP กิจกรรม Quality)' : ' (+5 EXP)';
+                    updatedProject.comment = adminFeedback || `ยอดเยี่ยม! สภาและอาณาจักรเห็นชอบ อนุมัติไอเดียให้เป็นแผนแม่แบบ${qBonus} โปรดติดตามผลที่ลานภารกิจต่อไป`;
                 } else if (adminStatus === 'Founding') {
                     updatedProject.status = 'Founding'; updatedProject.ideaApproved = false;
-                    updatedProject.comment = adminFeedback || '犧≒ｸｳ犧･犧ｱ犧�ｸｭ犧｢犧ｹ犹謂ｹ�ｸ吭ｸ≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犹≒ｸ･犧ｰ犧巵ｸ｣犧ｰ犹犧｡犧ｴ犧吭ｹ�ｸｭ犹犧扉ｸｵ犧｢犧｣犹謂ｸｧ犧｡犧≒ｸｱ犧壟ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢';
+                    updatedProject.comment = adminFeedback || 'กำลังอยู่ในกระบวนการพิจารณาและประเมินไอเดียร่วมกับอาณาจักรเป้าหมาย';
                 } else if (adminStatus === 'Ruined') {
                     updatedProject.status = 'Ruined'; updatedProject.ideaApproved = false;
-                    updatedProject.comment = adminFeedback || '犹�ｸ｡犹謂ｸｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ: 犹犧吭ｸｷ犹謂ｸｭ犧�ｸ謂ｸｲ犧≒ｸ｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｹ�ｸ｡犹謂ｸｪ犧ｭ犧扉ｸ�ｸ･犹霞ｸｭ犧�ｸ≒ｸｱ犧壟ｸ�ｸ壟ｸ巵ｸ｣犧ｰ犧｡犧ｲ犧内ｸｫ犧･犧ｱ犧≒ｹ�ｸ吭ｸｪ犹謂ｸｧ犧吭ｸｭ犧ｷ犹謂ｸ吭ｸ�ｹ謂ｸｰ';
+                    updatedProject.comment = adminFeedback || 'ไม่อนุมัติ: เนื่องจากรายละเอียดไม่สอดคล้องกับงบประมาณหลักในส่วนอื่นค่ะ';
                 }
                 onUpdateProject(updatedProject);
-                alert('犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｸｳ犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｹ犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!');
+                alert('บันทึกคำพิจารณาสาส์นเรียบร้อยแล้ว!');
                 closeModal();
             };
 
             const handleUpgradeSuperRising = () => {
-                if (window.confirm('�荘 犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸ≒ｸｲ犧｣犧ｭ犧ｱ犧巵ｹ犧≒ｸ｣犧扉ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ吭ｸｵ犹霞ｹ犧巵ｹ�ｸ� "Super Rising" 犹犧樅ｸｷ犹謂ｸｭ犧｡犧ｭ犧壟ｹもｸ壟ｸ吭ｸｱ犧ｪ犧樅ｸｴ犹犧ｨ犧ｩ犹�ｸｫ犹霞ｸ憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ (+10 EXP) 犧ｫ犧｣犧ｷ犧ｭ犹�ｸ｡犹�?')) {
+                if (window.confirm('👑 ยืนยันการอัปเกรดสาส์นนี้เป็น "Super Rising" เพื่อมอบโบนัสพิเศษให้ผู้เสนอ (+10 EXP) หรือไม่?')) {
                     let updatedProject = { ...selectedProject };
                     updatedProject.isSuperRising = true;
-                    const qBonus = updatedProject.isQualityEvent ? ' (+20 EXP 犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡ Quality)' : ' (+10 EXP)';
-                    updatedProject.comment = `�荘 犧｢犧ｭ犧扉ｹ犧｢犧ｵ犹謂ｸ｢犧｡犧｣犧ｰ犧扉ｸｱ犧壟ｸ金ｸｹ犹犧巵ｸｭ犧｣犹�! 犧ｪ犧�犧ｲ犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹�ｸｭ犹犧扉ｸｵ犧｢犧伶ｸｵ犹謂ｸ癌ｹ謂ｸｧ犧｢犧･犧� Cost/Cycle Time 犧吭ｸｵ犹�${qBonus} 犹もｸ巵ｸ｣犧扉ｸ歩ｸｴ犧扉ｸ歩ｸｲ犧｡犧憫ｸ･犧伶ｸｵ犹謂ｸ･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�;
+                    const qBonus = updatedProject.isQualityEvent ? ' (+20 EXP กิจกรรม Quality)' : ' (+10 EXP)';
+                    updatedProject.comment = `👑 ยอดเยี่ยมระดับซูเปอร์! สภาอนุมัติไอเดียที่ช่วยลด Cost/Cycle Time นี้${qBonus} โปรดติดตามผลที่ลานภารกิจ`;
                     onUpdateProject(updatedProject);
                     setSelectedProject(updatedProject); 
-                    alert('�荘 犧ｭ犧ｱ犧巵ｹ犧≒ｸ｣犧扉ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｹ犧巵ｹ�ｸ� Super Rising 犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!');
+                    alert('👑 อัปเกรดสาส์นเป็น Super Rising เรียบร้อยแล้ว!');
                 }
             };
 
-            const [deleteConfirmProject, setDeleteConfirmProject] = useState(null);
-
             const handleSecretAction = (actionType) => {
                 if (actionType === 'Delete') {
-                    setDeleteConfirmProject(selectedProject);
+                    if (window.confirm('⚠️ คำเตือน: คุณกำลังจะทำลายสาส์นฉบับนี้แบบถาวร! ข้อมูลจะหายไปจากระบบทั้งหมด ยืนยันการทำลายหรือไม่?')) {
+                        onUpdateProject({ ...selectedProject, status: 'Deleted' });
+                        alert('🔥 เผาทำลายสาส์นเรียบร้อยแล้ว!'); closeModal();
+                    }
                 } else if (actionType === 'Hide') {
-                    if (window.confirm('�白 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣犧金ｹ謂ｸｭ犧吭ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ吭ｸｵ犹霞ｸ謂ｸｲ犧≒ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｪ犧ｲ犧倨ｸｲ犧｣犧内ｸｰ犧ｫ犧｣犧ｷ犧ｭ犹�ｸ｡犹�? (犧謂ｸｰ犧｡犧ｵ犹≒ｸ�ｹ謂ｹ≒ｸｭ犧扉ｸ｡犧ｴ犧吭ｸ伶ｸｵ犹謂ｸ｡犧ｭ犧�ｹ犧ｫ犹�ｸ�)')) {
+                    if (window.confirm('🔒 ต้องการซ่อนสาส์นนี้จากกระดานสาธารณะหรือไม่? (จะมีแค่แอดมินที่มองเห็น)')) {
                         onUpdateProject({ ...selectedProject, status: 'Hidden' });
-                        alert('�白 犧金ｹ謂ｸｭ犧吭ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｹ犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!'); closeModal();
+                        alert('🔒 ซ่อนสาส์นเรียบร้อยแล้ว!'); closeModal();
                     }
                 } else if (actionType === 'HallOfFame') {
-                    if (window.confirm('箝� 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣犧壟ｸ｣犧｣犧謂ｸｸ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ吭ｸｵ犹霞ｹ犧もｹ霞ｸｲ犧ｪ犧ｹ犹� Hall of fame 犹犧樅ｸｷ犹謂ｸｭ犹犧�ｸ･犧ｵ犧｢犧｣犹呉ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｫ犧｣犧ｷ犧ｭ犹�ｸ｡犹�?')) {
+                    if (window.confirm('⭐ ต้องการบรรจุสาส์นนี้เข้าสู่ Hall of fame เพื่อเคลียร์กระดานหรือไม่?')) {
                         onUpdateProject({ ...selectedProject, status: 'Hall of fame' });
-                        alert('箝� 犧壟ｸ｣犧｣犧謂ｸｸ犹犧もｹ霞ｸｲ犧ｫ犧ｭ犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!'); closeModal();
+                        alert('⭐ บรรจุเข้าหอเกียรติยศเรียบร้อยแล้ว!'); closeModal();
                     }
                 } else if (actionType === 'Restore') {
-                    if (window.confirm('�売 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣犧扉ｸｶ犧�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ吭ｸｵ犹霞ｸ≒ｸ･犧ｱ犧壟ｸ�ｸｷ犧吭ｸｪ犧ｹ犹謂ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｫ犧･犧ｱ犧≒ｸｫ犧｣犧ｷ犧ｭ犹�ｸ｡犹�?')) {
+                    if (window.confirm('🔄 ต้องการดึงสาส์นนี้กลับคืนสู่กระดานหลักหรือไม่?')) {
                         const restoreStatus = selectedProject.ideaApproved ? 'Rising' : 'Blueprint';
                         onUpdateProject({ ...selectedProject, status: restoreStatus });
-                        alert('�売 犧扉ｸｶ犧�ｸ≒ｸ･犧ｱ犧壟ｸ｡犧ｲ犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!'); closeModal();
+                        alert('🔄 ดึงกลับมาเรียบร้อยแล้ว!'); closeModal();
                     }
                 }
             };
 
             const getStatusBadge = (project) => {
                 if (project.status === 'Deleted') return null;
-                if (project.status === 'Hidden') return <span className="bg-gray-800 text-gray-300 border border-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[80px] inline-block text-center">犧籾ｸｹ犧≒ｸ金ｹ謂ｸｭ犧吭ｸ･犧ｱ犧�</span>;
+                if (project.status === 'Hidden') return <span className="bg-gray-800 text-gray-300 border border-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[80px] inline-block text-center">ถูกซ่อนลับ</span>;
                 if (project.status === 'Hall of fame') return <span className="bg-yellow-900 text-yellow-300 border border-yellow-500 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[100px] inline-block text-center"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span>;
                 if (project.status === 'Blueprint') return <span className="bg-blue-200 text-blue-800 border border-blue-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[70px] inline-block text-center">Blueprint</span>;
                 if (project.status === 'Ruined' && !project.ideaApproved) return <span className="bg-red-200 text-red-800 border border-red-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm w-[70px] inline-block text-center">Ruined</span>;
@@ -1341,11 +1262,11 @@
             const percentage = totalFiltered > 0 ? ((countCardStatus / totalFiltered) * 100).toFixed(1) : '0.0';
 
             const kingdoms = [
-                { name: '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ', id: 'bes', hexColor: '#10b981' },
-                { name: '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢', id: 'cas', hexColor: '#ef4444' },
-                { name: '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�', id: 'bla', hexColor: '#38bdf8' },
-                { name: '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ', id: 'mac', hexColor: '#a855f7' },
-                { name: '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�', id: 'fin', hexColor: '#facc15' },
+                { name: 'เบสเซนตร้า', id: 'bes', hexColor: '#10b981' },
+                { name: 'แคสเทอเรีย', id: 'cas', hexColor: '#ef4444' },
+                { name: 'แบลงค์ไฮม์การ์ด', id: 'bla', hexColor: '#38bdf8' },
+                { name: 'แมคชีนโพลิส', id: 'mac', hexColor: '#a855f7' },
+                { name: 'ไฟนัลธรอน', id: 'fin', hexColor: '#facc15' },
             ];
 
             const indexOfLastItem = currentPage * itemsPerPage;
@@ -1357,71 +1278,57 @@
                 <div className="space-y-6 animate-fade-in">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#8b5a2b]/30 pb-4">
                         <div className="bg-[#f4e4bc] border-2 border-[#8b5a2b] px-5 py-2.5 rounded-xl shadow-lg inline-block">
-                            <h1 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] drop-shadow-sm font-cinzel">犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｹ≒ｸｫ犹謂ｸ�ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧� Diecast</h1>
+                            <h1 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] drop-shadow-sm font-cinzel">ประกาศิตแห่งแผ่นดิน Diecast</h1>
                             <p className="text-xs text-[#8b5a2b] font-sans mt-0.5 font-bold">(Idea Summary Dashboard)</p>
                         </div>
                         <div className="flex gap-2">
                             <button onClick={handleExportCSV} className="px-4 py-2.5 rounded-xl border border-blue-600 bg-blue-100 text-blue-800 font-bold shadow hover:bg-blue-200 transition text-xs flex items-center gap-2 cursor-pointer">
-                                <i className="fa-solid fa-download"></i> 犹犧壟ｸｴ犧≒ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸｪ犧�犧ｲ (Export CSV)
+                                <i className="fa-solid fa-download"></i> เบิกบันทึกสภา (Export CSV)
                             </button>
                             <button onClick={handleAdminLogin} className={`px-4 py-2.5 rounded-xl border-2 font-bold transition shadow-lg flex items-center gap-2 cursor-pointer text-xs ${isAdminMode ? 'bg-green-800 text-white border-green-500 hover:bg-green-700' : 'bg-[#f4e4bc] text-[#5d3a1a] border-[#8b5a2b] hover:bg-[#e5d3a6]'}`}>
                                 <i className={`fa-solid ${isAdminMode ? 'fa-unlock' : 'fa-lock'}`}></i>
-                                {isAdminMode ? '犹もｸｫ犧｡犧扉ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧� (犧巵ｸ･犧扉ｸ･犹�ｸｭ犧�)' : '犹もｸｫ犧｡犧扉ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�'}
+                                {isAdminMode ? 'โหมดสภาเมือง (ปลดล็อก)' : 'โหมดสภาเมือง'}
                             </button>
                         </div>
                     </div>
 
-                    <div className={`parchment rounded-2xl shadow-xl transition-all duration-300 ${isExpBoardOpen ? 'p-6 bg-gradient-to-b from-[#f4e4bc] to-[#ebdcb9]' : 'p-4 hover:bg-[#e8d6ab]'}`}>
-                        <div 
-                            onClick={() => setIsExpBoardOpen(!isExpBoardOpen)}
-                            className="flex justify-between items-center cursor-pointer select-none"
-                            title={isExpBoardOpen ? "犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犧樅ｸｱ犧壟ｹ犧≒ｹ�ｸ�" : "犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犹≒ｸｪ犧扉ｸ�ｸｪ犧籾ｸｲ犧吭ｸｰ犧�ｸｧ犧ｲ犧｡犧≒ｹ霞ｸｲ犧ｧ犧ｫ犧吭ｹ霞ｸｲ"}
-                        >
-                            <h3 className="text-lg md:text-xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
-                                <span>犧ｪ犧籾ｸｲ犧吭ｸｰ犧�ｸｧ犧ｲ犧｡犧≒ｹ霞ｸｲ犧ｧ犧ｫ犧吭ｹ霞ｸｲ犹≒ｸ歩ｹ謂ｸ･犧ｰ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣</span>
-                            </h3>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isExpBoardOpen ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.9)] scale-110' : 'bg-[#8b5a2b]/20 text-[#5d3a1a]'}`}>
-                                <i className="fa-solid fa-chevron-down text-base"></i>
-                            </div>
-                        </div>
-
-                        {isExpBoardOpen && (
-                            <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
-                                {kingdoms.map(k => {
-                                    const levelData = calculateLevel(kingdomEXP[k.name] || 0);
-                                    const percent = (levelData.currentExp / levelData.requiredExp) * 100;
-                                    return (
-                                        <div key={k.id}>
-                                            <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
-                                                <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
-                                                <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
-                                            </div>
-                                            <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
-                                                <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
-                                            </div>
+                    <div className="parchment p-6 rounded-2xl shadow-xl">
+                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
+                        <div className="space-y-4">
+                            {kingdoms.map(k => {
+                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                return (
+                                    <div key={k.id}>
+                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="stat-card p-5 rounded-2xl text-center flex flex-col justify-center">
-                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">犹≒ｸ憫ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ犧歩ｸｲ犧｡犧游ｸｴ犧･犹犧歩ｸｭ犧｣犹�<br />(Filtered Plans)</p>
+                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">แผนพัฒนาตามฟิลเตอร์<br />(Filtered Plans)</p>
                             <h2 className="text-4xl font-bold text-[#5d3a1a] font-cinzel">{totalFiltered}</h2>
                         </div>
                         <div className="stat-card p-4 rounded-2xl text-center flex flex-col items-center justify-center">
                             <select value={cardStatusFilter} onChange={(e) => setCardStatusFilter(e.target.value)} className="custom-select text-xs font-bold text-[#5d3a1a] mb-1 w-full text-center bg-[#f4e4bc]">
-                                <option value="Blueprint">�東 Blueprint (犧｣犧ｭ犧歩ｸ｣犧ｧ犧�)</option>
-                                <option value="Founding">�女�� Founding (犧≒ｸｳ犧･犧ｱ犧�ｸ樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ)</option>
-                                <option value="Rising">箝� Rising (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹�ｸｭ犹犧扉ｸｵ犧｢犹≒ｸ･犹霞ｸｧ)</option>
-                                <option value="Ruined">笶� Ruined (犧巵ｸｱ犧扉ｸ歩ｸ�)</option>
+                                <option value="Blueprint">📌 Blueprint (รอตรวจ)</option>
+                                <option value="Founding">🏗️ Founding (กำลังพิจารณา)</option>
+                                <option value="Rising">⭐ Rising (อนุมัติไอเดียแล้ว)</option>
+                                <option value="Ruined">❌ Ruined (ปัดตก)</option>
                             </select>
                             <h2 className={`text-4xl font-bold font-cinzel ${cardStatusFilter === 'Blueprint' ? 'text-blue-700' : cardStatusFilter === 'Founding' ? 'text-yellow-700' : cardStatusFilter === 'Rising' ? 'text-emerald-700' : 'text-red-700'}`}>{countCardStatus}</h2>
                         </div>
                         <div className="stat-card p-5 rounded-2xl text-center flex flex-col justify-center">
-                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">犧ｪ犧ｱ犧扉ｸｪ犹謂ｸｧ犧吭ｸ謂ｸｲ犧≒ｹ≒ｸ憫ｸ吭ｸ伶ｸｱ犹霞ｸ�ｸｫ犧｡犧�<br />(Percentage)</p>
+                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">สัดส่วนจากแผนทั้งหมด<br />(Percentage)</p>
                             <h2 className="text-4xl font-bold text-[#5d3a1a] font-cinzel">{percentage}%</h2>
                         </div>
                     </div>
@@ -1429,41 +1336,34 @@
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
                         <div className="flex flex-wrap gap-2 items-center">
                             <span className="font-bold text-[#5d3a1a] mr-1">FILTERS:</span>
-                            <select name="origin" value={filters.origin} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Origin (犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ)</option><option value="犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ">犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ</option><option value="犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢">犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢</option><option value="犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�">犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�</option><option value="犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ">犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ</option><option value="犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�">犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�</option></select>
-                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (犧憫ｸｹ犹霞ｸ籾ｸｹ犧≒ｹ犧ｪ犧吭ｸｭ)</option><option value="犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ">犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ</option><option value="犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢">犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢</option><option value="犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�">犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�</option><option value="犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ">犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ</option><option value="犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�">犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�</option></select>
-                            <select name="location" value={filters.location} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Location (犧ｪ犧籾ｸｲ犧吭ｸ伶ｸｵ犹�)</option><option value="犹もｸ｣犧謂ｸ吭ｸｰ">犹もｸ｣犧謂ｸ吭ｸｰ</option><option value="犧壟ｸｲ犧�ｸ巵ｸｰ犧ｭ犧ｴ犧�">犧壟ｸｲ犧�ｸ巵ｸｰ犧ｭ犧ｴ犧�</option><option value="犧壟ｹ霞ｸｲ犧吭ｸｫ犧ｧ犹霞ｸｲ 2">犧壟ｹ霞ｸｲ犧吭ｸｫ犧ｧ犹霞ｸｲ 2</option></select>
-                            <select name="category" value={filters.category} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Category (犧ｫ犧｡犧ｧ犧扉ｸｫ犧｡犧ｹ犹�)</option><option value="Safety">Safety</option><option value="Quality">Quality</option><option value="Culture">Culture</option></select>
-                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Status (犧ｪ犧籾ｸｲ犧吭ｸｰ犹�ｸｭ犹犧扉ｸｵ犧｢)</option><option value="Blueprint">Blueprint</option><option value="Founding">Founding</option><option value="Rising">Rising</option><option value="Ruined">Ruined</option></select>
+                            <select name="origin" value={filters.origin} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Origin (ผู้เสนอ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
+                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (ผู้ถูกเสนอ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
+                            <select name="location" value={filters.location} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Location (สถานที่)</option><option value="โรจนะ">โรจนะ</option><option value="บางปะอิน">บางปะอิน</option><option value="บ้านหว้า 2">บ้านหว้า 2</option></select>
+                            <select name="category" value={filters.category} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Category (หมวดหมู่)</option><option value="Safety">Safety</option><option value="Quality">Quality</option><option value="Culture">Culture</option></select>
+                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Status (สถานะไอเดีย)</option><option value="Blueprint">Blueprint</option><option value="Founding">Founding</option><option value="Rising">Rising</option><option value="Ruined">Ruined</option></select>
                         </div>
-                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="�剥 犧�ｹ霞ｸ吭ｸｫ犧ｲ ID, 犧癌ｸｷ犹謂ｸｭ, 犧｣犧ｫ犧ｱ犧ｪ..." className="w-full md:w-64 custom-select text-xs font-medium" />
+                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID, ชื่อ, รหัส..." className="w-full md:w-64 custom-select text-xs font-medium" />
                     </div>
 
-                    {/* Mobile Scroll Hint Badge */}
-                    <div className="md:hidden text-center mb-2">
-                        <span className="text-[11px] font-bold text-[#8b5a2b] bg-[#f4e4bc] px-3 py-1 rounded-full border border-[#8b5a2b]/30 shadow-sm animate-pulse inline-flex items-center gap-1.5">
-                            �争 犧巵ｸｱ犧扉ｸ吭ｸｴ犹霞ｸｧ犧金ｹ霞ｸｲ犧｢-犧もｸｧ犧ｲ犹犧樅ｸｷ犹謂ｸｭ犧扉ｸｹ犧歩ｸｲ犧｣犧ｲ犧� �痩
-                        </span>
-                    </div>
-
-                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
                         <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
                             <thead>
                                 <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
-                                    <th className="py-3 px-2">犧｣犧ｫ犧ｱ犧ｪ犹≒ｸ壟ｸ壟ｹ≒ｸ巵ｸ･犧�</th>
-                                    <th className="py-3 px-2 max-w-[200px]">犧癌ｸｷ犹謂ｸｭ犹もｸ�ｸ｣犧�ｸ≒ｸｲ犧｣</th>
-                                    <th className="py-3 px-2">犧｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧�</th>
-                                    <th className="py-3 px-2">犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ (犧霞ｸｲ犧｢犧ｲ)</th>
-                                    <th className="py-3 px-2 text-blue-800">犧壟ｹ霞ｸｲ犧吭ｹ犧≒ｸｴ犧�</th>
-                                    <th className="py-3 px-2 text-red-800">犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢</th>
-                                    <th className="py-3 px-2 bg-[#e5d3a6]/60 rounded-t-lg">犧ｪ犧籾ｸｲ犧吭ｸ伶ｸｵ犹�</th>
-                                    <th className="py-3 px-2">犧ｫ犧｡犧ｧ犧扉ｸｫ犧｡犧ｹ犹�</th>
-                                    <th className="py-3 px-2 text-center w-24">犧ｪ犧籾ｸｲ犧吭ｸｰ</th>
-                                    <th className="py-3 px-2 text-center">犹犧巵ｸｴ犧扉ｸｪ犧ｲ犧ｪ犹呉ｸ�</th>
+                                    <th className="py-3 px-2">รหัสแบบแปลน</th>
+                                    <th className="py-3 px-2 max-w-[200px]">ชื่อโครงการ</th>
+                                    <th className="py-3 px-2">รหัสพนักงาน</th>
+                                    <th className="py-3 px-2">ผู้เสนอ (ฉายา)</th>
+                                    <th className="py-3 px-2 text-blue-800">บ้านเกิด</th>
+                                    <th className="py-3 px-2 text-red-800">เป้าหมาย</th>
+                                    <th className="py-3 px-2 bg-[#e5d3a6]/60 rounded-t-lg">สถานที่</th>
+                                    <th className="py-3 px-2">หมวดหมู่</th>
+                                    <th className="py-3 px-2 text-center w-24">สถานะ</th>
+                                    <th className="py-3 px-2 text-center">เปิดสาส์น</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[#8b5a2b]">
                                 {currentItems.length === 0 ? (
-                                    <tr><td colSpan={10} className="py-8 text-center font-bold text-[#8b5a2b]/60">�孱�� 犹�ｸ｡犹謂ｸ樅ｸ壟ｸもｹ霞ｸｭ犧｡犧ｹ犧･犧ｪ犧ｲ犧ｪ犹呉ｸ�</td></tr>
+                                    <tr><td colSpan={10} className="py-8 text-center font-bold text-[#8b5a2b]/60">🛡️ ไม่พบข้อมูลสาส์น</td></tr>
                                 ) : (
                                     currentItems.map(p => {
                                         const isHiddenRow = p.status === 'Hidden' || p.status === 'Hall of fame';
@@ -1472,10 +1372,10 @@
                                             <td className="py-3.5 px-2 font-bold text-slate-800">
                                                 {p.id} 
                                                 {p.isQualityEvent && <span className="ml-1 text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
-                                                {p.isSuperRising && <span className="ml-1 text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">�荘</span>}
+                                                {p.isSuperRising && <span className="ml-1 text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
                                             </td>
                                             <td className="py-3.5 px-2 font-semibold max-w-[200px] truncate">{p.title}</td>
-                                            <td className="py-3.5 px-2 font-mono font-bold text-gray-700">{maskEmpId(p.emp)}</td>
+                                            <td className="py-3.5 px-2 font-mono text-xs">{maskEmpId(p.emp)}</td>
                                             <td className="py-3.5 px-2">{p.name}</td>
                                             <td className="py-3.5 px-2 font-bold">{p.origin}</td>
                                             <td className="py-3.5 px-2 font-bold">{p.target}</td>
@@ -1486,7 +1386,7 @@
                                             <td className="py-3.5 px-2 text-center">{getStatusBadge(p)}</td>
                                             <td className="py-3.5 px-2 text-center">
                                                 <button onClick={() => openModal(p)} className="bg-[#5d3a1a] text-[#f7e6c4] px-3 py-1.5 rounded-lg hover:bg-[#8b5a2b] hover:text-white shadow transition cursor-pointer text-xs font-bold whitespace-nowrap">
-                                                    <i className="fa-solid fa-envelope-open-text mr-1"></i> 犧扉ｸｹ犹犧樅ｸｴ犹謂ｸ｡犹犧歩ｸｴ犧｡
+                                                    <i className="fa-solid fa-envelope-open-text mr-1"></i> ดูเพิ่มเติม
                                                 </button>
                                             </td>
                                         </tr>
@@ -1498,64 +1398,64 @@
                         
                         {totalPages > 1 && (
                             <div className="flex justify-center items-center gap-3 mt-6 border-t border-[#8b5a2b]/20 pt-4">
-                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer"><i className="fa-solid fa-chevron-left mr-1"></i> 犧｢犹霞ｸｭ犧吭ｸ≒ｸ･犧ｱ犧�</button>
+                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer"><i className="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ</button>
                                 <span className="text-sm font-bold text-[#5d3a1a] bg-white px-4 py-1.5 border border-[#8b5a2b]/40 rounded-lg shadow-inner">{currentPage} / {totalPages}</span>
-                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer">犧籾ｸｱ犧扉ｹ�ｸ� <i className="fa-solid fa-chevron-right ml-1"></i></button>
+                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer">ถัดไป <i className="fa-solid fa-chevron-right ml-1"></i></button>
                             </div>
                         )}
                     </div>
 
                     {selectedProject && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4" onClick={closeModal}>
-                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
+                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto">
                                 <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
                                 <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">�糖 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ犹≒ｸ扉ｹ謂ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣ �糖</h2>
-                                    <p className="text-[#8b5a2b] mt-1.5 italic font-bold">犧｣犧ｫ犧ｱ犧ｪ犹≒ｸ壟ｸ壟ｹ≒ｸ巵ｸ･犧�: {selectedProject.id}</p>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">📜 สาส์นพัฒนาแด่อาณาจักร 📜</h2>
+                                    <p className="text-[#8b5a2b] mt-1.5 italic font-bold">รหัสแบบแปลน: {selectedProject.id}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mb-6 text-[#5d3a1a] text-xs">
-                                    {isAdminMode && <p><strong className="font-bold text-[#5d3a1a]">犧｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧� (Admin Only):</strong> <span className="text-red-700 font-bold">{selectedProject.emp}</span></p>}
-                                    <p className={!isAdminMode ? "col-span-2" : ""}><strong className="font-bold text-[#5d3a1a]">犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ (犧吭ｸｲ犧｡犹≒ｸ杳ｸ�):</strong> <span className="text-[#1e3a8a] font-medium ml-1">{selectedProject.name}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧歩ｹ霞ｸ吭ｸｪ犧ｱ犧�ｸ≒ｸｱ犧�:</strong> <span className={`ml-1 ${selectedProject.origin.includes('犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ') ? 'text-purple-700 font-bold' : selectedProject.origin.includes('犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢') ? 'text-red-600 font-bold' : selectedProject.origin.includes('犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�') ? 'text-sky-600 font-bold' : selectedProject.origin.includes('犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ') ? 'text-emerald-700 font-bold' : 'text-amber-600 font-bold'}`}>{selectedProject.origin}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢:</strong> <span className={`ml-1 ${selectedProject.target.includes('犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ') ? 'text-purple-700 font-bold' : selectedProject.target.includes('犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢') ? 'text-red-600 font-bold' : selectedProject.target.includes('犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�') ? 'text-sky-600 font-bold' : selectedProject.target.includes('犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ') ? 'text-emerald-700 font-bold' : 'text-amber-600 font-bold'}`}>{selectedProject.target}</span></p>
-                                    <p className="col-span-2"><strong className="font-bold text-[#5d3a1a]">犧巵ｸ｣犧ｰ犹犧�犧伶ｸ樅ｸ･犧ｱ犧�ｸｪ犧ｲ犧ｪ犧吭ｹ�:</strong> <span className="bg-blue-100 text-blue-900 px-2.5 py-1 rounded font-bold border border-blue-300 ml-1">{selectedProject.category}</span></p>
+                                    {isAdminMode && <p><strong className="font-bold text-[#5d3a1a]">รหัสพนักงาน (Admin Only):</strong> <span className="text-[#1e3a8a] font-bold">{selectedProject.emp}</span></p>}
+                                    <p className={!isAdminMode ? "col-span-2" : ""}>
+                                        <strong className="font-bold text-[#5d3a1a]">ผู้เสนอ (นามแฝง):</strong> <span className="text-[#1e3a8a] font-medium">{selectedProject.name}</span>
+                                    </p>
+                                    <p>
+                                        <strong className="font-bold text-[#5d3a1a]">อาณาจักรต้นสังกัด:</strong>{' '}
+                                        <span className={`px-2 py-0.5 rounded text-xs font-bold border ${selectedProject.origin === 'เบสเซนตร้า' ? 'text-purple-700 bg-purple-50 border-purple-300' : selectedProject.origin === 'แคสเทอเรีย' ? 'text-red-600 bg-red-50 border-red-300' : selectedProject.origin === 'แบลงค์ไฮม์การ์ด' ? 'text-sky-600 bg-sky-50 border-sky-300' : selectedProject.origin === 'แมคชีนโพลิส' ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-amber-600 bg-amber-50 border-amber-300'}`}>
+                                            {selectedProject.origin}
+                                        </span>
+                                    </p>
+                                    <p>
+                                        <strong className="font-bold text-[#5d3a1a]">อาณาจักรเป้าหมาย:</strong>{' '}
+                                        <span className={`px-2 py-0.5 rounded text-xs font-bold border ${selectedProject.target === 'เบสเซนตร้า' ? 'text-purple-700 bg-purple-50 border-purple-300' : selectedProject.target === 'แคสเทอเรีย' ? 'text-red-600 bg-red-50 border-red-300' : selectedProject.target === 'แบลงค์ไฮม์การ์ด' ? 'text-sky-600 bg-sky-50 border-sky-300' : selectedProject.target === 'แมคชีนโพลิส' ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-amber-600 bg-amber-50 border-amber-300'}`}>
+                                            {selectedProject.target}
+                                        </span>
+                                    </p>
+                                    <p className="col-span-2">
+                                        <strong className="font-bold text-[#5d3a1a]">ประเภทพลังสาสน์:</strong> <span className="bg-blue-100 text-blue-900 px-2.5 py-1 rounded font-bold border border-blue-300">{selectedProject.category}</span>
+                                    </p>
                                 </div>
                                 <div className="space-y-4 text-[#5d3a1a] bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
-                                    <p><strong className="font-bold text-[#5d3a1a]">犹もｸ｣犧�ｸ�ｸｲ犧� / 犧ｪ犧籾ｸｲ犧吭ｸ伶ｸｵ犹�:</strong> <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 ml-1">{selectedProject.factory}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣犧伶ｸｵ犹謂ｸ樅ｸｱ犧亭ｸ吭ｸｲ:</strong> <span className="text-[#1e3a8a] font-medium ml-1">{selectedProject.location}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧樅ｸｴ犧≒ｸｱ犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ:</strong> <span className="text-[#1e3a8a] font-medium ml-1">{selectedProject.pinpoint}</span></p>
-                                    <p><strong className="font-bold text-[#5d3a1a]">犧癌ｸｷ犹謂ｸｭ犹もｸ�ｸ｣犧�ｸ≒ｸｲ犧｣:</strong> <span className="font-bold text-[#1e3a8a] text-base ml-1">{selectedProject.title}</span></p>
+                                    <p><strong className="font-bold text-[#5d3a1a]">โรงงาน / สถานที่:</strong> <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">{selectedProject.factory}</span></p>
+                                    <p><strong className="font-bold text-[#5d3a1a]">กระบวนการที่พัฒนา:</strong> <span className="text-[#1e3a8a] font-medium">{selectedProject.location}</span></p>
+                                    <p><strong className="font-bold text-[#5d3a1a]">พิกัดปัญหา:</strong> <span className="text-[#1e3a8a] font-medium">{selectedProject.pinpoint}</span></p>
+                                    <p><strong className="font-bold text-[#5d3a1a]">ชื่อโครงการ:</strong> <span className="font-bold text-[#1e3a8a] text-base">{selectedProject.title}</span></p>
                                     <div>
-                                        <p className="font-bold text-[#5d3a1a]">犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ/犧もｹ霞ｸｭ犧｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧�:</p>
-                                        <p className="text-[#1e3a8a] font-medium leading-relaxed bg-white p-3 rounded-lg border border-[#8b5a2b]/20 shadow-inner mt-1">{selectedProject.problem}</p>
+                                        <p className="font-bold text-[#5d3a1a]">รายละเอียดปัญหา/ข้อร้องเรียน:</p>
+                                        <p className="text-[#1e3a8a] font-medium ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 whitespace-pre-wrap">{selectedProject.problem}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold text-[#5d3a1a]">犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ霞ｹ�ｸ� (犧伶ｸｵ犹謂ｹ犧ｪ犧吭ｸｭ):</p>
-                                        <p className="text-[#1e3a8a] font-medium leading-relaxed bg-white p-3 rounded-lg border border-[#8b5a2b]/20 shadow-inner mt-1">{selectedProject.solution}</p>
+                                        <p className="font-bold text-[#5d3a1a]">วิธีแก้ไข (ที่เสนอ):</p>
+                                        <p className="text-[#1e3a8a] font-medium ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 whitespace-pre-wrap">{selectedProject.solution}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold text-[#5d3a1a]">犧巵ｸ｣犧ｰ犹もｸ｢犧癌ｸ吭ｹ呉ｸ伶ｸｵ犹謂ｸ�ｸｲ犧扉ｸｧ犹謂ｸｲ犧謂ｸｰ犹�ｸ扉ｹ霞ｸ｣犧ｱ犧�:</p>
-                                        <p className="text-[#1e3a8a] font-medium leading-relaxed bg-white p-3 rounded-lg border border-[#8b5a2b]/20 shadow-inner mt-1">{selectedProject.benefit}</p>
+                                        <p className="font-bold text-[#5d3a1a]">ประโยชน์ที่คาดว่าจะได้รับ:</p>
+                                        <p className="text-[#1e3a8a] font-medium ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 whitespace-pre-wrap">{selectedProject.benefit}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> 犧�犧ｲ犧樅ｸ樅ｸｴ犧≒ｸｱ犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ (Before):</p>
-                                        {(selectedProject.images && selectedProject.images.length > 0) ? (
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
-                                                {selectedProject.images.map((imgUrl, idx) => (
-                                                    <div key={idx} className="bg-black/10 rounded-lg border border-gray-400 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
-                                                        <img src={imgUrl} alt={`Before ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
-                                                            <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> 犧�ｸ･犧ｴ犧≒ｸもｸ｢犧ｲ犧｢
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : selectedProject.imagePreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedProject.imagePreview)}>
-                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
-                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> 犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犧もｸ｢犧ｲ犧｢犧｣犧ｹ犧巵ｸ�犧ｲ犧�
-                                                </div>
+                                        <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> ภาพพิกัดปัญหา (Before):</p>
+                                        {selectedProject.imagePreview ? (
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner">
+                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain" />
                                             </div>
                                         ) : (
                                             <div className="bg-gray-200 h-24 mt-1.5 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 font-bold"><span>{selectedProject.imageText}</span></div>
@@ -1565,9 +1465,9 @@
 
                                 <div className="mt-6 p-4 comment-box rounded-xl shadow-inner">
                                     <div className="flex justify-between items-center mb-2 border-b border-[#8b5a2b]/25 pb-1 text-xs">
-                                        <p className="font-bold text-[#5d3a1a]">�荘 犧壟ｸｱ犧財ｸ癌ｸｲ犧謂ｸｲ犧≒ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�:</p>
+                                        <p className="font-bold text-[#5d3a1a]">👑 บัญชาจากสภาเมือง:</p>
                                         {isAdminMode && selectedProject.ideaApproved && !selectedProject.isSuperRising && selectedProject.status !== 'Deleted' ? (
-                                            <button onClick={handleUpgradeSuperRising} className="bg-green-200 text-green-800 border border-green-500 px-4 py-1.5 rounded-full text-xs font-bold shadow-md hover:scale-105 hover:bg-green-300 transition cursor-pointer flex items-center gap-1" title="犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犧ｭ犧ｱ犧巵ｹ犧≒ｸ｣犧扉ｹ犧巵ｹ�ｸ� Super Rising">
+                                            <button onClick={handleUpgradeSuperRising} className="bg-green-200 text-green-800 border border-green-500 px-4 py-1.5 rounded-full text-xs font-bold shadow-md hover:scale-105 hover:bg-green-300 transition cursor-pointer flex items-center gap-1" title="คลิกเพื่ออัปเกรดเป็น Super Rising">
                                                 Rising <i className="fa-solid fa-arrow-up animate-bounce"></i>
                                             </button>
                                         ) : (
@@ -1575,109 +1475,63 @@
                                         )}
                                     </div>
                                     <div className="text-[#5d3a1a] text-xs leading-relaxed">
-                                        {selectedProject.status === 'Blueprint' && <span>竢ｳ 犧｡犹霞ｸｲ犹犧｣犹�ｸｧ犧≒ｸｳ犧･犧ｱ犧�ｸｧ犧ｴ犹謂ｸ�ｸ吭ｸｳ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸもｸｭ犧�ｸ伶ｹ謂ｸｲ犧吭ｸｪ犹謂ｸ�ｸ籾ｸｶ犧�ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧� 犧ｭ犧扉ｹ�ｸ謂ｸ｣犧ｭ犧ｪ犧ｱ犧≒ｸ吭ｸｴ犧�</span>}
-                                        {selectedProject.status === 'Hidden' && <span>�白 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ霞ｸ壟ｸｱ犧壟ｸ吭ｸｵ犹霞ｸ籾ｸｹ犧≒ｹ犧≒ｹ�ｸ壟ｹ犧巵ｹ�ｸ吭ｸ�ｸｧ犧ｲ犧｡犧･犧ｱ犧壟ｸｪ犧ｸ犧扉ｸ｢犧ｭ犧扉ｹもｸ扉ｸ｢犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�</span>}
-                                        {selectedProject.status === 'Hall of fame' && <span>箝� 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ霞ｸ壟ｸｱ犧壟ｸ吭ｸｵ犹霞ｸ籾ｸｹ犧≒ｸ壟ｸ｣犧｣犧謂ｸｸ犧･犧�ｹ�ｸ吭ｸｫ犧ｭ犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ犹≒ｸ･犹霞ｸｧ (犧金ｹ謂ｸｭ犧吭ｸ謂ｸｲ犧≒ｸｫ犧吭ｹ霞ｸｲ犧ｫ犧･犧ｱ犧�)</span>}
+                                        {selectedProject.status === 'Blueprint' && <span>⏳ ม้าเร็วกำลังวิ่งนำสาส์นของท่านส่งถึงสภาเมือง อดใจรอสักนิด</span>}
+                                        {selectedProject.status === 'Hidden' && <span>🔒 สาส์นฉบับนี้ถูกเก็บเป็นความลับสุดยอดโดยสภาเมือง</span>}
+                                        {selectedProject.status === 'Hall of fame' && <span>⭐ สาส์นฉบับนี้ถูกบรรจุลงในหอเกียรติยศแล้ว (ซ่อนจากหน้าหลัก)</span>}
                                         {selectedProject.status !== 'Blueprint' && selectedProject.status !== 'Hidden' && selectedProject.status !== 'Hall of fame' && selectedProject.comment && <span dangerouslySetInnerHTML={{ __html: selectedProject.comment }}></span>}
                                     </div>
                                 </div>
 
-                                {(selectedProject.status === 'Blueprint' || (selectedProject.status === 'Founding' && !selectedProject.ideaApproved)) && (
-                                    <div className="mt-4 p-3.5 bg-amber-100/90 border border-amber-400 rounded-xl text-center shadow-sm">
-                                        <p className="text-xs text-amber-900 font-bold mb-2">
-                                            笨擾ｸ� 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣犹犧樅ｸｴ犹謂ｸ｡犹犧歩ｸｴ犧｡/犹≒ｸ≒ｹ霞ｹ�ｸもｸもｹ霞ｸｭ犧｡犧ｹ犧･犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ霞ｸ壟ｸｱ犧壟ｸ吭ｸｵ犹霞ｹ�ｸ癌ｹ謂ｹ�ｸｫ犧｡犧�ｸｰ?
-                                        </p>
-                                        <button 
-                                            type="button"
-                                            onClick={() => {
-                                                const pass = prompt('�理�� 犧≒ｸ｣犧ｸ犧内ｸｲ犧≒ｸ｣犧ｭ犧≒ｸ｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧吭ｸ霞ｸ壟ｸｱ犧壟ｹ犧歩ｹ�ｸ｡犹犧樅ｸｷ犹謂ｸｭ犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｹ≒ｸ≒ｹ霞ｹ�ｸもｸｪ犧ｲ犧ｪ犹呉ｸ�:');
-                                                if (!pass) return;
-                                                if (pass.trim().toLowerCase() === String(selectedProject.emp).trim().toLowerCase()) {
-                                                    closeModal();
-                                                    if (onStartEdit) onStartEdit(selectedProject);
-                                                } else {
-                                                    alert('笶� 犧｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧吭ｹ�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧� 犧�ｸｸ犧内ｹ�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｹ≒ｸ≒ｹ霞ｹ�ｸもｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ吭ｸｵ犹霞ｸ�ｹ謂ｸｰ');
-                                                }
-                                            }} 
-                                            className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm rounded-lg shadow transition cursor-pointer border border-yellow-300 flex items-center justify-center gap-1.5"
-                                        >
-                                            <i className="fa-solid fa-pen-to-square"></i> 笨擾ｸ� 犧もｸｭ犹≒ｸ≒ｹ霞ｹ�ｸもｸｪ犧ｲ犧ｪ犹呉ｸ� (犧歩ｹ霞ｸｭ犧�ｸ｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸ｣犧ｫ犧ｱ犧ｪ犧樅ｸ吭ｸｱ犧≒ｸ�ｸｲ犧吭ｸ霞ｸ壟ｸｱ犧壟ｹ犧歩ｹ�ｸ｡)
-                                        </button>
-                                    </div>
-                                )}
-
                                 {isAdminMode && (
                                     <div className="mt-6 p-4 bg-gray-800 border border-gray-600 rounded-xl space-y-3 shadow-inner">
-                                        <p className="font-bold text-gray-300 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-user-secret"></i> 犧�ｸｳ犧ｪ犧ｱ犹謂ｸ�ｸ･犧ｱ犧壟ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧� (犧謂ｸｱ犧扉ｸ≒ｸｲ犧｣犧巵ｸｱ犧財ｸｫ犧ｲ / 犹犧�ｸ･犧ｵ犧｢犧｣犹呉ｸもｸ｢犧ｰ)</p>
+                                        <p className="font-bold text-gray-300 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-user-secret"></i> คำสั่งลับสภาเมือง (จัดการปัญหา / เคลียร์ขยะ)</p>
                                         <div className="flex flex-wrap gap-2">
                                             {selectedProject.status === 'Hidden' || selectedProject.status === 'Hall of fame' ? (
-                                                <button onClick={() => handleSecretAction('Restore')} className="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> 犧扉ｸｶ犧�ｸ≒ｸ･犧ｱ犧壟ｸ�ｸｷ犧吭ｸ｡犧ｲ (Restore)</button>
+                                                <button onClick={() => handleSecretAction('Restore')} className="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> ดึงกลับคืนมา (Restore)</button>
                                             ) : (
                                                 <>
-                                                    <button onClick={() => handleSecretAction('Hide')} className="flex-1 bg-gray-600 text-white font-bold py-2 rounded hover:bg-gray-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-eye-slash mr-1"></i> 犧金ｹ謂ｸｭ犧� (Hide)</button>
+                                                    <button onClick={() => handleSecretAction('Hide')} className="flex-1 bg-gray-600 text-white font-bold py-2 rounded hover:bg-gray-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-eye-slash mr-1"></i> ซ่อน (Hide)</button>
                                                 </>
                                             )}
-                                            <button onClick={() => handleSecretAction('Delete')} className="flex-1 bg-red-900 text-white font-bold py-2 rounded hover:bg-red-800 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-fire mr-1"></i> 犧･犧壟ｸ伶ｸｴ犹霞ｸ� (Delete)</button>
+                                            <button onClick={() => handleSecretAction('Delete')} className="flex-1 bg-red-900 text-white font-bold py-2 rounded hover:bg-red-800 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-fire mr-1"></i> ลบทิ้ง (Delete)</button>
                                         </div>
                                     </div>
                                 )}
 
                                 {isAdminMode && (selectedProject.status === 'Blueprint' || !selectedProject.ideaApproved) && selectedProject.status !== 'Hidden' && selectedProject.status !== 'Hall of fame' && (
                                     <div className="mt-4 p-4 bg-red-50 border border-red-300 rounded-xl space-y-3">
-                                        <p className="font-bold text-red-800 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> 犹≒ｸ憫ｸ�ｸ�ｸｧ犧壟ｸ�ｸｸ犧｡犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧� (犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ歩ｹ霞ｸ吭ｸ伶ｸｲ犧�)</p>
+                                        <p className="font-bold text-red-800 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> แผงควบคุมสภาเมือง (พิจารณาสาส์นต้นทาง)</p>
                                         <select value={adminCategory} onChange={(e) => setAdminCategory(e.target.value)} className="w-full p-2.5 border border-red-300 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none mb-1">
-                                            <option value="Quality">�虫 犧ｫ犧｡犧ｧ犧扉ｸｫ犧｡犧ｹ犹�: Quality (犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡犧樅ｸｴ犹犧ｨ犧ｩ x2 EXP!)</option>
-                                            <option value="Safety">�孱�� 犧ｫ犧｡犧ｧ犧扉ｸｫ犧｡犧ｹ犹�: Safety</option>
-                                            <option value="Culture">�糖 犧ｫ犧｡犧ｧ犧扉ｸｫ犧｡犧ｹ犹�: Culture</option>
-                                            <option value="Secret">�白 犧ｫ犧｡犧ｧ犧扉ｸｫ犧｡犧ｹ犹�: Secret</option>
+                                            <option value="Quality">💎 หมวดหมู่: Quality (กิจกรรมพิเศษ x2 EXP!)</option>
+                                            <option value="Safety">🛡️ หมวดหมู่: Safety</option>
+                                            <option value="Culture">📜 หมวดหมู่: Culture</option>
+                                            <option value="Secret">🔒 หมวดหมู่: Secret</option>
                                         </select>
                                         <select value={adminStatus} onChange={(e) => setAdminStatus(e.target.value)} className="w-full p-2.5 border border-red-300 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
-                                            <option value="">-- 犧ｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸｪ犧籾ｸｲ犧吭ｸｰ犹�ｸｭ犹犧扉ｸｵ犧｢ --</option>
-                                            <option value="Founding">�女�� Founding (犧≒ｸｳ犧･犧ｱ犧�ｸ樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ / 犧巵ｸ｣犧ｶ犧≒ｸｩ犧ｲ犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢)</option>
-                                            <option value="Rising">箝� Rising (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹�ｸｭ犹犧扉ｸｵ犧｢犧巵ｸ≒ｸ歩ｸｴ)</option>
-                                            <option value="Ruined">笶� Ruined (犧巵ｸｱ犧扉ｸ歩ｸ≒ｹ�ｸｭ犹犧扉ｸｵ犧｢)</option>
+                                            <option value="">-- อัปเดตสถานะไอเดีย --</option>
+                                            <option value="Founding">🏗️ Founding (กำลังพิจารณา / ปรึกษาเป้าหมาย)</option>
+                                            <option value="Rising">⭐ Rising (อนุมัติไอเดียปกติ)</option>
+                                            <option value="Ruined">❌ Ruined (ปัดตกไอเดีย)</option>
                                         </select>
-                                        <textarea rows={2} value={adminFeedback} onChange={(e) => setAdminFeedback(e.target.value)} placeholder="犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸもｸｭ犧�ｸｭ犧｡犹犧｡犧吭ｸ歩ｹ呉ｸｧ犹謂ｸｲ..." className="w-full p-2.5 border border-red-300 rounded-lg text-xs bg-white text-slate-800 outline-none"></textarea>
-                                        <button onClick={handleAdminSubmit} className="w-full bg-red-800 text-white font-bold py-2.5 rounded-lg hover:bg-red-700 shadow transition cursor-pointer text-xs">犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｸｳ犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犧ｪ犧ｲ犧ｪ犹呉ｸ�</button>
+                                        <textarea rows={2} value={adminFeedback} onChange={(e) => setAdminFeedback(e.target.value)} placeholder="สภาเมืองขอคอมเมนต์ว่า..." className="w-full p-2.5 border border-red-300 rounded-lg text-xs bg-white text-slate-800 outline-none"></textarea>
+                                        <button onClick={handleAdminSubmit} className="w-full bg-red-800 text-white font-bold py-2.5 rounded-lg hover:bg-red-700 shadow transition cursor-pointer text-xs">บันทึกคำพิจารณาสาส์น</button>
+                                    </div>
+                                )}
+                                 {onStartEdit && selectedProject.status === 'Blueprint' && (
+                                    <div className="mt-4 pt-4 border-t border-[#8b5a2b]/30 flex justify-end">
+                                        <button 
+                                            onClick={() => {
+                                                const projToEdit = selectedProject;
+                                                closeModal();
+                                                onStartEdit(projToEdit);
+                                            }} 
+                                            className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <i className="fa-solid fa-pen-to-square"></i> ✏️ แก้ไขสาส์นพัฒนาฉบับนี้
+                                        </button>
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    )}
-
-                    {deleteConfirmProject && (
-                        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in pointer-events-auto">
-                            <div className="bg-[#2a1215] border-4 border-red-700 p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-red-100 relative">
-                                <div className="text-5xl mb-3 animate-bounce">�櫨</div>
-                                <h3 className="text-xl md:text-2xl font-bold text-red-400 font-cinzel mb-2">犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸ≒ｸｲ犧｣犹犧憫ｸｲ犧伶ｸｳ犧･犧ｲ犧｢犧ｪ犧ｲ犧ｪ犹呉ｸ�?</h3>
-                                <p className="text-xs md:text-sm text-gray-300 mb-2 leading-relaxed">
-                                    犧ｭ犹霞ｸｲ犧�ｸｭ犧ｴ犧�ｸｪ犧ｲ犧ｪ犹呉ｸ�: <strong className="text-white">{deleteConfirmProject.id}</strong> ({deleteConfirmProject.title})
-                                </p>
-                                <p className="text-xs text-red-300 font-bold mb-6">
-                                    笞��� 犧もｹ霞ｸｭ犧｡犧ｹ犧･犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ霞ｸ壟ｸｱ犧壟ｸ吭ｸｵ犹霞ｸ謂ｸｰ犧籾ｸｹ犧≒ｸ伶ｸｳ犧･犧ｲ犧｢犧籾ｸｲ犧ｧ犧｣犧謂ｸｲ犧≒ｸ｣犧ｰ犧壟ｸ� 犹�ｸ｡犹謂ｸｪ犧ｲ犧｡犧ｲ犧｣犧籾ｸ≒ｸｹ犹霞ｸ�ｸｷ犧吭ｸ≒ｸ･犧ｱ犧壟ｸ｡犧ｲ犹�ｸ扉ｹ霞ｸ吭ｸｰ犧�ｸｰ!
-                                </p>
-                                <div className="flex gap-3">
-                                    <button type="button" onClick={() => setDeleteConfirmProject(null)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
-                                        <i className="fa-solid fa-xmark mr-1.5"></i> 犧｢犧≒ｹ犧･犧ｴ犧�
-                                    </button>
-                                    <button type="button" onClick={() => {
-                                        onUpdateProject({ ...deleteConfirmProject, status: 'Deleted' });
-                                        alert('�櫨 犹犧憫ｸｲ犧伶ｸｳ犧･犧ｲ犧｢犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｹ犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!');
-                                        setDeleteConfirmProject(null);
-                                        closeModal();
-                                    }} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-red-400">
-                                        <i className="fa-solid fa-trash-can mr-1.5"></i> 犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸ伶ｸｳ犧･犧ｲ犧｢犧ｪ犧ｲ犧ｪ犹呉ｸ�
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {zoomedImg && (
-                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
-                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
-                            <img src={zoomedImg} alt="Zoomed" className="max-h-[85vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] rounded-lg border border-white/20" onClick={(e) => e.stopPropagation()} />
-                            <p className="absolute bottom-6 text-gray-400 text-sm italic bg-black/60 px-4 py-1 rounded-full border border-white/10">犧�ｸ･犧ｴ犧≒ｸ伶ｸｵ犹謂ｹ�ｸ扉ｸ≒ｹ�ｹ�ｸ扉ｹ霞ｹ犧樅ｸｷ犹謂ｸｭ犧巵ｸｴ犧�</p>
                         </div>
                     )}
                 </div>
@@ -1689,13 +1543,10 @@
         // ==========================================
         function QuestBoard({ projects, onUpdateProject, kingdomEXP }) {
             const [currentRole, setCurrentRole] = useState('none');
-            const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedQuest, setSelectedQuest] = useState(null);
-            const [zoomedImg, setZoomedImg] = useState(null);
             const [targetCommentText, setTargetCommentText] = useState('');
             const [targetImageFile, setTargetImageFile] = useState(null);
             const [targetImagePreview, setTargetImagePreview] = useState(null);
-            const [targetImages, setTargetImages] = useState([]);
             const [centralStatus, setCentralStatus] = useState('');
             const [centralComment, setCentralComment] = useState('');
 
@@ -1706,186 +1557,99 @@
             const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
             useEffect(() => { setCurrentPage(1); }, [filters]);
 
-            const handleRoleLogin = (type) => {
-                if (type === 'target') {
-                    if (currentRole !== 'none' && currentRole !== 'central') {
-                        setCurrentRole('none');
-                        alert('�坎 犧ｭ犧ｭ犧≒ｸ謂ｸｲ犧≒ｸ｣犧ｰ犧壟ｸ壟ｸ歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ');
-                        return;
-                    }
-                    const pass = prompt('�理�� 犧≒ｸ｣犧ｸ犧内ｸｲ犹�ｸｪ犹謂ｸ｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸ歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧もｸｭ犧�ｸ�ｸｸ犧�:');
-                    if (!pass) return;
-                    
-                    const passMap = {
-                        '1111': '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ',
-                        '2222': '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢',
-                        '3333': '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�',
-                        '4444': '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ',
-                        '5555': '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�'
-                    };
-                    
-                    const matchedKingdom = passMap[pass.trim()];
-                    if (matchedKingdom) {
-                        setCurrentRole(matchedKingdom);
-                        alert(`笨� 犧･犹�ｸｭ犧≒ｸｭ犧ｴ犧吭ｹ犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸｪ犧ｴ犧伶ｸ倨ｸｴ犧ｪ犧�犧ｲ犧歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣ "${matchedKingdom}" 犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!`);
-                    } else {
-                        alert('笶� 犧｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸ歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧�!');
-                    }
-                } else if (type === 'central') {
-                    if (currentRole === 'central') {
-                        setCurrentRole('none');
-                        alert('�坎 犧ｭ犧ｭ犧≒ｸ謂ｸｲ犧≒ｸ｣犧ｰ犧壟ｸ壟ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧�ｹ犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ');
-                        return;
-                    }
-                    const pass = prompt('�柏 犧≒ｸ｣犧ｸ犧内ｸｲ犹�ｸｪ犹謂ｸ｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧�:');
-                    if (pass === '9999' || pass === '1234') {
-                        setCurrentRole('central');
-                        alert('笨� 犧･犹�ｸｭ犧≒ｸｭ犧ｴ犧吭ｹ犧もｹ霞ｸｲ犧ｪ犧ｹ犹謂ｸｪ犧ｴ犧伶ｸ倨ｸｴ犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧�ｹ犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!');
-                    } else if (pass !== null) {
-                        alert('笶� 犧｣犧ｫ犧ｱ犧ｪ犧憫ｹ謂ｸｲ犧吭ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｹ�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ歩ｹ霞ｸｭ犧�!');
-                    }
+            const handleRoleLogin = (role) => {
+                if (role === 'target') {
+                    if (currentRole !== 'none' && currentRole !== 'central') { setCurrentRole('none'); alert('ออกจากระบบตัวแทนอาณาจักรเรียบร้อย'); return; }
+                    const pass = prompt('🔐 ใส่รหัสผ่านตัวแทนอาณาจักร:');
+                    if (pass === '1111') { setCurrentRole('เบสเซนตร้า'); alert("✅ ล็อกอินเป็นตัวแทน 'เบสเซนตร้า' เรียบร้อย"); }
+                    else if (pass === '2222') { setCurrentRole('แคสเทอเรีย'); alert("✅ ล็อกอินเป็นตัวแทน 'แคสเทอเรีย' เรียบร้อย"); }
+                    else if (pass === '3333') { setCurrentRole('แบลงค์ไฮม์การ์ด'); alert("✅ ล็อกอินเป็นตัวแทน 'แบลงค์ไฮม์การ์ด' เรียบร้อย"); }
+                    else if (pass === '4444') { setCurrentRole('แมคชีนโพลิส'); alert("✅ ล็อกอินเป็นตัวแทน 'แมคชีนโพลิส' เรียบร้อย"); }
+                    else if (pass === '5555') { setCurrentRole('ไฟนัลธรอน'); alert("✅ ล็อกอินเป็นตัวแทน 'ไฟนัลธรอน' เรียบร้อย"); }
+                    else if (pass) alert('❌ รหัสผ่านไม่ถูกต้อง!');
+                } else if (role === 'central') {
+                    if (currentRole === 'central') { setCurrentRole('none'); alert('ออกจากระบบสภาเมืองส่วนกลาง'); return; }
+                    const pass = prompt('🔐 ใส่รหัสผ่านสภาเมืองกลาง:');
+                    if (pass === '9999') { setCurrentRole('central'); alert("✅ ล็อกอินเป็น 'สภาเมืองส่วนกลาง' เรียบร้อย"); }
+                    else if (pass) alert('❌ รหัสผิด!');
                 }
             };
 
+            const getQuestStatusStr = (p) => {
+                if (p.status === 'Rising' && p.isSuperRising) return 'Super Rising';
+                return p.status;
+            };
+
             const handleExportCSV = () => {
-                const activeQuests = (projects || []).filter(p => p && p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-                const exportQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p && p.status !== 'Hall of fame');
-                if (exportQuests.length === 0) { alert('犹�ｸ｡犹謂ｸ｡犧ｵ犧もｹ霞ｸｭ犧｡犧ｹ犧･犧�犧ｲ犧｣犧≒ｸｴ犧謂ｹ�ｸｫ犹霞ｹ犧壟ｸｴ犧≒ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｹ謂ｸｰ'); return; }
+                const activeQuestsToExport = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
                 
-                const headers = ['犧｣犧ｫ犧ｱ犧ｪ犧ｪ犧ｲ犧ｪ犹呉ｸ�', '犧癌ｸｷ犹謂ｸｭ犧�犧ｲ犧｣犧≒ｸｴ犧�', '犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ犹�ｸｭ犹犧扉ｸｵ犧｢ (Origin)', '犧憫ｸｹ犹霞ｸ｣犧ｱ犧壟ｸ憫ｸｴ犧扉ｸ癌ｸｭ犧� (Target)', '犧ｪ犧籾ｸｲ犧吭ｸｰ犧�犧ｲ犧｣犧≒ｸｴ犧�', '犧もｹ霞ｸｭ犧�ｸｧ犧ｲ犧｡犧ｭ犧倨ｸｴ犧壟ｸｲ犧｢', '犧�ｸｧ犧ｲ犧｡犧�ｸｴ犧扉ｹ犧ｫ犹�ｸ吭ｸｪ犧�犧ｲ'];
-                const csvRows = exportQuests.map(q => [
-                    q.id, q.title, q.origin, q.target, q.status, q.targetComment || '', q.adminComment || ''
+                if (activeQuestsToExport.length === 0) { alert('ไม่มีข้อมูลให้เบิกบันทึกค่ะ'); return; }
+                
+                const headers = [
+                    'รหัสสาส์น', 'โรงงาน', 'กระบวนการ', 'พิกัดจุดเกิดเหตุ', 'ผู้เสนอ (Origin)', 
+                    'รายละเอียดปัญหา', 'วิธีแก้ไขที่เสนอ', 'รูปสาส์นตั้งต้น', 
+                    'ผู้รับผิดชอบ (Target)', 'ข้อความจากทีมงาน', 'รูปหลังการแก้ไข', 'สถานะภารกิจ'
+                ];
+                
+                const csvRows = activeQuestsToExport.map(p => [ 
+                    p.id, p.factory, p.location, p.pinpoint, p.origin, 
+                    p.problem, p.solution, p.imagePreview ? 'มี' : 'ไม่มี', 
+                    p.target, p.targetComment || '-', p.imageAfterPreview ? 'มี' : 'ไม่มี', getQuestStatusStr(p) 
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
                 const csvString = [headers.join(','), ...csvRows].join('\n');
                 const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `DK_Quest_report_${getFormattedDate()}.csv`;
-                link.click();
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `DK_Quest_report_${getFormattedDate()}.csv`; link.click();
             };
 
-            const handleMultiEvidenceChange = (e) => {
-                if (e.target.files) {
-                    const files = Array.from(e.target.files);
-                    const currentCount = targetImages.length;
-                    const availableSlots = 5 - currentCount;
-                    if (availableSlots <= 0) {
-                        alert('犹≒ｸ吭ｸ壟ｸ�犧ｲ犧樅ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｹ�ｸ扉ｹ霞ｸｪ犧ｹ犧�ｸｪ犧ｸ犧� 5 犧｣犧ｹ犧巵ｹ犧伶ｹ謂ｸｲ犧吭ｸｱ犹霞ｸ吭ｸ�ｹ謂ｸｰ');
-                        return;
-                    }
-                    const selectedFiles = files.slice(0, availableSlots);
-                    selectedFiles.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width, height = img.height;
-                                if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
-                                else { if (height > 800) { width *= 800 / height; height = 800; } }
-                                canvas.width = width; canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0, width, height);
-                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
-                                setTargetImages(prev => [...prev, compressedDataUrl]);
-                            };
-                            img.src = event.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                }
-            };
-
-            const handleRemoveEvidence = (indexToRemove) => {
-                setTargetImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
-            };
-
-            const openQuestModal = (quest) => { 
-                setSelectedQuest(quest); 
-                setTargetCommentText(''); 
-                setTargetImageFile(null); 
-                setTargetImagePreview(null);
-                setTargetImages(quest.imagesAfter || (quest.imageAfterPreview ? [quest.imageAfterPreview] : []));
-                setCentralStatus(''); 
-                setCentralComment(''); 
-            };
+            const openQuestModal = (quest) => { setSelectedQuest(quest); setTargetCommentText(''); setTargetImageFile(null); setTargetImagePreview(null); setCentralStatus(''); setCentralComment(''); };
             
             const closeModal = () => { 
                 setSelectedQuest(null); 
                 setTargetCommentText(''); 
                 setTargetImageFile(null); 
                 setTargetImagePreview(null); 
-                setTargetImages([]);
             };
-
-            const [showQuestConfirm, setShowQuestConfirm] = useState(false);
-            const [isSubmitting, setIsSubmitting] = useState(false);
 
             const handleTargetSubmit = () => {
-                if (!targetCommentText) { alert('犧≒ｸ｣犧ｸ犧内ｸｲ犧≒ｸ｣犧ｭ犧≒ｸもｹ霞ｸｭ犧�ｸｧ犧ｲ犧｡犧ｭ犧倨ｸｴ犧壟ｸｲ犧｢犧扉ｹ霞ｸｧ犧｢犧�ｹ謂ｸｰ'); return; }
-                setShowQuestConfirm(true);
-            };
-
-            const handleFinalTargetSubmit = async () => {
-                if (isSubmitting) return;
-                setIsSubmitting(true);
-                try {
-                    setShowQuestConfirm(false);
-                    const imageList = targetImages.length > 0 ? targetImages : (targetImagePreview ? [targetImagePreview] : []);
-                    const updatedQuest = { 
-                        ...selectedQuest, 
-                        status: 'Evidence', 
-                        targetComment: targetCommentText, 
-                        imageAfterText: imageList.length > 0 ? `�萄 犧�犧ｲ犧樅ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧�: (${imageList.length} 犧｣犧ｹ犧�)` : '�萄 犧�犧ｲ犧樅ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸ≒ｸｲ犧｣犹≒ｸ≒ｹ霞ｹ�ｸ� (After)', 
-                        imageAfterPreview: imageList[0] || null,
-                        imagesAfter: imageList,
-                        adminComment: '犧｣犧ｭ犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ≒ｸ･犧ｲ犧�ｸ歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧壟ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧�...' 
-                    };
-                    await onUpdateProject(updatedQuest);
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                    setShowQuestConfirm(false);
-                    alert("犧ｭ犧ｱ犧巵ｹもｸｫ犧･犧扉ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸｪ犧ｳ犹犧｣犹�ｸ�!");
-                    closeModal();
-                } catch (err) {
-                    alert('犹犧≒ｸｴ犧扉ｸもｹ霞ｸｭ犧憫ｸｴ犧扉ｸ樅ｸ･犧ｲ犧扉ｹ�ｸ吭ｸ≒ｸｲ犧｣犧ｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧� 犧≒ｸ｣犧ｸ犧内ｸｲ犧･犧ｭ犧�ｹ�ｸｫ犧｡犹謂ｸｭ犧ｵ犧≒ｸ�ｸ｣犧ｱ犹霞ｸ�ｸ�ｹ謂ｸｰ');
-                } finally {
-                    setIsSubmitting(false);
-                }
+                if (!targetCommentText) { alert('กรุณากรอกข้อความอธิบายด้วยค่ะ'); return; }
+                const updatedQuest = { ...selectedQuest, status: 'Evidence', targetComment: targetCommentText, imageAfterText: targetImageFile ? `📸 ภาพหลักฐาน: ${targetImageFile}` : '📸 ภาพหลักฐานการแก้ไข (After)', imageAfterPreview: targetImagePreview, adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' };
+                onUpdateProject(updatedQuest);
+                alert("อัปโหลดหลักฐานสำเร็จ!");
+                closeModal();
             };
 
             const handleCentralSubmit = () => {
-                if (!centralStatus) { alert('犧≒ｸ｣犧ｸ犧内ｸｲ犹犧･犧ｷ犧ｭ犧≒ｸ�ｸｳ犧歩ｸｱ犧扉ｸｪ犧ｴ犧吭ｸ≒ｹ謂ｸｭ犧吭ｸ�ｹ謂ｸｰ'); return; }
-                const bonusText = selectedQuest.isQualityEvent ? ' (+30 EXP 犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡ Quality)' : ' (+15 EXP)';
-                const updatedQuest = { ...selectedQuest, status: centralStatus, adminComment: centralComment || (centralStatus === 'Rising' ? `犧歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧壟ｸ憫ｹ謂ｸｲ犧�! 犹�ｸ扉ｹ霞ｸ｣犧ｱ犧壟ｸ≒ｸｲ犧｣犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹≒ｸ･犹霞ｸｧ${bonusText}` : '犧ｪ犹謂ｸ�ｸ≒ｸ･犧ｱ犧壟ｹ≒ｸ≒ｹ霞ｹ�ｸ�') };
+                if (!centralStatus) { alert('กรุณาเลือกคำตัดสินก่อนค่ะ'); return; }
+                const bonusText = selectedQuest.isQualityEvent ? ' (+30 EXP กิจกรรม Quality)' : ' (+15 EXP)';
+                const updatedQuest = { ...selectedQuest, status: centralStatus, adminComment: centralComment || (centralStatus === 'Rising' ? `ตรวจสอบผ่าน! ได้รับการอนุมัติแล้ว${bonusText}` : 'ส่งกลับแก้ไข') };
                 if (centralStatus === 'Abandoned') updatedQuest.wasAbandoned = true;
                 onUpdateProject(updatedQuest);
-                alert('犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｸｳ犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢!');
+                alert('บันทึกคำพิจารณาเรียบร้อย!');
                 closeModal();
             };
 
             const handleCentralQuestAction = (actionType) => {
                 if (actionType === 'HallOfFame') {
-                    if (window.confirm('箝� 犧壟ｸ｣犧｣犧謂ｸｸ犧�犧ｲ犧｣犧≒ｸｴ犧謂ｸ吭ｸｵ犹霞ｸ･犧� Hall of fame 犹犧樅ｸｷ犹謂ｸｭ犹�ｸｫ犹霞ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｹもｸ･犹謂ｸ�ｸもｸｶ犹霞ｸ吭ｸｫ犧｣犧ｷ犧ｭ犹�ｸ｡犹�?')) {
+                    if (window.confirm('⭐ บรรจุภารกิจนี้ลง Hall of fame เพื่อให้กระดานโล่งขึ้นหรือไม่?')) {
                         onUpdateProject({ ...selectedQuest, status: 'Hall of fame' });
-                        alert('箝� 犧壟ｸ｣犧｣犧謂ｸｸ犹犧もｹ霞ｸｲ犧ｫ犧ｭ犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!'); closeModal();
+                        alert('⭐ บรรจุเข้าหอเกียรติยศเรียบร้อยแล้ว!'); closeModal();
                     }
                 } else if (actionType === 'Restore') {
-                    if (window.confirm('�売 犧扉ｸｶ犧�ｸ�犧ｲ犧｣犧≒ｸｴ犧謂ｸ≒ｸ･犧ｱ犧壟ｸｪ犧ｹ犹謂ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｫ犧･犧ｱ犧≒ｸｫ犧｣犧ｷ犧ｭ犹�ｸ｡犹�?')) {
+                    if (window.confirm('🔄 ดึงภารกิจกลับสู่กระดานหลักหรือไม่?')) {
                         onUpdateProject({ ...selectedQuest, status: 'Rising' });
-                        alert('�売 犧扉ｸｶ犧�ｸ≒ｸ･犧ｱ犧壟ｸ｡犧ｲ犹犧｣犧ｵ犧｢犧壟ｸ｣犹霞ｸｭ犧｢犹≒ｸ･犹霞ｸｧ!'); closeModal();
+                        alert('🔄 ดึงกลับมาเรียบร้อยแล้ว!'); closeModal();
                     }
                 }
             };
 
-            const activeQuests = (projects || []).filter(p => p && p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p && p.status !== 'Hall of fame');
+            const activeQuests = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
+            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p.status !== 'Hall of fame');
             
             const filteredQuests = visibleQuests.filter(q => {
-                if (!q) return false;
-                const matchTarget = !filters.target || (q.target && q.target.includes(filters.target));
+                const matchTarget = !filters.target || q.target.includes(filters.target);
                 const matchStatus = !filters.status || q.status === filters.status;
-                const rowText = `${q.id || ''} ${q.title || ''} ${q.origin || ''} ${q.target || ''}`.toLowerCase();
+                const rowText = `${q.id} ${q.title} ${q.origin} ${q.target}`.toLowerCase();
                 const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
                 return matchTarget && matchStatus && matchSearch;
             });
@@ -1893,10 +1657,9 @@
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
             const currentItems = filteredQuests.slice(indexOfFirstItem, indexOfLastItem);
-            const totalPages = Math.max(1, Math.ceil(filteredQuests.length / itemsPerPage));
+            const totalPages = Math.ceil(filteredQuests.length / itemsPerPage);
 
             const getStatusBadge = (q) => {
-                if (!q) return null;
                 if (q.status === 'Founding') return <span className="px-3 py-1 rounded-full bg-yellow-200 text-yellow-800 border border-yellow-400 text-xs font-bold w-[80px] inline-block text-center">Founding</span>;
                 if (q.status === 'Evidence') return <span className="px-3 py-1 rounded-full bg-purple-200 text-purple-800 border border-purple-400 text-xs font-bold w-[80px] inline-block text-center">Evidence</span>;
                 if (q.status === 'Rising') {
@@ -1910,11 +1673,11 @@
             };
 
             const kingdoms = [
-                { name: '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ', id: 'bes', hexColor: '#10b981' },
-                { name: '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢', id: 'cas', hexColor: '#ef4444' },
-                { name: '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�', id: 'bla', hexColor: '#38bdf8' },
-                { name: '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ', id: 'mac', hexColor: '#a855f7' },
-                { name: '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�', id: 'fin', hexColor: '#facc15' },
+                { name: 'เบสเซนตร้า', id: 'bes', hexColor: '#10b981' },
+                { name: 'แคสเทอเรีย', id: 'cas', hexColor: '#ef4444' },
+                { name: 'แบลงค์ไฮม์การ์ด', id: 'bla', hexColor: '#38bdf8' },
+                { name: 'แมคชีนโพลิส', id: 'mac', hexColor: '#a855f7' },
+                { name: 'ไฟนัลธรอน', id: 'fin', hexColor: '#facc15' },
             ];
 
             const isTargetLoggedIn = currentRole !== 'none' && currentRole !== 'central';
@@ -1923,84 +1686,69 @@
                 <div className="space-y-6 animate-fade-in">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#8b5a2b]/30 pb-4">
                         <div className="bg-[#f4e4bc] border-2 border-[#8b5a2b] px-5 py-2.5 rounded-xl shadow-lg inline-block">
-                            <h1 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] drop-shadow-sm font-cinzel">笞費ｸ� 犧･犧ｲ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸ�犧ｲ犧｣犧≒ｸｴ犧� 笞費ｸ�</h1>
+                            <h1 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] drop-shadow-sm font-cinzel">⚔️ ลานส่งมอบภารกิจ ⚔️</h1>
                             <p className="text-xs text-[#8b5a2b] font-sans mt-0.5 font-bold">(Quest Turn-In & Approval Board)</p>
                         </div>
                         <div className="flex gap-2">
                             <button onClick={handleExportCSV} className="px-4 py-2.5 rounded-xl border border-blue-600 bg-blue-100 text-blue-800 font-bold shadow hover:bg-blue-200 transition text-xs flex items-center gap-2 cursor-pointer">
-                                <i className="fa-solid fa-download"></i> 犹犧壟ｸｴ犧≒ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸｪ犧�犧ｲ (Export CSV)
+                                <i className="fa-solid fa-download"></i> เบิกบันทึกสภา (Export CSV)
                             </button>
                             <button onClick={() => handleRoleLogin('target')} className={`px-4 py-2.5 rounded-xl border-2 font-bold shadow transition cursor-pointer flex items-center gap-2 text-xs ${isTargetLoggedIn ? 'bg-blue-600 text-white border-blue-400' : 'bg-[#e0f2fe] text-[#0369a1] border-[#0284c7]'}`}>
                                 <i className="fa-solid fa-user-shield"></i>
-                                {isTargetLoggedIn ? `犧歩ｸｱ犧ｧ犹≒ｸ伶ｸ�: ${currentRole}` : '犧歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣'}
+                                {isTargetLoggedIn ? `ตัวแทน: ${currentRole}` : 'ตัวแทนอาณาจักร'}
                             </button>
                             <button onClick={() => handleRoleLogin('central')} className={`px-4 py-2.5 rounded-xl border-2 font-bold shadow transition cursor-pointer flex items-center gap-2 text-xs ${currentRole === 'central' ? 'bg-yellow-600 text-white border-yellow-400' : 'bg-[#fef08a] text-[#b45309] border-[#d97706]'}`}>
                                 <i className="fa-solid fa-gavel"></i>
-                                {currentRole === 'central' ? '犧ｪ犧�犧ｲ犧ｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧� (犧･犹�ｸｭ犧≒ｸｭ犧ｴ犧�)' : '犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧�'}
+                                {currentRole === 'central' ? 'สภาส่วนกลาง (ล็อกอิน)' : 'สภาเมืองส่วนกลาง'}
                             </button>
                         </div>
                     </div>
 
-                    <div className={`parchment rounded-2xl shadow-xl transition-all duration-300 ${isExpBoardOpen ? 'p-6 bg-gradient-to-b from-[#f4e4bc] to-[#ebdcb9]' : 'p-4 hover:bg-[#e8d6ab]'}`}>
-                        <div 
-                            onClick={() => setIsExpBoardOpen(!isExpBoardOpen)}
-                            className="flex justify-between items-center cursor-pointer select-none"
-                            title={isExpBoardOpen ? "犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犧樅ｸｱ犧壟ｹ犧≒ｹ�ｸ�" : "犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犹≒ｸｪ犧扉ｸ�ｸｪ犧籾ｸｲ犧吭ｸｰ犧�ｸｧ犧ｲ犧｡犧≒ｹ霞ｸｲ犧ｧ犧ｫ犧吭ｹ霞ｸｲ"}
-                        >
-                            <h3 className="text-lg md:text-xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
-                                <span>犧ｪ犧籾ｸｲ犧吭ｸｰ犧�ｸｧ犧ｲ犧｡犧≒ｹ霞ｸｲ犧ｧ犧ｫ犧吭ｹ霞ｸｲ犹≒ｸ歩ｹ謂ｸ･犧ｰ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣</span>
-                            </h3>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isExpBoardOpen ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.9)] scale-110' : 'bg-[#8b5a2b]/20 text-[#5d3a1a]'}`}>
-                                <i className="fa-solid fa-chevron-down text-base"></i>
-                            </div>
-                        </div>
-
-                        {isExpBoardOpen && (
-                            <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
-                                {kingdoms.map(k => {
-                                    const expVal = (kingdomEXP && kingdomEXP[k.name]) ? kingdomEXP[k.name] : 0;
-                                    const levelData = calculateLevel(expVal);
-                                    const percent = levelData.requiredExp > 0 ? (levelData.currentExp / levelData.requiredExp) * 100 : 0;
-                                    return (
-                                        <div key={k.id}>
-                                            <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
-                                                <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
-                                                <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
-                                            </div>
-                                            <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
-                                                <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
-                                            </div>
+                    <div className="parchment p-6 rounded-2xl shadow-xl">
+                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
+                        <div className="space-y-4">
+                            {kingdoms.map(k => {
+                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                return (
+                                    <div key={k.id}>
+                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
                         <div className="flex flex-wrap gap-2 items-center">
-                            <span className="font-bold text-[#5d3a1a] mr-1">FILTERS 犧�犧ｲ犧｣犧≒ｸｴ犧�:</span>
-                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧伶ｸｵ犹謂ｸ歩ｹ霞ｸｭ犧�ｸ｣犧ｱ犧壟ｸ憫ｸｴ犧扉ｸ癌ｸｭ犧�)</option><option value="犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ">犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ</option><option value="犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢">犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢</option><option value="犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�">犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�</option><option value="犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ">犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ</option><option value="犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�">犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�</option></select>
-                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-bold border-blue-600"><option value="">Status (犧ｪ犧籾ｸｲ犧吭ｸｰ犧�犧ｲ犧｣犧≒ｸｴ犧�)</option><option value="Founding">�女�� Founding (犧≒ｸｳ犧･犧ｱ犧�ｸ扉ｸｳ犹犧吭ｸｴ犧吭ｸ≒ｸｲ犧｣犹≒ｸ≒ｹ霞ｹ�ｸ�)</option><option value="Evidence">�豆 Evidence (犧ｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｹ≒ｸ･犹霞ｸｧ)</option><option value="Rising">箝� Rising (犧歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧壟ｸ憫ｹ謂ｸｲ犧� 犧｣犧ｱ犧� EXP)</option><option value="Ruined">笶� Ruined (犹≒ｸ≒ｹ霞ｹ�ｸもｹ�ｸ｡犹謂ｸ憫ｹ謂ｸｲ犧�/犧｣犧ｭ犧≒ｸ･犧ｱ犧壟ｹ�ｸ巵ｹ≒ｸ≒ｹ霞ｹ�ｸｫ犧｡犹�)</option><option value="Abandoned">�遜 Abandoned (犧伶ｸｴ犹霞ｸ�ｸ｣犹霞ｸｲ犧�)</option></select>
+                            <span className="font-bold text-[#5d3a1a] mr-1">FILTERS ภารกิจ:</span>
+                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (อาณาจักรที่ต้องรับผิดชอบ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
+                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-bold border-blue-600"><option value="">Status (สถานะภารกิจ)</option><option value="Founding">🏗️ Founding (กำลังดำเนินการแก้ไข)</option><option value="Evidence">📤 Evidence (ส่งมอบหลักฐานแล้ว)</option><option value="Rising">⭐ Rising (ตรวจสอบผ่าน รับ EXP)</option><option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน/รอกลับไปแก้ใหม่)</option><option value="Abandoned">👻 Abandoned (ทิ้งร้าง)</option></select>
                         </div>
-                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="�剥 犧�ｹ霞ｸ吭ｸｫ犧ｲ ID 犧ｪ犧ｲ犧ｪ犹呉ｸ�..." className="w-full md:w-64 custom-select text-xs font-medium" />
+                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID สาส์น..." className="w-full md:w-64 custom-select text-xs font-medium" />
                     </div>
 
                     <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
                         <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
                             <thead>
                                 <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
-                                    <th className="py-3 px-2">犧｣犧ｫ犧ｱ犧ｪ犧ｪ犧ｲ犧ｪ犹呉ｸ�</th>
-                                    <th className="py-3 px-2 max-w-[200px]">犧癌ｸｷ犹謂ｸｭ犧�犧ｲ犧｣犧≒ｸｴ犧�</th>
-                                    <th className="py-3 px-2 text-blue-800">犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ犹�ｸｭ犹犧扉ｸｵ犧｢ (Origin)</th>
-                                    <th className="py-3 px-2 text-red-800">犧憫ｸｹ犹霞ｸ｣犧ｱ犧壟ｸ憫ｸｴ犧扉ｸ癌ｸｭ犧� (Target)</th>
-                                    <th className="py-3 px-2 text-center w-24">犧ｪ犧籾ｸｲ犧吭ｸｰ犧�犧ｲ犧｣犧≒ｸｴ犧�</th>
-                                    <th className="py-3 px-2 text-center">犧歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧�</th>
+                                    <th className="py-3 px-2">รหัสสาส์น</th>
+                                    <th className="py-3 px-2 max-w-[200px]">ชื่อภารกิจ</th>
+                                    <th className="py-3 px-2 text-blue-800">ผู้เสนอไอเดีย (Origin)</th>
+                                    <th className="py-3 px-2 text-red-800">ผู้รับผิดชอบ (Target)</th>
+                                    <th className="py-3 px-2 text-center w-24">สถานะภารกิจ</th>
+                                    <th className="py-3 px-2 text-center">ตรวจสอบ</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[#8b5a2b]">
                                 {currentItems.length === 0 ? (
-                                    <tr><td colSpan={6} className="py-8 text-center font-bold text-[#8b5a2b]/60">笞費ｸ� 犹�ｸ｡犹謂ｸ樅ｸ壟ｸ�犧ｲ犧｣犧≒ｸｴ犧�</td></tr>
+                                    <tr><td colSpan={6} className="py-8 text-center font-bold text-[#8b5a2b]/60">⚔️ ไม่พบภารกิจ</td></tr>
                                 ) : (
                                     currentItems.map(q => {
                                         let rowBg = '';
@@ -2018,7 +1766,7 @@
                                                 <td className="py-4 px-2 font-bold text-red-800">{q.target}</td>
                                                 <td className="py-4 px-2 text-center">{getStatusBadge(q)}</td>
                                                 <td className="py-4 px-2 text-center">
-                                                    <button onClick={() => openQuestModal(q)} className="bg-[#5d3a1a] text-[#f7e6c4] px-4 py-1.5 rounded-lg hover:bg-[#8b5a2b] hover:text-white shadow font-bold text-xs cursor-pointer transition whitespace-nowrap">犹犧巵ｸｴ犧扉ｸ�犧ｲ犧｣犧≒ｸｴ犧�</button>
+                                                    <button onClick={() => openQuestModal(q)} className="bg-[#5d3a1a] text-[#f7e6c4] px-4 py-1.5 rounded-lg hover:bg-[#8b5a2b] hover:text-white shadow font-bold text-xs cursor-pointer transition whitespace-nowrap">เปิดภารกิจ</button>
                                                 </td>
                                             </tr>
                                         );
@@ -2029,43 +1777,38 @@
 
                         {totalPages > 1 && (
                             <div className="flex justify-center items-center gap-3 mt-6 border-t border-[#8b5a2b]/20 pt-4">
-                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer"><i className="fa-solid fa-chevron-left mr-1"></i> 犧｢犹霞ｸｭ犧吭ｸ≒ｸ･犧ｱ犧�</button>
+                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer"><i className="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ</button>
                                 <span className="text-sm font-bold text-[#5d3a1a] bg-white px-4 py-1.5 border border-[#8b5a2b]/40 rounded-lg shadow-inner">{currentPage} / {totalPages}</span>
-                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer">犧籾ｸｱ犧扉ｹ�ｸ� <i className="fa-solid fa-chevron-right ml-1"></i></button>
+                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 bg-[#f4e4bc] border border-[#8b5a2b] text-[#5d3a1a] rounded-lg hover:bg-[#e5d3a6] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs shadow-sm transition cursor-pointer">ถัดไป <i className="fa-solid fa-chevron-right ml-1"></i></button>
                             </div>
                         )}
                     </div>
 
                     {selectedQuest && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4" onClick={closeModal}>
-                            <div className="decree-modal max-w-4xl w-full p-6 md:p-8 rounded-2xl relative max-h-[95vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
+                            <div className="decree-modal max-w-4xl w-full p-6 md:p-8 rounded-2xl relative max-h-[95vh] overflow-y-auto">
                                 <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-3xl font-bold cursor-pointer transition">&times;</button>
                                 <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">�孱�� 犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｸ�犧ｲ犧｣犧≒ｸｴ犧� �孱��</h2>
-                                    <p className="text-[#8b5a2b] mt-1 italic font-bold">犧ｭ犹霞ｸｲ犧�ｸｭ犧ｴ犧�ｸｪ犧ｲ犧ｪ犹呉ｸ�: {selectedQuest.id}</p>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">🛡️ รายละเอียดภารกิจ 🛡️</h2>
+                                    <p className="text-[#8b5a2b] mt-1 italic font-bold">อ้างอิงสาส์น: {selectedQuest.id}</p>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
-                                        <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ歩ｸｱ犹霞ｸ�ｸ歩ｹ霞ｸ� (犧ｪ犧ｴ犹謂ｸ�ｸ伶ｸｵ犹謂ｸ歩ｹ霞ｸｭ犧�ｹ≒ｸ≒ｹ霞ｹ�ｸ�)</h3>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">犹もｸ｣犧�ｸ�ｸｲ犧�:</strong> {selectedQuest.factory}</p>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">犧≒ｸ｣犧ｰ犧壟ｸｧ犧吭ｸ≒ｸｲ犧｣:</strong> {selectedQuest.location}</p>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">犧樅ｸｴ犧≒ｸｱ犧扉ｸ謂ｸｸ犧扉ｹ犧≒ｸｴ犧扉ｹ犧ｫ犧歩ｸｸ:</strong> {selectedQuest.pinpoint}</p>
-                                        <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ (Origin):</strong> {selectedQuest.origin}</p>
+                                        <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> สาส์นตั้งต้น (สิ่งที่ต้องแก้ไข)</h3>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> {selectedQuest.factory}</p>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> {selectedQuest.location}</p>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> {selectedQuest.pinpoint}</p>
+                                        <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">ผู้เสนอ (Origin):</strong> {selectedQuest.origin}</p>
                                         <div className="mb-3 mt-3 text-[#3f2a14]">
-                                            <strong className="font-bold">犧｣犧ｲ犧｢犧･犧ｰ犹犧ｭ犧ｵ犧｢犧扉ｸ巵ｸｱ犧財ｸｫ犧ｲ:</strong>
+                                            <strong className="font-bold">รายละเอียดปัญหา:</strong>
                                             <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.problem}</p>
                                         </div>
                                         <div className="mb-3 text-[#3f2a14]">
-                                            <p className="font-bold flex items-center justify-between">犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ霞ｹ�ｸ� (犧伶ｸｵ犹謂ｹ犧ｪ犧吭ｸｭ犧｡犧ｲ):</p>
+                                            <p className="font-bold flex items-center justify-between">วิธีแก้ไข (ที่เสนอมา):</p>
                                             <p className="text-[#8b5a2b] ml-4 bg-white p-2 mt-1 rounded-lg border border-[#8b5a2b]/20 italic">{selectedQuest.solution}</p>
                                         </div>
                                         {selectedQuest.imagePreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imagePreview)}>
-                                                <img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
-                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> 犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犧もｸ｢犧ｲ犧｢犧｣犧ｹ犧巵ｸ�犧ｲ犧�
-                                                </div>
-                                            </div>
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain" /></div>
                                         ) : (
                                             <div className="bg-gray-200 h-32 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 text-xs font-bold shadow-inner"><span>{selectedQuest.imageText}</span></div>
                                         )}
@@ -2073,35 +1816,19 @@
 
                                     <div className="proof-box p-4 text-xs relative rounded-xl">
                                         <div className="absolute top-2 right-2">{getStatusBadge(selectedQuest)}</div>
-                                        <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> 犧ｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸ謂ｸｲ犧≒ｸｫ犧吭ｹ霞ｸｲ犧�ｸｲ犧� (犧憫ｸ･犧･犧ｱ犧樅ｸ倨ｹ�)</h3>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">犧憫ｸｹ犹霞ｸ｣犧ｱ犧壟ｸ憫ｸｴ犧扉ｸ癌ｸｭ犧� (Target):</strong> {selectedQuest.target}</p>
+                                        <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> หลักฐานจากหน้างาน (ผลลัพธ์)</h3>
+                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> {selectedQuest.target}</p>
                                         <div className="mb-3 text-[#3f2a14]">
-                                            <strong className="font-bold">犧もｹ霞ｸｭ犧�ｸｧ犧ｲ犧｡犧謂ｸｲ犧≒ｸ伶ｸｵ犧｡犧�ｸｲ犧�:</strong>
+                                            <strong className="font-bold">ข้อความจากทีมงาน:</strong>
                                             <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
                                         </div>
-                                        {(selectedQuest.imagesAfter && selectedQuest.imagesAfter.length > 0) ? (
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
-                                                {selectedQuest.imagesAfter.map((imgUrl, idx) => (
-                                                    <div key={idx} className="bg-black/10 rounded-lg border border-green-500 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
-                                                        <img src={imgUrl} alt={`After ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
-                                                            <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> 犧�ｸ･犧ｴ犧≒ｸもｸ｢犧ｲ犧｢
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : selectedQuest.imageAfterPreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imageAfterPreview)}>
-                                                <img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
-                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> 犧�ｸ･犧ｴ犧≒ｹ犧樅ｸｷ犹謂ｸｭ犧もｸ｢犧ｲ犧｢犧｣犧ｹ犧巵ｸ�犧ｲ犧�
-                                                </div>
-                                            </div>
+                                        {selectedQuest.imageAfterPreview ? (
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain" /></div>
                                         ) : (
-                                            <div className="bg-white h-32 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '�萄 犧�犧ｲ犧樅ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸ≒ｸｲ犧｣犹≒ｸ≒ｹ霞ｹ�ｸ� (After)'}</span></div>
+                                            <div className="bg-white h-32 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '📸 ภาพหลักฐานการแก้ไข (After)'}</span></div>
                                         )}
                                         <div className="mt-3 bg-[#fff8e7] p-2.5 rounded-lg border border-gray-300 text-xs text-gray-600">
-                                            <strong className="text-amber-800">�荘 犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ≒ｸ･犧ｲ犧�ｸ�ｸｭ犧｡犹犧｡犧吭ｸ歩ｹ�:</strong>
+                                            <strong className="text-amber-800">👑 สภาเมืองกลางคอมเมนต์:</strong>
                                             <p className="italic mt-0.5">{selectedQuest.adminComment || '-'}</p>
                                         </div>
                                     </div>
@@ -2109,91 +1836,66 @@
 
                                 {currentRole === selectedQuest.target && (selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Evidence') && (
                                     <div className="mt-6 p-4 target-panel space-y-3">
-                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-upload"></i> 犧ｪ犹謂ｸ�ｸ｡犧ｭ犧�/犹≒ｸ≒ｹ霞ｹ�ｸもｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧� (犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢)</p>
-                                        <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="犧ｭ犧倨ｸｴ犧壟ｸｲ犧｢犧ｪ犧ｴ犹謂ｸ�ｸ伶ｸｵ犹謂ｹ�ｸ扉ｹ霞ｸ･犧�ｸ｡犧ｷ犧ｭ犹≒ｸ≒ｹ霞ｹ�ｸもｹ�ｸ巵ｹ≒ｸ･犹霞ｸｧ..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
-                                        
-                                        <div className="bg-white/80 p-3 rounded-lg border border-sky-300">
-                                            <div className="flex justify-between items-center mb-1.5">
-                                                <span className="text-xs font-bold text-sky-900">犹≒ｸ吭ｸ壟ｸ�犧ｲ犧樅ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸ≒ｸｲ犧｣犹≒ｸ≒ｹ霞ｹ�ｸ� (犧ｪ犧ｹ犧�ｸｪ犧ｸ犧� 5 犧｣犧ｹ犧�):</span>
-                                                <span className="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-300">
-                                                    {targetImages.length} / 5 犧｣犧ｹ犧�
-                                                </span>
-                                            </div>
-
-                                            {targetImages.length < 5 && (
-                                                <input type="file" accept="image/*" multiple onChange={handleMultiEvidenceChange} className="text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
-                                            )}
-
-                                            {targetImages.length > 0 && (
-                                                <div className="mt-2.5 grid grid-cols-3 sm:grid-cols-5 gap-2">
-                                                    {targetImages.map((imgUrl, idx) => (
-                                                        <div key={idx} className="relative h-20 border border-sky-400 rounded overflow-hidden group bg-black/20 shadow">
-                                                            <img src={imgUrl} alt={`Evidence ${idx+1}`} className="w-full h-full object-cover" />
-                                                            <button type="button" onClick={() => handleRemoveEvidence(idx)} className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shadow cursor-pointer">&times;</button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {showQuestConfirm ? (
-                                            <div className="bg-[#2c1d11] border-2 border-[#8b5a2b] p-3 rounded-lg text-center shadow-xl text-[#ebdcb9] animate-fade-in mt-2">
-                                                <p className="text-xs font-bold text-[#f7e6c4] mb-1">�孱�� 犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸ≒ｸｲ犧｣犧ｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸ�犧ｲ犧｣犧≒ｸｴ犧謂ｸ吭ｸｵ犹�?</p>
-                                                <div className="flex gap-2 mt-2">
-                                                    <button type="button" onClick={() => setShowQuestConfirm(false)} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-[11px] transition cursor-pointer border border-white/20 disabled:opacity-50">
-                                                        <i className="fa-solid fa-rotate-left mr-1"></i> 犧歩ｸ｣犧ｧ犧謂ｸｪ犧ｭ犧壟ｸ金ｹ霞ｸｳ
-                                                    </button>
-                                                    <button type="button" onClick={handleFinalTargetSubmit} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-[11px] transition cursor-pointer shadow border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1">
-                                                        {isSubmitting ? <><span className="inline-block animate-pulse text-xs">�錘�暢</span> 竢ｳ 犧≒ｸｳ犧･犧ｱ犧�ｸ�ｸｧ犧壟ｸ｡犹霞ｸｲ犧ｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧�...</> : <><i className="fa-solid fa-check"></i> 犧｢犧ｷ犧吭ｸ｢犧ｱ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸ�ｸｲ犧�</>}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
-                                                {selectedQuest.status === 'Evidence' ? '犹≒ｸ≒ｹ霞ｹ�ｸもｹ≒ｸ･犧ｰ犧ｭ犧ｱ犧巵ｹもｸｫ犧･犧扉ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｹ�ｸｫ犧｡犹� (Update)' : '犧ｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧� (犹犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｸｪ犧籾ｸｲ犧吭ｸｰ犹犧巵ｹ�ｸ� Evidence)'}
-                                            </button>
-                                        )}
+                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-upload"></i> ส่งมอบ/แก้ไขหลักฐาน (สำหรับอาณาจักรเป้าหมาย)</p>
+                                        <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="อธิบายสิ่งที่ได้ลงมือแก้ไขไปแล้ว..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
+                                        <input type="file" accept="image/*" onChange={(e) => { 
+                                            if(e.target.files && e.target.files[0]) { 
+                                                const file = e.target.files[0]; 
+                                                setTargetImageFile(file.name); 
+                                                const reader = new FileReader();
+                                                reader.onload = (event) => {
+                                                    const img = new Image();
+                                                    img.onload = () => {
+                                                        const canvas = document.createElement('canvas');
+                                                        let width = img.width, height = img.height;
+                                                        if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
+                                                        else { if (height > 800) { width *= 800 / height; height = 800; } }
+                                                        canvas.width = width; canvas.height = height;
+                                                        const ctx = canvas.getContext('2d');
+                                                        ctx.drawImage(img, 0, 0, width, height);
+                                                        setTargetImagePreview(canvas.toDataURL('image/jpeg', 0.7));
+                                                    };
+                                                    img.src = event.target.result;
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
+                                        {targetImageFile && <p className="text-xs text-blue-800 font-bold">📎 ไฟล์ที่แนบ: {targetImageFile}</p>}
+                                        <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
+                                            {selectedQuest.status === 'Evidence' ? 'แก้ไขและอัปโหลดหลักฐานใหม่ (Update)' : 'ส่งมอบหลักฐาน (เปลี่ยนสถานะเป็น Evidence)'}
+                                        </button>
                                     </div>
                                 )}
 
                                 {currentRole === 'central' && (selectedQuest.status === 'Evidence' || selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Rising' || selectedQuest.status === 'Hall of fame') && (
                                     <div className="mt-6 p-4 central-panel space-y-3">
-                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> 犧樅ｸｴ犧樅ｸｲ犧≒ｸｩ犧ｲ犧憫ｸ･犧�ｸｲ犧� (犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸｪ犹謂ｸｧ犧吭ｸ≒ｸ･犧ｲ犧�)</p>
+                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> พิพากษาผลงาน (สำหรับสภาเมืองส่วนกลาง)</p>
                                         
                                         {selectedQuest.status !== 'Hall of fame' && selectedQuest.status !== 'Rising' && (
                                             <>
                                                 <select value={centralStatus} onChange={(e) => setCentralStatus(e.target.value)} className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
-                                                    <option value="">-- 犹犧･犧ｷ犧ｭ犧≒ｸ�ｸｳ犧樅ｸｴ犧樅ｸｲ犧≒ｸｩ犧ｲ --</option>
-                                                    <option value="Rising">{selectedQuest.wasAbandoned || selectedQuest.status === 'Abandoned' ? '箝� Rising (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹≒ｸ謂ｸ� +5 EXP 犹犧吭ｸｷ犹謂ｸｭ犧�ｸ謂ｸｲ犧≒ｸｪ犹謂ｸ�ｸ･犹謂ｸｲ犧癌ｹ霞ｸｲ)' : `箝� Rising (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹≒ｸ謂ｸ≒ｸ�ｸｰ犹≒ｸ吭ｸ吭ｹ犧歩ｹ�ｸ｡)`}</option>
-                                                    <option value="Ruined">笶� Ruined (犹≒ｸ≒ｹ霞ｹ�ｸもｹ�ｸ｡犹謂ｸ憫ｹ謂ｸｲ犧� 犹�ｸｫ犹霞ｸ≒ｸ･犧ｱ犧壟ｹ�ｸ巵ｸ伶ｸｳ犹�ｸｫ犧｡犹�)</option>
-                                                    <option value="Abandoned">�遜 Abandoned (犧伶ｸｴ犹霞ｸ�ｸ｣犹霞ｸｲ犧� 犧巵ｸ･犹謂ｸｭ犧｢犹�ｸｧ犹霞ｸ吭ｸｲ犧吭ｹ犧≒ｸｴ犧吭ｸ≒ｸｳ犧ｫ犧吭ｸ�)</option>
+                                                    <option value="">-- เลือกคำพิพากษา --</option>
+                                                    <option value="Rising">{selectedQuest.wasAbandoned || selectedQuest.status === 'Abandoned' ? '⭐ Rising (อนุมัติแจก +5 EXP เนื่องจากส่งล่าช้า)' : `⭐ Rising (อนุมัติแจกคะแนนเต็ม)`}</option>
+                                                    <option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน ให้กลับไปทำใหม่)</option>
+                                                    <option value="Abandoned">👻 Abandoned (ทิ้งร้าง ปล่อยไว้นานเกินกำหนด)</option>
                                                 </select>
-                                                <textarea rows={2} value={centralComment} onChange={(e) => setCentralComment(e.target.value)} placeholder="犹犧ｫ犧歩ｸｸ犧憫ｸ･犧巵ｸ｣犧ｰ犧≒ｸｭ犧壟ｸ�ｸｳ犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ..." className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs bg-white text-slate-800 outline-none font-sans"></textarea>
-                                                <button onClick={handleCentralSubmit} className="w-full bg-[#b45309] text-white font-bold py-2.5 rounded-lg hover:bg-[#92400e] shadow transition cursor-pointer text-xs mb-2">犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｸｳ犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ</button>
+                                                <textarea rows={2} value={centralComment} onChange={(e) => setCentralComment(e.target.value)} placeholder="เหตุผลประกอบคำพิจารณา..." className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs bg-white text-slate-800 outline-none font-sans"></textarea>
+                                                <button onClick={handleCentralSubmit} className="w-full bg-[#b45309] text-white font-bold py-2.5 rounded-lg hover:bg-[#92400e] shadow transition cursor-pointer text-xs mb-2">บันทึกคำพิจารณา</button>
                                             </>
                                         )}
 
                                         <div className="flex gap-2 pt-2 border-t border-[#d97706]/30">
                                             {selectedQuest.status === 'Hall of fame' ? (
-                                                <button onClick={() => handleCentralQuestAction('Restore')} className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> 犧扉ｸｶ犧�ｸ≒ｸ･犧ｱ犧壟ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｫ犧･犧ｱ犧� (Restore)</button>
+                                                <button onClick={() => handleCentralQuestAction('Restore')} className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> ดึงกลับกระดานหลัก (Restore)</button>
                                             ) : (
                                                 (selectedQuest.status === 'Rising' || selectedQuest.ideaApproved) && (
-                                                    <button onClick={() => handleCentralQuestAction('HallOfFame')} className="w-full bg-yellow-600 text-black font-bold py-2 rounded hover:bg-yellow-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-star mr-1"></i> 犧壟ｸ｣犧｣犧謂ｸｸ犹犧もｹ霞ｸｲ Hall of fame (犧金ｹ謂ｸｭ犧吭ｸ謂ｸｲ犧≒ｸｫ犧吭ｹ霞ｸｲ犧ｫ犧･犧ｱ犧�)</button>
+                                                    <button onClick={() => handleCentralQuestAction('HallOfFame')} className="w-full bg-yellow-600 text-black font-bold py-2 rounded hover:bg-yellow-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-star mr-1"></i> บรรจุเข้า Hall of fame (ซ่อนจากหน้าหลัก)</button>
                                                 )
                                             )}
                                         </div>
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    )}
-
-
-                    {zoomedImg && (
-                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
-                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
-                            <img src={zoomedImg} alt="Zoomed" className="max-h-[85vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] rounded-lg border border-white/20" onClick={(e) => e.stopPropagation()} />
-                            <p className="absolute bottom-6 text-gray-400 text-sm italic bg-black/60 px-4 py-1 rounded-full border border-white/10">犧�ｸ･犧ｴ犧≒ｸ伶ｸｵ犹謂ｹ�ｸ扉ｸ≒ｹ�ｹ�ｸ扉ｹ霞ｹ犧樅ｸｷ犹謂ｸｭ犧巵ｸｴ犧�</p>
                         </div>
                     )}
                 </div>
@@ -2213,69 +1915,69 @@
             return (
                 <div className="max-w-5xl mx-auto w-full parchment-scroll p-6 md:p-12 rounded-lg relative my-4 animate-fade-in text-[#3d2511]">
                     <div className="text-center border-b-4 border-double border-[#8b5a2b] pb-6 mb-8">
-                        <h1 className="text-4xl md:text-5xl font-bold font-cinzelDeco text-[#5d3a1a] mb-2 tracking-wider">�糖 Diecast Chronicles �糖</h1>
+                        <h1 className="text-4xl md:text-5xl font-bold font-cinzelDeco text-[#5d3a1a] mb-2 tracking-wider">📜 Diecast Chronicles 📜</h1>
                         <p className="text-md md:text-lg text-[#8b5a2b] font-bold tracking-wider uppercase font-cinzel">The Lost Lore and Architect Playbook</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-8 bg-[#e5d3a6] p-1.5 rounded-lg border border-[#8b5a2b]/40">
-                        <button onClick={() => setActiveTab('lore')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'lore' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-book-open mr-1"></i> 犧巵ｸ説ｸ｡犧壟ｸ� & 犧巵ｸ｡犧�ｸｧ犧ｲ犧｡犧もｸｱ犧扉ｹ≒ｸ｢犹霞ｸ�</button>
-                        <button onClick={() => setActiveTab('rules')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'rules' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-scroll-old mr-1"></i> 犧≒ｸ錫ｹ≒ｸ･犧ｰ犧樅ｸ謂ｸ吭ｸｲ犧吭ｸｸ犧≒ｸ｣犧｡犹≒ｸｫ犹謂ｸ�ｸｪ犧�犧ｲ</button>
-                        <button onClick={() => setActiveTab('alignment')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'alignment' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-pen-nib mr-1"></i> 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸｧ犧ｴ犧籾ｸｵ犧吭ｸｱ犧≒ｸｪ犧｣犹霞ｸｲ犧�ｸｪ犧｣犧｣犧�ｹ�</button>
+                        <button onClick={() => setActiveTab('lore')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'lore' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-book-open mr-1"></i> ปฐมบท & ปมความขัดแย้ง</button>
+                        <button onClick={() => setActiveTab('rules')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'rules' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-scroll-old mr-1"></i> กฎและพจนานุกรมแห่งสภา</button>
+                        <button onClick={() => setActiveTab('alignment')} className={`py-2.5 px-2 rounded font-bold text-sm md:text-base border border-transparent hover:bg-[#8b5a2b]/20 transition cursor-pointer ${activeTab === 'alignment' ? 'bg-[#8b5a2b] text-[#f7e6c4] shadow-inner' : 'text-[#5d3a1a]'}`}><i className="fa-solid fa-pen-nib mr-1"></i> คัมภีร์วิถีนักสร้างสรรค์</button>
                     </div>
 
                     {activeTab === 'lore' && (
                         <div className="space-y-8 animate-fade-in">
                             <section className="text-justify">
-                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-feather-pointed"></i> 1. 犧巵ｸ説ｸ｡犧壟ｸ伶ｹ≒ｸｫ犹謂ｸ�ｸ扉ｸｴ犧吭ｹ≒ｸ扉ｸ� (The Lost Chronicles)</h2>
-                                <p className="leading-relaxed text-[#3d2511] text-base mb-4 indent-8">犧もｸｭ犧歩ｹ霞ｸｭ犧吭ｸ｣犧ｱ犧壟ｸ吭ｸｱ犧≒ｸ憫ｸ謂ｸ財ｸ�犧ｱ犧｢犧伶ｸｸ犧≒ｸ伶ｹ謂ｸｲ犧吭ｹ犧もｹ霞ｸｲ犧ｪ犧ｹ犹� <b>Diecast Kingdoms</b> 犧扉ｸｴ犧吭ｹ≒ｸ扉ｸ吭ｸ伶ｸｵ犹謂ｸ籾ｸｹ犧≒ｸもｸｱ犧壟ｹ犧�ｸ･犧ｷ犹謂ｸｭ犧吭ｸ扉ｹ霞ｸｧ犧｢犧樅ｸ･犧ｱ犧�ｸｭ犧ｱ犧吭ｹ犧巵ｹ�ｸ吭ｹ犧ｭ犧≒ｸ･犧ｱ犧≒ｸｩ犧内ｹ呉ｸ謂ｸｲ犧� 5 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧伶ｸｵ犹謂ｸ｢犧ｴ犹謂ｸ�ｹ�ｸｫ犧財ｹ� 犧�犧ｲ犧｢犧吭ｸｭ犧≒ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧吭ｸ吭ｸｵ犹霞ｸ�ｸｷ犧ｭ犧�犧ｲ犧樅ｹ≒ｸ伶ｸ吭ｸもｸｭ犧�ｸ�ｸｧ犧ｲ犧｡犧巵ｸ｣犧ｭ犧�ｸ扉ｸｭ犧�ｹ≒ｸ･犧ｰ犧≒ｸｲ犧｣犧｣犹謂ｸｧ犧｡犧｡犧ｷ犧ｭ犹犧巵ｹ�ｸ吭ｸ樅ｸｱ犧吭ｸ倨ｸ｡犧ｴ犧歩ｸ｣犧伶ｸｵ犹謂ｹ≒ｸ吭ｹ謂ｸ吭ｹ≒ｸ游ｹ霞ｸ吭ｸ癌ｹ謂ｸｧ犧｢犹犧ｫ犧･犧ｷ犧ｭ犧金ｸｶ犹謂ｸ�ｸ≒ｸｱ犧吭ｹ≒ｸ･犧ｰ犧≒ｸｱ犧� 犹≒ｸ歩ｹ謂ｸ伶ｸｧ犹謂ｸｲ... 犧�犧ｲ犧｢犹�ｸ歩ｹ霞ｸ｣犧ｭ犧｢犧｢犧ｴ犹霞ｸ｡犹≒ｸ･犧ｰ犧≒ｸｲ犧｣犧≒ｸｸ犧｡犧｡犧ｷ犧ｭ犧≒ｸｱ犧吭ｸ吭ｸｵ犹� 犧≒ｸ･犧ｱ犧壟ｸ｡犧ｵ犧｣犧ｭ犧｢犧｣犹霞ｸｲ犧ｧ犹≒ｸｫ犹謂ｸ�ｸｭ犧ｸ犧扉ｸ｡犧≒ｸｲ犧｣犧内ｹ� 犧�ｸｧ犧ｲ犧｡犹犧癌ｸｷ犹謂ｸｭ 犹≒ｸ･犧ｰ犧ｧ犧ｴ犧籾ｸｵ犧癌ｸｵ犧ｧ犧ｴ犧歩ｸ伶ｸｵ犹謂ｸもｸｱ犧扉ｹ≒ｸ｢犹霞ｸ� 犧樅ｸ｣犹霞ｸｭ犧｡犧謂ｸｰ犧巵ｸｰ犧伶ｸｸ犧もｸｶ犹霞ｸ吭ｸ｡犧ｲ犧ｪ犧ｰ犧壟ｸｱ犹霞ｸ吭ｸ｡犧ｴ犧歩ｸ｣犧�犧ｲ犧樅ｹ�ｸ扉ｹ霞ｸ歩ｸ･犧ｭ犧扉ｹ犧ｧ犧･犧ｲ!</p>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-feather-pointed"></i> 1. ปฐมบทแห่งดินแดน (The Lost Chronicles)</h2>
+                                <p className="leading-relaxed text-[#3d2511] text-base mb-4 indent-8">ขอต้อนรับนักผจญภัยทุกท่านเข้าสู่ <b>Diecast Kingdoms</b> ดินแดนที่ถูกขับเคลื่อนด้วยพลังอันเป็นเอกลักษณ์จาก 5 อาณาจักรที่ยิ่งใหญ่ ภายนอกแผ่นดินนี้คือภาพแทนของความปรองดองและการร่วมมือเป็นพันธมิตรที่แน่นแฟ้นช่วยเหลือซึ่งกันและกัน แต่ทว่า... ภายใต้รอยยิ้มและการกุมมือกันนี้ กลับมีรอยร้าวแห่งอุดมการณ์ ความเชื่อ และวิถีชีวิตที่ขัดแย้ง พร้อมจะปะทุขึ้นมาสะบั้นมิตรภาพได้ตลอดเวลา!</p>
                             </section>
 
                             <section className="mb-8">
                                 <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 font-cinzel">
-                                    <i className="fa-solid fa-shield-halved"></i> 2. 犹犧ｪ犧ｲ犧ｫ犧･犧ｱ犧≒ｸ伶ｸｱ犹霞ｸ�ｸｫ犹霞ｸｲ (The Five Realms)
+                                    <i className="fa-solid fa-shield-halved"></i> 2. เสาหลักทั้งห้า (The Five Realms)
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-red-600 bg-white/40">
                                         <div>
-                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">�櫨 Casteria (犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢)</h3>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">🔥 Casteria (แคสเทอเรีย)</h3>
                                             <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
-                                                犧扉ｸｴ犧吭ｹ≒ｸ扉ｸ吭ｹ≒ｸｫ犹謂ｸ�ｹ�ｸ游ｹ≒ｸ･犧ｰ犹犧ｫ犧･犹�ｸ≒ｸ≒ｸ･犹霞ｸｲ 犧｡犧ｵ犧ｫ犧吭ｹ霞ｸｲ犧憫ｸｲ犧ｪ犧ｴ犧�ｹもｸ歩ｸ･犧ｲ犧ｧ犧ｲ犧巵ｸｰ犧伶ｸｸ犧�ｸｭ犧｢犧樅ｸｴ犧伶ｸｱ犧≒ｸｩ犹呉ｹ犧｡犧ｷ犧ｭ犧� 犧憫ｸｹ犹霞ｸ�ｸ吭ｸ｡犧ｵ犧壟ｸｸ犧�ｸ･犧ｴ犧≒ｹ犧ｫ犧｡犧ｷ犧ｭ犧� <b>"犧�ｸ吭ｹ≒ｸ�ｸ｣犧ｰ犧癌ｹ謂ｸｲ犧�ｸ歩ｸｵ犹犧ｫ犧･犹�ｸ�"</b> 犧憫ｸｹ犹霞ｸ巵ｸ｣犧ｰ犧内ｸｵ犧歩ｹ≒ｸ･犧ｰ犹犧巵ｸｵ犹謂ｸ｢犧｡犧扉ｹ霞ｸｧ犧｢犧伶ｸｱ犧≒ｸｩ犧ｰ犧≒ｸｲ犧｣犧ｫ犧･犧ｭ犧｡犧ｪ犧｣犧｣犧�ｹ呉ｸｪ犧｣犹霞ｸｲ犧�ｸ｣犧ｰ犧扉ｸｱ犧壟ｸｪ犧ｹ犧� 犧壟ｸｹ犧癌ｸｲ犧ｪ犧ｱ犧財ｸ･犧ｱ犧≒ｸｩ犧内ｹ呉ｸｪ犧ｴ犧�ｹもｸ歩ｹ犧ｫ犧･犹�ｸ≒ｸｭ犧ｱ犧�ｸ�ｸｵ 犧�ｸ･犧ｱ犹謂ｸ�ｹ�ｸ�ｸ･犹霞ｹ�ｸ吭ｸｫ犧｢犧ｲ犧扉ｹ犧ｫ犧�ｸｷ犹謂ｸｭ犹≒ｸ･犧ｰ犧≒ｸｲ犧｣犧･犧�ｸ｡犧ｷ犧ｭ犧伶ｸｳ
+                                                ดินแดนแห่งไฟและเหล็กกล้า มีหน้าผาสิงโตลาวาปะทุคอยพิทักษ์เมือง ผู้คนมีบุคลิกเหมือน <b>"คนแคระช่างตีเหล็ก"</b> ผู้ประณีตและเปี่ยมด้วยทักษะการหลอมสรรค์สร้างระดับสูง บูชาสัญลักษณ์สิงโตเหล็กอัคคี คลั่งไคล้ในหยาดเหงื่อและการลงมือทำ
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-sky-500 bg-white/40">
                                         <div>
-                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">笶�ｸ� BlankHeimgard (犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�)</h3>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">❄️ BlankHeimgard (แบลงค์ไฮม์การ์ด)</h3>
                                             <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
-                                                犧巵ｸ｣犧ｲ犧≒ｸｲ犧｣犧吭ｹ霞ｸｳ犹≒ｸもｹ�ｸ�ｹ≒ｸ･犧ｰ犧樅ｸｲ犧｢犧ｸ犧ｫ犧ｴ犧｡犧ｰ犧ｭ犧ｱ犧吭ｸｫ犧吭ｸｲ犧ｧ犹犧ｫ犧吭ｹ�ｸ� 犧憫ｸｹ犹霞ｸ�ｸ吭ｸ｡犧ｵ犧ｧ犧ｴ犧籾ｸｵ犧癌ｸｵ犧ｧ犧ｴ犧歩ｹ≒ｸ壟ｸ� <b>"犧癌ｸｲ犧ｧ犧吭ｸｭ犧｣犹呉ｸｪ犧｣犧ｱ犧≒ｸｪ犧�ｸ�"</b> 犧伶ｸｵ犹謂ｹ�ｸ癌ｹ霞ｸ癌ｸｵ犧ｧ犧ｴ犧歩ｹ≒ｸ壟ｸ壟ｸｪ犹もｸ･犧ｧ犹呉ｹ�ｸ･犧游ｹ� 犧｣犧ｱ犧≒ｸ倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ犹≒ｸ･犧ｰ犧ｪ犧ｱ犧吭ｹもｸ扉ｸｩ 犹≒ｸ｡犹霞ｸ�犧ｲ犧｢犧吭ｸｭ犧≒ｸ謂ｸｰ犧扉ｸｹ犹犧｢犹�ｸ吭ｸ癌ｸｲ犹�ｸ｡犹謂ｹ犧巵ｹ�ｸ吭ｸ｡犧ｴ犧歩ｸ｣犹犧吭ｸｷ犹謂ｸｭ犧�ｸ謂ｸｲ犧≒ｸ�犧ｱ犧｢犧倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ犧｣犧ｸ犧｡犹犧｣犹霞ｸｲ 犹≒ｸ歩ｹ謂ｹ≒ｸ伶ｹ霞ｸ謂ｸ｣犧ｴ犧�ｹ≒ｸ･犹霞ｸｧ犧謂ｸ｣犧ｴ犧�ｹ�ｸ謂ｹ≒ｸ･犧ｰ犧ｪ犧ｹ犹霞ｸ癌ｸｵ犧ｧ犧ｴ犧歩ｸｭ犧｢犹謂ｸｲ犧�ｸｫ犧ｲ犹�ｸ�ｸ｣犹犧巵ｸ｣犧ｵ犧｢犧壟ｹ�ｸ｡犹謂ｹ�ｸ扉ｹ� 犧壟ｸｹ犧癌ｸｲ犹犧≒ｸ･犹�ｸ扉ｸｫ犧ｴ犧｡犧ｰ犹≒ｸ･犧ｰ犹犧伶ｸ樅ｸ≒ｸｧ犧ｲ犧�ｸもｸｲ犧ｧ犧≒ｸｴ犹謂ｸ�ｸ≒ｹ霞ｸｲ犧吭ｸ歩ｸ｣犧ｰ犧≒ｸｲ犧｣犧歩ｸｲ
+                                                ปราการน้ำแข็งและพายุหิมะอันหนาวเหน็บ ผู้คนมีวิถีชีวิตแบบ <b>"ชาวนอร์สรักสงบ"</b> ที่ใช้ชีวิตแบบสโลว์ไลฟ์ รักธรรมชาติและสันโดษ แม้ภายนอกจะดูเย็นชาไม่เป็นมิตรเนื่องจากภัยธรรมชาติรุมเร้า แต่แท้จริงแล้วจริงใจและสู้ชีวิตอย่างหาใครเปรียบไม่ได้ บูชาเกล็ดหิมะและเทพกวางขาวกิ่งก้านตระการตา
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-purple-600 bg-white/40">
                                         <div>
-                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">笞呻ｸ� Machinepolis (犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ)</h3>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">⚙️ Machinepolis (แมคชีนโพลิส)</h3>
                                             <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
-                                                犧｡犧ｫ犧ｲ犧吭ｸ�ｸ｣犧謂ｸｱ犧≒ｸ｣犧≒ｸ･犧･犹霞ｸｳ犧｢犧ｸ犧�ｸｪ犧ｸ犧扉ｹ�ｸｮ犹犧伶ｸ� 犧壟ｹ霞ｸｲ犧吭ｹ犧≒ｸｴ犧扉ｸもｸｭ犧�ｹ犧ｫ犧･犹謂ｸｲ <b>"犧吭ｸｱ犧≒ｸ巵ｸ｣犧ｰ犧扉ｸｴ犧ｩ犧説ｹ呉ｹ≒ｸ･犧ｰ犧吭ｸｱ犧≒ｸｧ犧ｴ犧伶ｸ｢犧ｲ犧ｨ犧ｲ犧ｪ犧歩ｸ｣犹�"</b>犧憫ｸｹ犹霞ｸ�ｹ霞ｸ吭ｸｫ犧ｲ犧�ｸｧ犧ｲ犧｡犧謂ｸ｣犧ｴ犧� 犧歩ｸ｣犧｣犧≒ｸｰ 犹≒ｸ･犧ｰ犧憫ｸ･犧･犧ｱ犧樅ｸ倨ｹ呉ｸ伶ｸｵ犹謂ｸ樅ｸｴ犧ｪ犧ｹ犧謂ｸ吭ｹ呉ｹ�ｸ扉ｹ霞ｸ扉ｹ霞ｸｧ犧｢犧�ｸｧ犧ｲ犧｡犧｣犧ｧ犧扉ｹ犧｣犹�ｸｧ 犧樅ｸ｣犹霞ｸｭ犧｡犧謂ｸｰ犧巵ｸ鐘ｸｴ犧ｧ犧ｱ犧歩ｸｴ犹≒ｸ･犧ｰ犧巵ｸ｣犧ｱ犧壟ｹ犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｸｪ犧ｴ犹謂ｸ�ｸ｣犧ｭ犧壟ｸ歩ｸｱ犧ｧ犧ｭ犧｢犧ｹ犹謂ｹ犧ｪ犧｡犧ｭ 犧｢犧ｶ犧扉ｸ｡犧ｱ犹謂ｸ吭ｹ�ｸ吭ｸ�ｸｧ犧ｲ犧｡犧謂ｸ｣犧ｴ犧�ｸ伶ｸｵ犹謂ｸ歩ｸｲ犹犧ｫ犹�ｸ吭ｹ≒ｸ･犧ｰ犧ｪ犧ｱ犧｡犧憫ｸｱ犧ｪ 犧ｨ犧｣犧ｱ犧伶ｸ倨ｸｲ犹�ｸ吭ｸ游ｸｱ犧吭ｹ犧游ｸｷ犹謂ｸｭ犧�ｹ≒ｸ･犧ｰ犧≒ｸ･犹�ｸ･ 犧ｪ犧ｱ犧財ｸ･犧ｱ犧≒ｸｩ犧内ｹ呉ｸ�ｸｷ犧ｭ犧｡犹霞ｸｲ犹犧樅ｸ≒ｸｲ犧金ｸｱ犧ｪ犧｡犧ｵ犧巵ｸｵ犧≒ｸ伶ｸｵ犹謂ｸ伶ｸｰ犧｢犧ｲ犧吭ｹ�ｸ巵ｸｪ犧ｹ犹謂ｸｭ犧吭ｸｲ犧�ｸ�
+                                                มหานครจักรกลล้ำยุคสุดไฮเทค บ้านเกิดของเหล่า <b>"นักประดิษฐ์และนักวิทยาศาสตร์"</b>ผู้ค้นหาความจริง ตรรกะ และผลลัพธ์ที่พิสูจน์ได้ด้วยความรวดเร็ว พร้อมจะปฏิวัติและปรับเปลี่ยนสิ่งรอบตัวอยู่เสมอ ยึดมั่นในความจริงที่ตาเห็นและสัมผัส ศรัทธาในฟันเฟื่องและกลไล สัญลักษณ์คือม้าเพกาซัสมีปีกที่ทะยานไปสู่อนาคต
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between border-l-4 border-l-amber-500 bg-white/40">
                                         <div>
-                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">笨ｨ Finalthron (犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�)</h3>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">✨ Finalthron (ไฟนัลธรอน)</h3>
                                             <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
-                                                犧扉ｸｴ犧吭ｹ≒ｸ扉ｸ吭ｸｨ犧ｱ犧≒ｸ扉ｸｴ犹呉ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｸ壟ｸ吭ｸ｢犧ｭ犧扉ｹ犧もｸｲ犧ｪ犧ｹ犧�ｹ犧ｪ犧ｵ犧｢犧扉ｸ游ｹ霞ｸｲ 犹もｸｭ犧壟ｸ･犹霞ｸｭ犧｡犹�ｸ巵ｸ扉ｹ霞ｸｧ犧｢犧憫ｸｷ犧吭ｸ伶ｸ｣犧ｲ犧｢犹≒ｸ･犧ｰ犹犧ｪ犧ｵ犧｢犧�ｸ�ｸ･犧ｷ犹謂ｸ吭ｸ≒ｸｱ犧�ｸｧ犧ｲ犧･ 犧樅ｸ｣犧｡犹≒ｸ扉ｸ吭ｸ｣犧ｰ犧ｫ犧ｧ犹謂ｸｲ犧�ｹ犧伶ｸ樅ｸ倨ｸｴ犧扉ｸｲ犹≒ｸｫ犹謂ｸ�ｹ≒ｸｪ犧�ｸｭ犧ｭ犹もｸ｣犧｣犧ｲ犧ｪ犧ｵ犧伶ｸｭ犧�ｸｭ犧ｱ犧吭ｸｨ犧ｱ犧≒ｸ扉ｸｴ犹呉ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｹ≒ｸ･犧ｰ<b>"犧吭ｸｱ犧≒ｸ壟ｸｧ犧癌ｸｪ犧ｲ犧ｧ犧�"</b> 犧憫ｸｹ犹霞ｹ犧癌ｸｷ犹謂ｸｭ犧｡犹もｸ｢犧�ｹもｸ･犧≒ｸ�ｸｧ犧ｲ犧｡犧謂ｸ｣犧ｴ犧�ｹ≒ｸ･犧ｰ犹もｸ･犧≒ｹ≒ｸｫ犹謂ｸ�ｸｨ犧｣犧ｱ犧伶ｸ倨ｸｲ 犧伶ｸｳ犧ｫ犧吭ｹ霞ｸｲ犧伶ｸｵ犹謂ｸ歩ｸｱ犧扉ｸｪ犧ｴ犧吭ｸ樅ｸｴ犧樅ｸｲ犧≒ｸｩ犧ｲ犧扉ｹ霞ｸｧ犧｢犧｡犧ｲ犧歩ｸ｣犧説ｸｲ犧吭ｸ�ｸｧ犧ｲ犧｡犧ｪ犧｡犧壟ｸｹ犧｣犧内ｹ呉ｹ≒ｸ壟ｸ壟ｸｪ犧ｹ犧�ｸｪ犧ｸ犧� 犹犧≒ｸ･犧ｵ犧｢犧扉ｸ癌ｸｱ犧�ｸ�ｸｧ犧ｲ犧｡犧憫ｸｴ犧扉ｸ樅ｸ･犧ｲ犧扉ｹ≒ｸ･犧ｰ犧�ｸｧ犧ｲ犧｡犹�ｸ｣犹霞ｸ｣犧ｰ犹犧壟ｸｵ犧｢犧� 犧ｪ犧ｱ犧財ｸ･犧ｱ犧≒ｸｩ犧内ｹ呉ｸ�ｸｷ犧ｭ犧樅ｸ財ｸｲ犧吭ｸ≒ｸ｢犧ｹ犧�ｸｪ犧ｧ犧｣犧｣犧�ｹ呉ｸ伶ｸｭ犧�ｸ�ｸｳ犧もｸｲ犧ｧ犧憫ｸｹ犹霞ｸ壟ｸ｣犧ｴ犧ｪ犧ｸ犧伶ｸ倨ｸｴ犹�
+                                                ดินแดนศักดิ์สิทธิ์บนยอดเขาสูงเสียดฟ้า โอบล้อมไปด้วยผืนทรายและเสียงคลื่นกังวาล พรมแดนระหว่างเทพธิดาแห่งแสงออโรราสีทองอันศักดิ์สิทธิ์และ<b>"นักบวชสาวก"</b> ผู้เชื่อมโยงโลกความจริงและโลกแห่งศรัทธา ทำหน้าที่ตัดสินพิพากษาด้วยมาตรฐานความสมบูรณ์แบบสูงสุด เกลียดชังความผิดพลาดและความไร้ระเบียบ สัญลักษณ์คือพญานกยูงสวรรค์ทองคำขาวผู้บริสุทธิ์
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="kingdom-card p-4 rounded-lg flex flex-col justify-between md:col-span-2 border-l-4 border-l-emerald-700 bg-white/40">
                                         <div>
-                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">�床 Bascentra (犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ)</h3>
+                                            <h3 className="font-bold text-lg text-[#5d3a1a] mb-1">🏰 Bascentra (เบสเซนตร้า)</h3>
                                             <p className="text-xs leading-relaxed text-[#5d3a1a]/90">
-                                                犧吭ｸ�ｸ｣犹犧ｧ犧伶ｸ｡犧吭ｸ歩ｸ｣犹呉ｹもｸ壟ｸ｣犧ｲ犧内ｸｭ犧ｱ犧吭ｸｭ犧壟ｸｭ犧ｸ犹謂ｸ� 犧歩ｸｱ犹霞ｸ�ｸｭ犧｢犧ｹ犹謂ｸ≒ｸｶ犹謂ｸ�ｸ≒ｸ･犧ｲ犧�ｹ≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｸ壟ｸ吭ｸ憫ｸｷ犧吭ｸ扉ｸｴ犧吭ｹ犧もｸｵ犧｢犧ｧ犧もｸ謂ｸｵ犧ｭ犧ｱ犧吭ｸｭ犧ｸ犧扉ｸ｡犧ｪ犧｡犧壟ｸｹ犧｣犧内ｹ� 犧伶ｸｳ犧ｫ犧吭ｹ霞ｸｲ犧伶ｸｵ犹謂ｹ犧巵ｹ�ｸ� <b>"犧ｨ犧ｹ犧吭ｸ｢犹呉ｸ≒ｸ･犧ｲ犧�ｸ≒ｸｲ犧｣犧籾ｹ謂ｸｧ犧�ｸ扉ｸｸ犧･犧ｭ犧ｳ犧吭ｸｲ犧謂ｹ≒ｸ･犧ｰ犧≒ｸｲ犧｣犧｣犧ｱ犧≒ｸｩ犧ｲ犧｡犧ｲ犧歩ｸ｣犧説ｸｲ犧�" (The Balancing Center & Standard)</b> 犧ｨ犧ｹ犧吭ｸ｢犹呉ｸ≒ｸ･犧ｲ犧�ｹ≒ｸｫ犹謂ｸ�ｸ�ｸｧ犧ｲ犧｡犧巵ｸ｣犧ｭ犧�ｸ扉ｸｭ犧� 犧�ｸｭ犧｢犧｣犹霞ｸｭ犧｢犹犧｣犧ｵ犧｢犧�ｸ巵ｸ｣犧ｰ犧ｪ犧ｲ犧吭ｹ犧｣犧ｷ犹謂ｸｭ犧�ｸ｣犧ｲ犧ｧ犹≒ｸ･犧ｰ犹もｸ�ｸ｣犧�ｸｪ犧｣犹霞ｸｲ犧�ｸもｸｭ犧�ｸ伶ｸｸ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸｫ犹霞ｹ犧巵ｹ�ｸ吭ｸｭ犧ｱ犧吭ｸｫ犧吭ｸｶ犹謂ｸ�ｸｭ犧ｱ犧吭ｹ犧扉ｸｵ犧｢犧ｧ犧≒ｸｱ犧�
+                                                นครเวทมนตร์โบราณอันอบอุ่น ตั้งอยู่กึ่งกลางแผนที่บนผืนดินเขียวขจีอันอุดมสมบูรณ์ ทำหน้าที่เป็น <b>"ศูนย์กลางการถ่วงดุลอำนาจและการรักษามาตรฐาน" (The Balancing Center & Standard)</b> ศูนย์กลางแห่งความปรองดอง คอยร้อยเรียงประสานเรื่องราวและโครงสร้างของทุกอาณาจักรให้เป็นอันหนึ่งอันเดียวกัน
                                             </p>
                                         </div>
                                     </div>
@@ -2283,20 +1985,20 @@
                             </section>
                             
                             <section>
-                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-face-angry"></i> 3. 犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ｣犧ｭ犧｢犧｣犹霞ｸｲ犧ｧ犹≒ｸ･犧ｰ犹≒ｸ｣犧�ｸｭ犧�ｸ歩ｸｴ (The Hidden Friction)</h2>
-                                <p className="text-[#8b5a2b] font-bold mb-4 italic text-sm">犧�ｸ･犧ｴ犧≒ｹ犧･犧ｷ犧ｭ犧≒ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧樅ｸｷ犹謂ｸｭ犧扉ｸｹ犧巵ｸ｡犧･犧ｶ犧≒ｸ�ｸｧ犧ｲ犧｡犧ｭ犧�ｸ歩ｸｴ犧もｸｭ犧�ｸ樅ｸｧ犧≒ｹ犧もｸｲ:</p>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-face-angry"></i> 3. บันทึกรอยร้าวและแรงอคติ (The Hidden Friction)</h2>
+                                <p className="text-[#8b5a2b] font-bold mb-4 italic text-sm">คลิกเลือกอาณาจักรเพื่อดูปมลึกความอคติของพวกเขา:</p>
                                 <div className="space-y-3">
-                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>�櫨 犧ｭ犧�ｸ歩ｸｴ犧もｸｭ犧� Casteria (犧ｪ犧ｴ犧�ｹもｸ歩ｹ犧樅ｸ･犧ｴ犧�)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>�圻 <b>犹�ｸ｡犹謂ｸｪ犧壟ｸｭ犧ｲ犧｣犧｡犧内ｹ� Blankheimgard:</b> "犧樅ｸｧ犧≒ｸｪ犹もｸ･犧ｧ犹呉ｹ�ｸ･犧游ｹ呉ｹ犧霞ｸｷ犹謂ｸｭ犧｢犧癌ｸｲ 犧ｧ犧ｱ犧吭ｹ� 犹犧ｭ犧ｲ犹≒ｸ歩ｹ謂ｸ≒ｸ･犧ｱ犧ｧ犧ｫ犧吭ｸｲ犧ｧ 犹�ｸ｡犹謂ｸ｣犧ｹ犹霞ｸ謂ｸｱ犧≒ｸ�ｸｧ犧ｲ犧｡犹犧｣犹謂ｸｲ犧｣犹霞ｸｭ犧吭ｸ≒ｸ｣犧ｰ犧歩ｸｷ犧ｭ犧｣犧ｷ犧ｭ犧｣犹霞ｸ吭ｹ≒ｸ･犧ｰ犧謂ｸｴ犧歩ｸｧ犧ｴ犧財ｸ財ｸｲ犧内ｹ≒ｸｫ犹謂ｸ�ｸ≒ｸｲ犧｣犧伶ｸｳ犧�ｸｲ犧吭ｸｫ犧吭ｸｱ犧�!"</p><p>�圻 <b>犹�ｸ｡犹謂ｸ癌ｸｭ犧� Machinepolis:</b> "犧樅ｸｧ犧≒ｸ壟ｹ霞ｸｲ犧ｧ犧ｴ犧伶ｸ｢犧ｲ犧ｨ犧ｲ犧ｪ犧歩ｸ｣犹呉ｹ�ｸｮ犹犧伶ｸ� 犹犧ｭ犧ｲ犹�ｸ謂ｸｭ犧ｭ犧≒ｸｫ犹謂ｸｲ犧�ｸ｣犧ｲ犧≒ｹ犧ｫ犧�ｹ霞ｸｲ犧扉ｸｱ犹霞ｸ�ｹ犧扉ｸｴ犧｡ 犹�ｸ癌ｹ霞ｹ≒ｸ歩ｹ謂ｹ犧�ｸ｣犧ｷ犹謂ｸｭ犧�ｸ謂ｸｱ犧≒ｸ｣犧伶ｸｷ犹謂ｸｭ犹� 犹≒ｸ･犹霞ｸｧ犧｡犧ｲ犧扉ｸｹ犧籾ｸｹ犧≒ｸ≒ｸｲ犧｣犧ｫ犧･犧ｭ犧｡犧扉ｹ霞ｸｧ犧｢犧杳ｸｵ犧｡犧ｷ犧ｭ犧ｭ犧ｱ犧吭ｸ巵ｸ｣犧ｰ犧内ｸｵ犧歩ｹもｸ壟ｸ｣犧ｲ犧内ｸもｸｭ犧�ｹ犧｣犧ｲ!"</p><p>�圻 <b>犹�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ癌ｸｰ犧歩ｸｲ Finalthron:</b> "犧樅ｸｧ犧≒ｸｧ犧ｱ犧吭ｹ� 犧扉ｸｵ犹≒ｸ歩ｹ謂ｸｪ犧ｧ犧扉ｸｭ犹霞ｸｭ犧吭ｸｧ犧ｭ犧吭ｸ｣犹霞ｸｭ犧�ｸもｸｭ犧歩ｹ謂ｸｭ犧樅ｸ｣犧ｰ犹犧謂ｹ霞ｸｲ 犧｣犧ｱ犧�ｹ犧≒ｸｵ犧｢犧謂ｹ犧ｫ犧�ｸｷ犹謂ｸｭ犹≒ｸ･犧ｰ犹犧もｸ｡犹謂ｸｲ犧扉ｸｳ 犹≒ｸ歩ｹ謂ｹ�ｸ｡犹謂ｹ犧�ｸ｢犧�ｸｴ犧扉ｸ伶ｸｳ犧ｭ犧ｰ犹�ｸ｣犧扉ｹ霞ｸｧ犧｢犧歩ｸｱ犧ｧ犹犧ｭ犧�ｸｪ犧ｱ犧≒ｸｭ犧｢犹謂ｸｲ犧�ｹ犧･犧｢!"</p></div></details>
-                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>笶�ｸ� 犧ｭ犧�ｸ歩ｸｴ犧もｸｭ犧� Blankheimgard (犧ｫ犧ｴ犧｡犧ｰ犧もｸｲ犧ｧ犧壟ｸ｣犧ｴ犧ｪ犧ｸ犧伶ｸ倨ｸｴ犹�)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>�圻 <b>犹�ｸ｡犹謂ｸｪ犧壟ｸｭ犧ｲ犧｣犧｡犧内ｹ� Casteria:</b> "犧樅ｸｧ犧≒ｸ壟ｹ霞ｸｲ犧樅ｸ･犧ｱ犧�ｹもｸ憫ｸ�ｸ憫ｸｲ犧� 犧｣犹霞ｸｭ犧吭ｸ｣犧吭ｸ≒ｸ｣犧ｰ犧ｧ犧吭ｸ≒ｸ｣犧ｰ犧ｧ犧ｲ犧｢犧謂ｸ吭ｹ犧ｫ犧�ｸｷ犹謂ｸｭ犧伶ｹ謂ｸｧ犧｡犧≒ｸｲ犧｢犧歩ｸ･犧ｭ犧扉ｹ犧ｧ犧･犧ｲ 犧吭ｹ謂ｸｲ犧｣犧ｳ犧�ｸｲ犧財ｹ�ｸ� 犹�ｸ｡犹謂ｸ｣犧ｹ犹霞ｸ謂ｸｱ犧≒ｸ�ｸｸ犧内ｸ�ｹ謂ｸｲ犧もｸｭ犧�ｸ�ｸｧ犧ｲ犧｡犧ｪ犧�ｸ壟ｸもｸｭ犧�ｸ倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ!"</p><p>�圻 <b>犹�ｸ｡犹謂ｸ癌ｸｭ犧� Machinepolis:</b> "犧樅ｸｧ犧≒ｹ�ｸｮ犹犧巵ｸｭ犧｣犹呉ｸ伶ｸｳ犧ｭ犧ｰ犹�ｸ｣犧ｫ犧ｸ犹霞ｸ吭ｸｫ犧ｱ犧吭ｸ樅ｸ･犧ｱ犧吭ｹ≒ｸ･犹謂ｸ� 犹犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｹ�ｸ巵ｹ犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｸ｡犧ｲ犧｣犧ｧ犧扉ｹ犧｣犹�ｸｧ犧｣犧ｲ犧ｧ犧樅ｸｲ犧｢犧ｸ犧謂ｸ吭ｸｨ犧ｹ犧吭ｸ｢犹呉ｹ犧ｪ犧ｵ犧｢犧謂ｸｴ犧歩ｹ�ｸ謂ｸ伶ｸｵ犹謂ｸｪ犧壟ｸｲ犧｢犹� 犹犧ｫ犧｡犧ｷ犧ｭ犧吭ｸｫ犧ｴ犧｡犧ｰ犹もｸ巵ｸ｣犧｢!"</p><p>�圻 <b>犹�ｸ｡犹謂ｸ籾ｸｹ犧≒ｸ癌ｸｰ犧歩ｸｲ Finalthron:</b> "犹≒ｸｪ犧�ｸｭ犧壟ｸｭ犧ｸ犹謂ｸ吭ｸｪ犧ｧ犹謂ｸｲ犧�ｹもｸ｣犹謂ｸ謂ｸｭ犧｡犧巵ｸ･犧ｭ犧｡犧伶ｸｵ犹謂ｸ樅ｸ｢犧ｲ犧｢犧ｲ犧｡犧ｪ犹謂ｸｭ犧�ｸ･犧�ｸ｡犧ｲ犧･犧ｰ犧･犧ｲ犧｢犧扉ｸｴ犧吭ｹ≒ｸ扉ｸ吭ｹ≒ｸ･犧ｰ犧扉ｸｹ犧籾ｸｹ犧≒ｸ�ｸｧ犧ｲ犧｡犧ｪ犧�ｸ壟ｹ犧ｫ犧吭ｹ�ｸ壟ｸｫ犧吭ｸｲ犧ｧ犧もｸｭ犧�ｸ倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ犧ｭ犧ｱ犧吭ｸ�ｸ扉ｸ�ｸｲ犧｡!"</p></div></details>
-                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>笞呻ｸ� 犧ｭ犧�ｸ歩ｸｴ犧もｸｭ犧� Machinepolis (犧謂ｸｱ犧≒ｸ｣犧≒ｸ･犹�ｸｮ犹犧伶ｸ�)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>�圻 <b>犹�ｸ｡犹謂ｸｪ犧壟ｸｭ犧ｲ犧｣犧内ｹ� Casteria:</b> "犧樅ｸｧ犧≒ｹ�ｸ癌ｹ霞ｹ≒ｸ歩ｹ謂ｸｧ犧ｴ犧倨ｸｵ犧･犹霞ｸｲ犧ｫ犧･犧ｱ犧�ｹもｸ壟ｸ｣犧ｲ犧� 犧扉ｸｷ犹霞ｸｭ犧扉ｸｶ犧�ｸ扉ｸｱ犧≒ｸ扉ｸｲ犧吭ｹ�ｸ｡犹謂ｸ樅ｸｱ犧亭ｸ吭ｸｲ 犧巵ｸｱ犧扉ｸ巵ｸ鐘ｸｴ犹犧ｪ犧倨ｸ｣犧ｰ犧壟ｸ壟ｸｭ犧ｱ犧歩ｹもｸ吭ｸ｡犧ｱ犧歩ｸｴ犧伶ｸｵ犹謂ｸ｣犧ｧ犧扉ｹ犧｣犹�ｸｧ犹≒ｸ･犧ｰ犹≒ｸ｡犹謂ｸ吭ｸ｢犧ｳ犧≒ｸｧ犹謂ｸｲ!"</p><p>�圻 <b>犹�ｸ｡犹謂ｸ癌ｸｭ犧� Blankheimgard:</b> "犧樅ｸｧ犧≒ｸｪ犹もｸ･犧ｧ犹呉ｹ�ｸ･犧游ｹ呉ｹ犧霞ｸｷ犹謂ｸｭ犧｢犧癌ｸｲ 犧癌ｸｱ犧≒ｸ癌ｹ霞ｸｲ犹�ｸ｣犹霞ｸ巵ｸ｣犧ｰ犧ｪ犧ｴ犧伶ｸ倨ｸｴ犧�犧ｲ犧� 犧｡犧ｵ犧扉ｸｵ犹≒ｸ�ｹ謂ｸ伶ｸｳ犧歩ｸｱ犧ｧ犧ｪ犧�ｸ壟ｹ犧ｪ犧�ｸｵ犹謂ｸ｢犧｡犧｣犧ｱ犧≒ｸｩ犧ｲ犧｣犧ｹ犧巵ｸ≒ｸｲ犧｣犹≒ｸ歩ｹ謂ｸ籾ｹ謂ｸｧ犧�ｹ犧ｧ犧･犧ｲ犹≒ｸｫ犹謂ｸ�ｸ≒ｸｲ犧｣犧樅ｸｱ犧亭ｸ吭ｸｲ!"</p><p>�圻 <b>犹犧≒ｸ･犧ｵ犧｢犧� Finalthron:</b> "犧樅ｸｧ犧≒ｸ�ｸ｡犧�ｸｲ犧｢犧ｭ犹霞ｸｭ犧吭ｸｧ犧ｭ犧吭ｸ樅ｸｶ犹謂ｸ�ｸ樅ｸｲ犹≒ｸ歩ｹ謂ｸ樅ｸ｣犧ｰ犹犧謂ｹ霞ｸｲ犹≒ｸ･犧ｰ犧ｪ犧ｴ犹謂ｸ�ｸｨ犧ｱ犧≒ｸ扉ｸｴ犹呉ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹� 犧伶ｸｱ犹霞ｸ�ｸ伶ｸｵ犹謂ｸ�ｸｧ犧ｲ犧｡犧謂ｸ｣犧ｴ犧�ｸ伶ｸｵ犹謂ｸ樅ｸｴ犧ｪ犧ｹ犧謂ｸ吭ｹ呉ｹ�ｸ扉ｹ霞ｸ伶ｸｲ犧�ｸｧ犧ｴ犧伶ｸ｢犧ｲ犧ｨ犧ｲ犧ｪ犧歩ｸ｣犹呉ｹ≒ｸ･犧ｰ犧歩ｸ｣犧｣犧≒ｸｰ犧歩ｹ謂ｸｲ犧�ｸｫ犧ｲ犧≒ｸ�ｸｷ犧ｭ犧ｪ犧ｱ犧謂ｸ倨ｸ｣犧｣犧｡!"</p></div></details>
-                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>笨ｨ 犧ｭ犧�ｸ歩ｸｴ犧もｸｭ犧� Finalthron (犧ｧ犧ｴ犧ｫ犧ｲ犧｣犹≒ｸｪ犧�ｸｨ犧ｱ犧≒ｸ扉ｸｴ犹呉ｸｪ犧ｴ犧伶ｸ倨ｸｴ犹�)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>�圻 <b>犹�ｸ｡犹謂ｸ癌ｸｭ犧� Casteria:</b> "犧樅ｸｧ犧≒ｸ巵ｹ謂ｸｲ犹犧籾ｸｷ犹謂ｸｭ犧� 犧扉ｸｴ犧壟ｸｫ犧｢犧ｲ犧� 犹犧巵ｸｷ犹霞ｸｭ犧吭ｸ｡犧ｭ犧｡犹�ｸ巵ｸ扉ｹ霞ｸｧ犧｢犧�ｸ｣犧ｲ犧壟ｹ犧籾ｹ霞ｸｲ犧籾ｹ謂ｸｲ犧吭ｸｪ犧≒ｸ巵ｸ｣犧� 犧伶ｸｳ犧･犧ｲ犧｢犧謂ｸｲ犧｣犧ｵ犧歩ｹ≒ｸｫ犹謂ｸ�ｸ�ｸｧ犧ｲ犧｡犧壟ｸ｣犧ｴ犧ｪ犧ｸ犧伶ｸ倨ｸｴ犹呉ｸｪ犧�ｹ謂ｸｲ犧�ｸｲ犧｡!"</p><p>�圻 <b>犹�ｸ｡犹謂ｸ癌ｸｭ犧� Machinepolis:</b> "犧樅ｸｧ犧≒ｸｫ犧｢犧ｴ犹謂ｸ�ｸ｢犹もｸｪ犧�ｸｴ犧扉ｸ�ｹ霞ｸ吭ｸ謂ｸｱ犧≒ｸ｣犧≒ｸ･犧杳ｸｷ犧吭ｸ≒ｸ錫ｸ伶ｹ霞ｸｲ犧伶ｸｲ犧｢犧倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ 犧伶ｹ霞ｸｲ犧伶ｸｲ犧｢犧ｭ犧ｳ犧吭ｸｲ犧謂ｹ犧伶ｸ樅ｸｪ犧ｧ犧｣犧｣犧�ｹ� 犧｡犧ｱ犧吭ｸ癌ｹ謂ｸｲ犧�ｸ壟ｸｲ犧巵ｸｫ犧吭ｸｲ犹≒ｸ･犧ｰ犧ｫ犧｢犧ｲ犧壟ｸ�ｸｲ犧｢!"</p><p>�圻 <b>犹犧壟ｸｷ犹謂ｸｭ犧ｫ犧吭ｹ謂ｸｲ犧｢ Blankheimgard:</b> "犧樅ｸｧ犧≒ｸ巵ｸ鐘ｸｴ犹犧ｪ犧倨ｹ�ｸ｡犹謂ｸ｢犧ｭ犧｡犧吭ｹ霞ｸｭ犧｡犧｣犧ｱ犧壟ｹ≒ｸｪ犧�ｸｭ犧ｱ犧吭ｸｭ犧壟ｸｭ犧ｸ犹謂ｸ� 犧扉ｸｱ犧吭ｸ癌ｸｭ犧壟ｸ謂ｸ｡犧巵ｸ･犧ｱ犧≒ｸｭ犧｢犧ｹ犹謂ｹ�ｸ吭ｸ�ｸｧ犧ｲ犧｡犧｡犧ｷ犧扉ｸ｡犧ｴ犧扉ｸｭ犧ｱ犧吭ｹ犧ｫ犧吭ｹ�ｸ壟ｸｫ犧吭ｸｲ犧ｧ犹≒ｸ･犧ｰ犧ｨ犧｣犧ｱ犧伶ｸ倨ｸｲ犧倨ｸ｣犧｣犧｡犧癌ｸｲ犧歩ｸｴ犧ｭ犧｢犹謂ｸｲ犧�ｹ�ｸ｣犹霞ｸ≒ｸ錫ｹ犧≒ｸ内ｸ隊ｹ�!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>🔥 อคติของ Casteria (สิงโตเพลิง)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารมณ์ Blankheimgard:</b> "พวกสโลว์ไลฟ์เฉื่อยชา วันๆ เอาแต่กลัวหนาว ไม่รู้จักความเร่าร้อนกระตือรือร้นและจิตวิญญาณแห่งการทำงานหนัก!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกบ้าวิทยาศาสตร์ไฮเทค เอาใจออกห่างรากเหง้าดั้งเดิม ใช้แต่เครื่องจักรทื่อๆ แล้วมาดูถูกการหลอมด้วยฝีมืออันประณีตโบราณของเรา!"</p><p>🚫 <b>ไม่ถูกชะตา Finalthron:</b> "พวกวันๆ ดีแต่สวดอ้อนวอนร้องขอต่อพระเจ้า รังเกียจเหงื่อและเขม่าดำ แต่ไม่เคยคิดทำอะไรด้วยตัวเองสักอย่างเลย!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>❄️ อคติของ Blankheimgard (หิมะขาวบริสุทธิ์)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารมณ์ Casteria:</b> "พวกบ้าพลังโผงผาง ร้อนรนกระวนกระวายจนเหงื่อท่วมกายตลอดเวลา น่ารำคาญใจ ไม่รู้จักคุณค่าของความสงบของธรรมชาติ!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกไฮเปอร์ทำอะไรหุ้นหันพลันแล่น เปลี่ยนไปเปลี่ยนมารวดเร็วราวพายุจนศูนย์เสียจิตใจที่สบายๆ เหมือนหิมะโปรย!"</p><p>🚫 <b>ไม่ถูกชะตา Finalthron:</b> "แสงอบอุ่นสว่างโร่จอมปลอมที่พยายามส่องลงมาละลายดินแดนและดูถูกความสงบเหน็บหนาวของธรรมชาติอันงดงาม!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>⚙️ อคติของ Machinepolis (จักรกลไฮเทค)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารณ์ Casteria:</b> "พวกใช้แต่วิธีล้าหลังโบราณ ดื้อดึงดักดานไม่พัฒนา ปัดปฏิเสธระบบอัตโนมัติที่รวดเร็วและแม่นยำกว่า!"</p><p>🚫 <b>ไม่ชอบ Blankheimgard:</b> "พวกสโลว์ไลฟ์เฉื่อยชา ชักช้าไร้ประสิทธิภาพ มีดีแค่ทำตัวสงบเสงี่ยมรักษารูปการแต่ถ่วงเวลาแห่งการพัฒนา!"</p><p>🚫 <b>เกลียด Finalthron:</b> "พวกงมงายอ้อนวอนพึ่งพาแต่พระเจ้าและสิ่งศักดิ์สิทธิ์ ทั้งที่ความจริงที่พิสูจน์ได้ทางวิทยาศาสตร์และตรรกะต่างหากคือสัจธรรม!"</p></div></details>
+                                    <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>✨ อคติของ Finalthron (วิหารแสงศักดิ์สิทธิ์)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่ชอบ Casteria:</b> "พวกป่าเถื่อน ดิบหยาบ เปื้อนมอมไปด้วยคราบเถ้าถ่านสกปรก ทำลายจารีตแห่งความบริสุทธิ์สง่างาม!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกหยิ่งยโสคิดค้นจักรกลฝืนกฎท้าทายธรรมชาติ ท้าทายอำนาจเทพสวรรค์ มันช่างบาปหนาและหยาบคาย!"</p><p>🚫 <b>เบื่อหน่าย Blankheimgard:</b> "พวกปฏิเสธไม่ยอมน้อมรับแสงอันอบอุ่น ดันชอบจมปลักอยู่ในความมืดมิดอันเหน็บหนาวและศรัทธาธรรมชาติอย่างไร้กฎเกณฑ์!"</p></div></details>
                                 </div>
                             </section>
                             
                             <section className="text-justify border-t-2 border-[#8b5a2b]/30 pt-8 mt-8">
-                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-scroll"></i> 4. 犧�犧ｲ犧｣犧≒ｸｴ犧謂ｸ樅ｸｱ犧�ｸ伶ｸ･犧ｲ犧｢犧≒ｸｳ犹≒ｸ樅ｸ�ｹ≒ｸｫ犹謂ｸ�ｸｭ犧�ｸ歩ｸｴ (Your Mission)</h2>
-                                <p className="leading-relaxed text-sm mb-4">犹犧｡犧ｷ犹謂ｸｭ犧ｭ犧�ｸ歩ｸｴ犹≒ｸ･犧ｰ犧ｪ犧�ｸ�ｸ｣犧ｲ犧｡犹犧｢犹�ｸ吭ｹ犧｣犧ｴ犹謂ｸ｡犧ｪ犧ｱ犹謂ｸ吭ｸ�ｸ･犧ｭ犧吭ｸ�ｸｧ犧ｲ犧｡犧｡犧ｱ犹謂ｸ吭ｸ�ｸ�ｹ≒ｸ･犧ｰ犧壟ｹ謂ｸｭ犧吭ｸ伶ｸｳ犧･犧ｲ犧｢ "犧｡犧ｲ犧歩ｸ｣犧説ｸｲ犧吭ｸもｸｭ犧�ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�" 犧ｪ犧�犧ｲ犹≒ｸｫ犹謂ｸ� <b>Bascentra</b> 犧謂ｸｶ犧�ｹ�ｸ扉ｹ霞ｹ�ｸ癌ｹ霞ｸ壟ｸｱ犧財ｸ癌ｸｲ犧ｪ犧ｴ犧伶ｸ倨ｸｴ犹� 犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧｣犧ｰ犧扉ｸ｡犧樅ｸ･犹犧｣犧ｵ犧｢犧≒ｸ歩ｸｱ犧ｧ <b>"犧吭ｸｱ犧≒ｸ憫ｸ謂ｸ財ｸ�犧ｱ犧｢"</b> 犧謂ｸｲ犧≒ｹ≒ｸ歩ｹ謂ｸ･犧ｰ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧壟ｹ霞ｸｲ犧吭ｹ犧≒ｸｴ犧� 犹犧樅ｸｷ犹謂ｸｭ犹犧｣犧ｵ犧｢犧吭ｸ｣犧ｹ犹霞ｹ≒ｸ･犧ｰ犹≒ｸ≒ｹ霞ｸ巵ｸｱ犧財ｸｫ犧ｲ犧｣犹謂ｸｧ犧｡犧≒ｸｱ犧�!</p>
-                                <p className="leading-relaxed text-sm bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">�痩 <b>犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧ｪ犧ｹ犧�ｸｪ犧ｸ犧�:</b> 犧�ｸｸ犧内ｸ歩ｹ霞ｸｭ犧�ｸ伶ｸｳ犧ｫ犧吭ｹ霞ｸｲ犧伶ｸｵ犹謂ｸ�ｹ霞ｸ吭ｸｫ犧ｲ "犧謂ｸｸ犧扉ｸ壟ｸ≒ｸ樅ｸ｣犹謂ｸｭ犧�/犧巵ｸｱ犧財ｸｫ犧ｲ" 犹�ｸ吭ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧吭ｹ犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢ 犹≒ｸ･犹霞ｸｧ犧｢犧ｷ犹謂ｸ� <b>"犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｹ≒ｸｫ犹謂ｸ�ｸ≒ｸｲ犧｣犧樅ｸｱ犧亭ｸ吭ｸｲ (Decrees of Development)"</b> 犧憫ｹ謂ｸｲ犧吭ｸ｣犧ｰ犧壟ｸ壟ｹ犧樅ｸｷ犹謂ｸｭ犧吭ｸｳ犧�ｸｰ犹≒ｸ吭ｸ� EXP 犧≒ｸ･犧ｱ犧壟ｹ�ｸ巵ｸ｢犧≒ｸ｣犧ｰ犧扉ｸｱ犧壟ｹ�ｸｫ犹霞ｹ犧｡犧ｷ犧ｭ犧�ｸ壟ｹ霞ｸｲ犧吭ｹ犧≒ｸｴ犧扉ｹ�ｸｫ犹霞ｸ｣犧ｸ犹謂ｸ�ｹ犧｣犧ｷ犧ｭ犧�ｹ犧ｫ犧吭ｸｷ犧ｭ犹�ｸ�ｸ｣ 犧もｸ内ｸｰ犹犧扉ｸｵ犧｢犧ｧ犧≒ｸｱ犧吭ｸ�ｸｸ犧内ｸ≒ｹ�ｸ歩ｹ霞ｸｭ犧�ｹ犧扉ｸｴ犧吭ｸ伶ｸｲ犧�ｸ｣犹謂ｸｧ犧｡犧｡犧ｷ犧ｭ犧樅ｸｱ犧亭ｸ吭ｸｲ犹≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧吭ｸｭ犧ｷ犹謂ｸ� 犹犧樅ｸｷ犹謂ｸｭ犧樅ｸｱ犧�ｸ伶ｸ･犧ｲ犧｢犧≒ｸｳ犹≒ｸ樅ｸ�ｹ≒ｸｫ犹謂ｸ�ｸｭ犧�ｸ歩ｸｴ犹≒ｸ･犧ｰ犧樅ｸｴ犧ｪ犧ｹ犧謂ｸ吭ｹ呉ｸ�ｸｸ犧内ｸ�ｹ謂ｸｲ犧もｸｭ犧�ｸ�ｸｳ犧ｧ犹謂ｸｲ <b>"Unity (犧ｪ犧ｲ犧｡犧ｱ犧�ｸ�ｸｵ犹犧巵ｹ�ｸ吭ｸｫ犧吭ｸｶ犹謂ｸ�ｹ犧扉ｸｵ犧｢犧ｧ)"</b> 犹�ｸｫ犹霞ｸ巵ｸ｣犧ｰ犧謂ｸｱ犧≒ｸｩ犹呉ｹ≒ｸ≒ｹ謂ｸｪ犧ｲ犧｢犧歩ｸｲ犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�!</p>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-scroll"></i> 4. ภารกิจพังทลายกำแพงแห่งอคติ (Your Mission)</h2>
+                                <p className="leading-relaxed text-sm mb-4">เมื่ออคติและสงครามเย็นเริ่มสั่นคลอนความมั่นคงและบ่อนทำลาย "มาตรฐานของแผ่นดิน" สภาแห่ง <b>Bascentra</b> จึงได้ใช้บัญชาสิทธิ์ ประกาศระดมพลเรียกตัว <b>"นักผจญภัย"</b> จากแต่ละอาณาจักรบ้านเกิด เพื่อเรียนรู้และแก้ปัญหาร่วมกัน!</p>
+                                <p className="leading-relaxed text-sm bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">👉 <b>เป้าหมายสูงสุด:</b> คุณต้องทำหน้าที่ค้นหา "จุดบกพร่อง/ปัญหา" ในแผ่นดินเป้าหมาย แล้วยื่น <b>"สาส์นแห่งการพัฒนา (Decrees of Development)"</b> ผ่านระบบเพื่อนำคะแนน EXP กลับไปยกระดับให้เมืองบ้านเกิดให้รุ่งเรืองเหนือใคร ขณะเดียวกันคุณก็ต้องเดินทางร่วมมือพัฒนาแผ่นดินอื่น เพื่อพังทลายกำแพงแห่งอคติและพิสูจน์คุณค่าของคำว่า <b>"Unity (สามัคคีเป็นหนึ่งเดียว)"</b> ให้ประจักษ์แก่สายตาสภาเมือง!</p>
                             </section>
                         </div>
                     )}
@@ -2305,26 +2007,26 @@
                         <div className="space-y-10 animate-fade-in">
                             <section className="text-justify">
                                 <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel">
-                                    <i className="fa-solid fa-swords"></i> 1. 犧≒ｸ錫ｹ≒ｸｫ犹謂ｸ�ｸ≒ｸｲ犧｣犧ｪ犧籾ｸｲ犧巵ｸ吭ｸｲ (Workflow & System)
+                                    <i className="fa-solid fa-swords"></i> 1. กฎแห่งการสถาปนา (Workflow & System)
                                 </h2>
-                                <p className="text-sm text-[#8b5a2b] mb-4 font-bold">犧｣犧ｰ犧壟ｸ壟ｸ吭ｸｵ犹霞ｸ籾ｸｹ犧≒ｹ≒ｸ壟ｹ謂ｸ�ｸ壟ｸ伶ｸ壟ｸｲ犧伶ｸｭ犧ｭ犧≒ｹ犧巵ｹ�ｸ� 3 犧杳ｹ謂ｸｲ犧｢ 犹犧樅ｸｷ犹謂ｸｭ犹�ｸｫ犹霞ｸ≒ｸｲ犧｣犧樅ｸｱ犧亭ｸ吭ｸｲ犹犧巵ｹ�ｸ吭ｹ�ｸ巵ｸｭ犧｢犹謂ｸｲ犧�ｸ｢犧ｸ犧歩ｸｴ犧倨ｸ｣犧｣犧｡: "犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ (Origin)", "犧憫ｸｹ犹霞ｸ･犧�ｸ｡犧ｷ犧ｭ犧伶ｸｳ (Target)" 犹≒ｸ･犧ｰ "犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧� (Central Admin)"</p>
+                                <p className="text-sm text-[#8b5a2b] mb-4 font-bold">ระบบนี้ถูกแบ่งบทบาทออกเป็น 3 ฝ่าย เพื่อให้การพัฒนาเป็นไปอย่างยุติธรรม: "ผู้เสนอ (Origin)", "ผู้ลงมือทำ (Target)" และ "สภาเมือง (Central Admin)"</p>
                                 <div className="space-y-6">
                                     <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-blue-600 shadow">
-                                        <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-lightbulb text-yellow-600 mr-2"></i> 犹犧游ｸｪ犧伶ｸｵ犹� 1: 犹犧ｪ犧吭ｸｭ犹�ｸｭ犹犧扉ｸｵ犧｢ (犧ｫ犧吭ｹ霞ｸｲ 犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｹ≒ｸｫ犹謂ｸ�ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�)</h3>
+                                        <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-lightbulb text-yellow-600 mr-2"></i> เฟสที่ 1: เสนอไอเดีย (หน้า ประกาศิตแห่งแผ่นดิน)</h3>
                                         <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
-                                            <li><b>犧｢犧ｷ犹謂ｸ吭ｸｪ犧ｲ犧ｪ犹呉ｸ�:</b> 犧樅ｸ壟ｸ巵ｸｱ犧財ｸｫ犧ｲ犧ｫ犧吭ｹ霞ｸｲ犧�ｸｲ犧� 犹�ｸｫ犹霞ｸ≒ｸ｣犧ｭ犧� "犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ犹≒ｸ扉ｹ謂ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣" 犧樅ｸ｣犹霞ｸｭ犧｡犧｣犧ｰ犧壟ｸｸ犹犧｡犧ｷ犧ｭ犧�ｹ犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢ 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ謂ｸｰ犹≒ｸｪ犧扉ｸ�ｸ憫ｸ･犧伶ｸｵ犹謂ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸ巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ (犧ｪ犧籾ｸｲ犧吭ｸｰ Blueprint)</li>
-                                            <li><b>犧ｪ犧�犧ｲ犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ:</b> 犹≒ｸｭ犧扉ｸ｡犧ｴ犧吭ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ謂ｸｰ犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犧�ｸｧ犧ｲ犧｡犹犧ｫ犧｡犧ｲ犧ｰ犧ｪ犧｡ 犧ｫ犧ｲ犧≒ｸ伶ｸｳ犹�ｸ扉ｹ霞ｸ謂ｸ｣犧ｴ犧�ｸ謂ｸｰ犧巵ｸ｣犧ｱ犧壟ｸｪ犧籾ｸｲ犧吭ｸｰ犹犧巵ｹ�ｸ� <b>Rising</b> (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犧憫ｹ謂ｸｲ犧�) 犧ｫ犧｣犧ｷ犧ｭ <b>Founding</b> (犧ｭ犧｢犧ｹ犹謂ｸ｣犧ｰ犧ｫ犧ｧ犹謂ｸｲ犧�ｸ樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ)</li>
-                                            <li><b>Super Rising:</b> 犧ｫ犧ｲ犧≒ｹ犧巵ｹ�ｸ吭ｹ�ｸｭ犹犧扉ｸｵ犧｢犧伶ｸｵ犹謂ｸ｢犧ｭ犧扉ｹ犧｢犧ｵ犹謂ｸ｢犧｡犧｣犧ｰ犧扉ｸｱ犧壟ｸ癌ｹ謂ｸｧ犧｢犧･犧扉ｸ歩ｹ霞ｸ吭ｸ伶ｸｸ犧� (Cost/Cycle Time) 犧ｪ犧�犧ｲ犧ｭ犧ｲ犧謂ｸ樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犧ｭ犧ｱ犧巵ｹ犧≒ｸ｣犧扉ｹ犧巵ｹ�ｸ� <b className="text-yellow-700">�荘 Super Rising</b> 犧伶ｸｱ犧吭ｸ伶ｸｵ!</li>
-                                            <li className="text-blue-700 font-bold bg-blue-100 p-2 rounded inline-block mt-2 shadow-inner">�醇 犧｣犧ｲ犧�ｸｧ犧ｱ犧･犧憫ｸｹ犹霞ｹ犧ｪ犧吭ｸｭ: 犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犧巵ｸ≒ｸ歩ｸｴ犧｣犧ｱ犧� +5 EXP / 犧ｫ犧ｲ犧≒ｹ�ｸ扉ｹ� Super Rising 犧｣犧ｱ犧壟ｹ犧壟ｸｴ犹霞ｸ･犹犧巵ｹ�ｸ� +10 EXP!</li>
+                                            <li><b>ยื่นสาส์น:</b> พบปัญหาหน้างาน ให้กรอก "สาส์นพัฒนาแด่อาณาจักร" พร้อมระบุเมืองเป้าหมาย สาส์นจะแสดงผลที่กระดานประกาศิตฯ (สถานะ Blueprint)</li>
+                                            <li><b>สภาอนุมัติ:</b> แอดมินสภาเมืองจะพิจารณาความเหมาะสม หากทำได้จริงจะปรับสถานะเป็น <b>Rising</b> (อนุมัติผ่าน) หรือ <b>Founding</b> (อยู่ระหว่างพิจารณา)</li>
+                                            <li><b>Super Rising:</b> หากเป็นไอเดียที่ยอดเยี่ยมระดับช่วยลดต้นทุน (Cost/Cycle Time) สภาอาจพิจารณาอัปเกรดเป็น <b className="text-yellow-700">👑 Super Rising</b> ทันที!</li>
+                                            <li className="text-blue-700 font-bold bg-blue-100 p-2 rounded inline-block mt-2 shadow-inner">🏆 รางวัลผู้เสนอ: อนุมัติปกติรับ +5 EXP / หากได้ Super Rising รับเบิ้ลเป็น +10 EXP!</li>
                                         </ul>
                                     </div>
                                     <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-red-600 shadow">
-                                        <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-hammer text-gray-600 mr-2"></i> 犹犧游ｸｪ犧伶ｸｵ犹� 2: 犧･犧�ｸ｡犧ｷ犧ｭ犧巵ｸ鐘ｸｴ犧壟ｸｱ犧歩ｸｴ (犧ｫ犧吭ｹ霞ｸｲ 犧･犧ｲ犧吭ｸｪ犹謂ｸ�ｸ｡犧ｭ犧壟ｸ�犧ｲ犧｣犧≒ｸｴ犧�)</h3>
+                                        <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-hammer text-gray-600 mr-2"></i> เฟสที่ 2: ลงมือปฏิบัติ (หน้า ลานส่งมอบภารกิจ)</h3>
                                         <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
-                                            <li><b>犧｣犧ｱ犧壟ｹ犧�ｸｧ犧ｪ犧歩ｹ呉ｹ≒ｸ･犧ｰ犹≒ｸ≒ｹ霞ｹ�ｸ�:</b> 犹犧｡犧ｷ犹謂ｸｭ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹≒ｸ･犹霞ｸｧ 犧謂ｸｰ犧｡犧ｲ犹もｸ憫ｸ･犹謂ｸ伶ｸｵ犹謂ｸ･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧� (犧ｪ犧籾ｸｲ犧吭ｸｰ Founding) 犧歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｹ犧｡犧ｷ犧ｭ犧�ｹ犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧歩ｹ霞ｸｭ犧�ｸ吭ｸｳ犹�ｸ巵ｸ･犧�ｸ｡犧ｷ犧ｭ犹≒ｸ≒ｹ霞ｹ�ｸもｸｫ犧吭ｹ霞ｸｲ犧�ｸｲ犧吭ｸ謂ｸ｣犧ｴ犧�</li>
-                                            <li><b>犧ｪ犹謂ｸ�ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧�:</b> 犧伶ｸｳ犹犧ｪ犧｣犹�ｸ謂ｹ≒ｸ･犹霞ｸｧ犹�ｸｫ犹霞ｸｭ犧ｱ犧巵ｹもｸｫ犧･犧扉ｸ�犧ｲ犧樅ｸ憫ｸ･犧･犧ｱ犧樅ｸ倨ｹ� (After) 犹犧樅ｸｷ犹謂ｸｭ犹犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｸｪ犧籾ｸｲ犧吭ｸｰ犹犧巵ｹ�ｸ� <b>Evidence</b> 犧｣犧ｭ犧ｪ犧�犧ｲ犧≒ｸ･犧ｲ犧�ｸ｡犧ｲ犧歩ｸ｣犧ｧ犧�</li>
-                                            <li><b>犧ｪ犧�犧ｲ犧歩ｸ｣犧ｧ犧謂ｸ�ｸｲ犧�:</b> 犧ｪ犧�犧ｲ犧≒ｸ･犧ｲ犧�ｸ巵ｸ｣犧ｰ犹犧｡犧ｴ犧吭ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧� 犧ｫ犧ｲ犧≒ｸ憫ｹ謂ｸｲ犧吭ｹ犧≒ｸ内ｸ隊ｹ呉ｸ謂ｸｰ犧巵ｸ｣犧ｱ犧壟ｸｪ犧籾ｸｲ犧吭ｸｰ犧もｸｱ犹霞ｸ吭ｸｪ犧ｸ犧扉ｸ｢犧ｭ犧扉ｹ犧巵ｹ�ｸ� <b>Rising</b> 犧ｫ犧ｲ犧≒ｹ�ｸ｡犹謂ｸ憫ｹ謂ｸｲ犧� 犧謂ｸｰ犧巵ｸｱ犧扉ｸ歩ｸ≒ｹ犧巵ｹ�ｸ� <b>Ruined</b> 犹�ｸｫ犹霞ｸ≒ｸ･犧ｱ犧壟ｹ�ｸ巵ｹ≒ｸ≒ｹ霞ｹ�ｸｫ犧｡犹�</li>
-                                            <li className="text-green-700 font-bold bg-green-100 p-2 rounded inline-block mt-2 shadow-inner">�醇 犧｣犧ｲ犧�ｸｧ犧ｱ犧･犧憫ｸｹ犹霞ｸ伶ｸｳ: 犹犧｡犧ｷ犹謂ｸｭ犧ｪ犧�犧ｲ犧歩ｸ｣犧ｧ犧謂ｸ憫ｹ謂ｸｲ犧� 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧伶ｸｵ犹謂ｸ･犧�ｸ｡犧ｷ犧ｭ犧伶ｸｳ犧｣犧ｱ犧壟ｸ伶ｸｱ犧吭ｸ伶ｸｵ +15 EXP!</li>
+                                            <li><b>รับเควสต์และแก้ไข:</b> เมื่อสาส์นอนุมัติแล้ว จะมาโผล่ที่ลานภารกิจ (สถานะ Founding) ตัวแทนเมืองเป้าหมายต้องนำไปลงมือแก้ไขหน้างานจริง</li>
+                                            <li><b>ส่งหลักฐาน:</b> ทำเสร็จแล้วให้อัปโหลดภาพผลลัพธ์ (After) เพื่อเปลี่ยนสถานะเป็น <b>Evidence</b> รอสภากลางมาตรวจ</li>
+                                            <li><b>สภาตรวจงาน:</b> สภากลางประเมินหลักฐาน หากผ่านเกณฑ์จะปรับสถานะขั้นสุดยอดเป็น <b>Rising</b> หากไม่ผ่าน จะปัดตกเป็น <b>Ruined</b> ให้กลับไปแก้ใหม่</li>
+                                            <li className="text-green-700 font-bold bg-green-100 p-2 rounded inline-block mt-2 shadow-inner">🏆 รางวัลผู้ทำ: เมื่อสภาตรวจผ่าน อาณาจักรเป้าหมายที่ลงมือทำรับทันที +15 EXP!</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -2332,97 +2034,97 @@
 
                             <section>
                                 <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel">
-                                    <i className="fa-solid fa-chart-line"></i> 2. 犹犧･犹犧ｧ犧･, 犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ 犹≒ｸ･犧ｰ犧�ｸｧ犧ｲ犧｡犧･犧ｱ犧�
+                                    <i className="fa-solid fa-chart-line"></i> 2. เลเวล, เกียรติยศ และความลับ
                                 </h2>
                                 <div className="space-y-4">
                                     <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20">
-                                        <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-400 font-bold text-xs mb-2 shadow-sm">�嶋 犧≒ｸｲ犧｣犧�ｸｳ犧吭ｸｧ犧� EXP (Leveling)</span>
+                                        <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-400 font-bold text-xs mb-2 shadow-sm">📈 การคำนวณ EXP (Leveling)</span>
                                         <p className="text-sm text-[#3d2511] leading-relaxed">
-                                            犧≒ｸｲ犧｣犧謂ｸｰ犧ｭ犧ｱ犧巵ｹ犧≒ｸ｣犧扉ｹ犧･犹犧ｧ犧･犹犧｡犧ｷ犧ｭ犧� 犧謂ｸｰ犹�ｸ癌ｹ霞ｸ｣犧ｰ犧壟ｸ壟ｸｫ犧･犧ｭ犧� EXP 犹≒ｸ壟ｸ壟ｸ伶ｸｧ犧ｵ犧�ｸｹ犧� (Scale) 犹もｸ扉ｸ｢犹犧｣犧ｴ犹謂ｸ｡犧謂ｸｲ犧� <b>Level 1 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣ 60 EXP</b> 犹≒ｸ･犧ｰ犧伶ｸｸ犧≒ｸ�ｸ｣犧ｱ犹霞ｸ�ｸ伶ｸｵ犹謂ｹ犧･犹犧ｧ犧･犧ｭ犧ｱ犧� 犧ｫ犧･犧ｭ犧� EXP 犧謂ｸｰ犧籾ｸｹ犧≒ｸ｣犧ｵ犹犧金ｹ�ｸ歩ｹ�ｸｫ犧｡犹� 犹≒ｸ･犧ｰ犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧｣犧ｭ犧壟ｸ籾ｸｱ犧扉ｹ�ｸ巵ｸ謂ｸｰ犧もｸ｢犧ｲ犧｢犧�ｸｧ犧ｲ犧｡犧｢犧ｲ犧≒ｹ犧樅ｸｴ犹謂ｸ｡犧もｸｶ犹霞ｸ� <b>20%</b> (犹犧癌ｹ謂ｸ� 犹犧･犹犧ｧ犧･ 2 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣ 72 EXP, 犹犧･犹犧ｧ犧･ 3 犧歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣ 86 EXP) 犧扉ｸｱ犧�ｸ吭ｸｱ犹霞ｸ吭ｸ�ｸｧ犧ｲ犧｡犧｣犹謂ｸｧ犧｡犧｡犧ｷ犧ｭ犧謂ｸｶ犧�ｸｪ犧ｳ犧�ｸｱ犧財ｸ伶ｸｵ犹謂ｸｪ犧ｸ犧�!
+                                            การจะอัปเกรดเลเวลเมือง จะใช้ระบบหลอด EXP แบบทวีคูณ (Scale) โดยเริ่มจาก <b>Level 1 ต้องการ 60 EXP</b> และทุกครั้งที่เลเวลอัป หลอด EXP จะถูกรีเซ็ตใหม่ และเป้าหมายรอบถัดไปจะขยายความยากเพิ่มขึ้น <b>20%</b> (เช่น เลเวล 2 ต้องการ 72 EXP, เลเวล 3 ต้องการ 86 EXP) ดังนั้นความร่วมมือจึงสำคัญที่สุด!
                                         </p>
                                     </div>
                                     <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20">
-                                        <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-400 font-bold text-xs mb-2 shadow-sm">�糖 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸ吭ｸｧ犧ｱ犧吭ｸｧ犧ｲ犧� (History of Kingdom)</span>
+                                        <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-400 font-bold text-xs mb-2 shadow-sm">📜 อาณาจักรในวันวาน (History of Kingdom)</span>
                                         <p className="text-sm text-[#3d2511] leading-relaxed">
-                                            犹犧｡犧ｷ犹謂ｸｭ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧もｸｭ犧�ｸ伶ｹ謂ｸｲ犧吭ｸ壟ｸ｣犧｣犧･犧ｸ犹犧･犹犧ｧ犧･犧歩ｸｲ犧｡犧伶ｸｵ犹謂ｸｪ犧�犧ｲ犧≒ｸｳ犧ｫ犧吭ｸ扉ｹ�ｸｧ犹� 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧吭ｸｱ犹霞ｸ吭ｸ謂ｸｰ犹犧≒ｸｴ犧扉ｸ≒ｸｲ犧｣犧ｧ犧ｴ犧ｧ犧ｱ犧亭ｸ吭ｸｲ犧≒ｸｲ犧｣! (犧�犧ｲ犧樅ｹ犧｡犧ｷ犧ｭ犧�ｹ�ｸ吭ｹ≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｸ謂ｸｰ犹犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｹ�ｸ�) 犹≒ｸ･犧ｰ犧�犧ｲ犧樅ｹ犧｡犧ｷ犧ｭ犧�ｹ�ｸ吭ｸｭ犧扉ｸｵ犧歩ｸ伶ｸｱ犹霞ｸ�ｸｫ犧｡犧扉ｸ謂ｸｰ犧籾ｸｹ犧≒ｸ壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｹ�ｸｧ犹霞ｹ�ｸ吭ｸｫ犧ｭ犧謂ｸ扉ｸｫ犧｡犧ｲ犧｢犹犧ｫ犧歩ｸｸ "犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸ吭ｸｧ犧ｱ犧吭ｸｧ犧ｲ犧�" 犹犧樅ｸｷ犹謂ｸｭ犹�ｸｫ犹霞ｸ�ｸ吭ｸ｣犧ｸ犹謂ｸ吭ｸｫ犧･犧ｱ犧�ｹ�ｸ扉ｹ霞ｸ扉ｸｹ犧�ｸｧ犧ｲ犧｡犧�犧ｲ犧�ｸ�犧ｹ犧｡犧ｴ犹�ｸ謂ｸ伶ｸｵ犹謂ｸ樅ｸｧ犧≒ｸ伶ｹ謂ｸｲ犧吭ｸ癌ｹ謂ｸｧ犧｢犧≒ｸｱ犧吭ｸｪ犧｣犹霞ｸｲ犧�ｸもｸｶ犹霞ｸ吭ｸ｡犧ｲ
+                                            เมื่ออาณาจักรของท่านบรรลุเลเวลตามที่สภากำหนดไว้ อาณาจักรนั้นจะเกิดการวิวัฒนาการ! (ภาพเมืองในแผนที่จะเปลี่ยนไป) และภาพเมืองในอดีตทั้งหมดจะถูกบันทึกไว้ในหอจดหมายเหตุ "อาณาจักรในวันวาน" เพื่อให้คนรุ่นหลังได้ดูความภาคภูมิใจที่พวกท่านช่วยกันสร้างขึ้นมา
                                         </p>
                                     </div>
                                     <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20">
-                                        <span className="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-400 font-bold text-xs mb-2 shadow-sm">�醇 犧ｫ犧ｭ犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ (Trophies)</span>
+                                        <span className="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-400 font-bold text-xs mb-2 shadow-sm">🏆 หอเกียรติยศ (Trophies)</span>
                                         <p className="text-sm text-[#3d2511] leading-relaxed">
-                                            犧吭ｸｭ犧≒ｸ謂ｸｲ犧≒ｸ�ｸｰ犹≒ｸ吭ｸ� EXP 犹≒ｸ･犹霞ｸｧ 犧｣犧ｰ犧壟ｸ壟ｸ｢犧ｱ犧�ｸ｡犧ｵ犧≒ｸｲ犧｣犧壟ｸｱ犧吭ｸ伶ｸｶ犧≒ｸ�ｸｧ犧ｲ犧｡犧�犧ｲ犧�ｸ�犧ｹ犧｡犧ｴ犹�ｸ謂ｸもｸｭ犧�ｹ≒ｸ歩ｹ謂ｸ･犧ｰ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸｧ犹霞ｹ�ｸ吭ｸｫ犧吭ｹ霞ｸｲ World Map 犧扉ｹ霞ｸｧ犧｢ 犧ｫ犧ｲ犧≒ｹ犧｡犧ｷ犧ｭ犧�ｹ�ｸ扉ｹ犧もｹ霞ｸｲ犧｣犹謂ｸｧ犧｡犧≒ｸｴ犧謂ｸ≒ｸ｣犧｣犧｡ 犧｡犧ｴ犧吭ｸｴ犹犧≒ｸ｡ 犧ｫ犧｣犧ｷ犧ｭ犧伶ｸｳ犧憫ｸ･犧�ｸｲ犧吭ｸ壟ｸ｣犧｣犧･犧ｸ犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧樅ｸｴ犹犧ｨ犧ｩ犧伶ｸｵ犹謂ｸｪ犧�犧ｲ犧≒ｸｳ犧ｫ犧吭ｸ� 犧謂ｸｰ犹�ｸ扉ｹ霞ｸ｣犧ｱ犧� "犧籾ｹ霞ｸｧ犧｢犧｣犧ｲ犧�ｸｧ犧ｱ犧･犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ" 犹�ｸ巵ｸ巵ｸ｣犧ｰ犧扉ｸｱ犧壟ｹ�ｸｧ犹霞ｹ�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧もｹ霞ｸｭ犧｡犧ｹ犧･犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹�ｸｫ犹霞ｹ≒ｸ�ｸｧ犹霞ｸ吭ｸｭ犧ｷ犹謂ｸ吭ｹ�ｸ扉ｹ霞ｸ巵ｸ｣犧ｰ犧謂ｸｱ犧≒ｸｩ犹�!
+                                            นอกจากคะแนน EXP แล้ว ระบบยังมีการบันทึกความภาคภูมิใจของแต่ละอาณาจักรไว้ในหน้า World Map ด้วย หากเมืองใดเข้าร่วมกิจกรรม มินิเกม หรือทำผลงานบรรลุเป้าหมายพิเศษที่สภากำหนด จะได้รับ "ถ้วยรางวัลเกียรติยศ" ไปประดับไว้ในหน้าข้อมูลอาณาจักรให้แคว้นอื่นได้ประจักษ์!
                                         </p>
                                     </div>
                                     <div className="p-4 bg-gray-800 rounded border border-gray-600">
-                                        <span className="inline-block px-3 py-1 rounded-full bg-gray-600 text-white border border-gray-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ･犧ｱ犧壟ｹ≒ｸｫ犹謂ｸ�ｹ犧�ｸｲ (Secret Message)</span>
+                                        <span className="inline-block px-3 py-1 rounded-full bg-gray-600 text-white border border-gray-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> สาส์นลับแห่งเงา (Secret Message)</span>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            犧ｫ犧ｲ犧≒ｸ伶ｹ謂ｸｲ犧吭ｸ｡犧ｵ犧巵ｸｱ犧財ｸｫ犧ｲ犧�ｸｱ犧壟ｸもｹ霞ｸｭ犧�ｹ�ｸ� 犧ｫ犧｣犧ｷ犧ｭ犹犧｣犧ｷ犹謂ｸｭ犧�ｸ｣犹霞ｸｭ犧�ｹ犧｣犧ｵ犧｢犧吭ｸｪ犹謂ｸｧ犧吭ｸ歩ｸｱ犧ｧ犧伶ｸｵ犹謂ｹ�ｸ｡犹謂ｸ歩ｹ霞ｸｭ犧�ｸ≒ｸｲ犧｣犹犧巵ｸｴ犧扉ｹ犧憫ｸ｢犧癌ｸｷ犹謂ｸｭ 犧伶ｹ謂ｸｲ犧� 爬歩ｧ財ｦｷ爬ｮ爬､爬ｾ爰游ｹ犧･犧ｷ犧ｭ犧≒ｸｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｹ�ｸ吭ｸ吭ｸｲ犧｡犹≒ｸ�ｸｧ犹霞ｸ� <b>"Bascentra (犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ)"</b> 犹�ｸ扉ｹ� 犧｣犧ｰ犧壟ｸ壟ｸ謂ｸｰ犧巵ｸｴ犧扉ｸ壟ｸｱ犧�ｸ歩ｸｱ犧ｧ犧歩ｸ吭ｸもｸｭ犧�ｸ伶ｹ謂ｸｲ犧吭ｹ犧巵ｹ�ｸ吭ｸ�ｸｧ犧ｲ犧｡犧･犧ｱ犧壟ｸもｸｱ犹霞ｸ吭ｸｪ犧ｹ犧�ｸｪ犧ｸ犧� 犹≒ｸ･犧ｰ犧ｪ犹謂ｸ�ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ霞ｸ壟ｸｱ犧壟ｸ吭ｸｵ犹霞ｸ歩ｸ｣犧�ｸ籾ｸｶ犧�ｸｪ犧�犧ｲ犧≒ｸ･犧ｲ犧� (HR) 犹もｸ扉ｸ｢犧伶ｸｵ犹謂ｸ憫ｸｹ犹霞ｸｭ犧ｷ犹謂ｸ吭ｸ謂ｸｰ犹�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧ｴ犧伶ｸ倨ｸｴ犹呉ｸ｡犧ｭ犧�ｹ犧ｫ犹�ｸ吭ｹ�ｸ吭ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｪ犧ｲ犧倨ｸｲ犧｣犧内ｸｰ犹もｸ扉ｸ｢犹犧扉ｹ�ｸ扉ｸもｸｲ犧�!
+                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ไม่ต้องการเปิดเผยชื่อ ท่าน ক্ষমতায়เลือกส่งสาส์นในนามแคว้น <b>"Bascentra (เบสเซนตร้า)"</b> ได้ ระบบจะปิดบังตัวตนของท่านเป็นความลับขั้นสูงสุด และส่งสาส์นฉบับนี้ตรงถึงสภากลาง (HR) โดยที่ผู้อื่นจะไม่มีสิทธิ์มองเห็นในกระดานสาธารณะโดยเด็ดขาด!
                                         </p>
                                     </div>
                                 </div>
                             </section>
 
                             <section>
-                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel"><i className="fa-solid fa-spell-book"></i> 3. 犧樅ｸ謂ｸ吭ｸｲ犧吭ｸｸ犧≒ｸ｣犧｡犹≒ｸｫ犹謂ｸ�ｸｪ犧�犧ｲ (Status Dictionary)</h2>
-                                <p className="text-sm text-[#8b5a2b] mb-4 font-bold">犹犧吭ｸｷ犹謂ｸｭ犧�ｸ謂ｸｲ犧≒ｸ｡犧ｵ 2 犧≒ｸ｣犧ｰ犧扉ｸｲ犧� 犧�ｸｧ犧ｲ犧｡犧ｫ犧｡犧ｲ犧｢犧もｸｭ犧�ｸｪ犧籾ｸｲ犧吭ｸｰ犧謂ｸｶ犧�ｹ≒ｸ壟ｹ謂ｸ�ｸ歩ｸｲ犧｡犧壟ｸ｣犧ｴ犧壟ｸ伶ｸもｸｭ犧�ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸ吭ｸｱ犹霞ｸ吭ｹ� 犧扉ｸｱ犧�ｸ吭ｸｵ犹�:</p>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel"><i className="fa-solid fa-spell-book"></i> 3. พจนานุกรมแห่งสภา (Status Dictionary)</h2>
+                                <p className="text-sm text-[#8b5a2b] mb-4 font-bold">เนื่องจากมี 2 กระดาน ความหมายของสถานะจึงแบ่งตามบริบทของกระดานนั้นๆ ดังนี้:</p>
                                 <div className="space-y-4">
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-400 font-bold text-xs mb-2 shadow-sm">Blueprint</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ:</b> 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｹ犧樅ｸｴ犹謂ｸ�ｸ籾ｸｹ犧≒ｸｪ犹謂ｸ�ｹ犧もｹ霞ｸｲ犧｡犧ｲ 犧｢犧ｱ犧�ｹ�ｸ｡犹謂ｹ�ｸ扉ｹ霞ｸ｣犧ｱ犧壟ｸ≒ｸｲ犧｣犧樅ｸｴ犧謂ｸｲ犧｣犧内ｸｲ犹�ｸ扉ｹ� (犧｣犧ｭ犧ｪ犧�犧ｲ犹犧巵ｸｴ犧扉ｸｭ犹謂ｸｲ犧�)</li><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�:</b> <i>(犹�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧籾ｸｲ犧吭ｸｰ犧吭ｸｵ犹霞ｹ�ｸ吭ｸ･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�)</i></li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-400 font-bold text-xs mb-2 shadow-sm">Founding</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ:</b> 犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ｣犧ｱ犧壟ｹ犧｣犧ｷ犹謂ｸｭ犧�ｹ≒ｸ･犹霞ｸｧ 犧≒ｸｳ犧･犧ｱ犧�ｸ巵ｸ｣犧ｶ犧≒ｸｩ犧ｲ犧≒ｸｱ犧壟ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧ｧ犹謂ｸｲ犧伶ｸｳ犹�ｸ扉ｹ霞ｸ謂ｸ｣犧ｴ犧�ｹ�ｸｫ犧｡ (犧｢犧ｱ犧�ｹ�ｸ｡犹謂ｹ�ｸ扉ｹ霞ｸ�ｸｰ犹≒ｸ吭ｸ�)</li><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�:</b> 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧｣犧ｱ犧壟ｹ犧｣犧ｷ犹謂ｸｭ犧�ｹ≒ｸ･犹霞ｸｧ 犧≒ｸｳ犧･犧ｱ犧�ｸ･犧�ｸ｡犧ｷ犧ｭ犹≒ｸ≒ｹ霞ｹ�ｸもｸｫ犧吭ｹ霞ｸｲ犧�ｸｲ犧吭ｸ謂ｸ｣犧ｴ犧� (犧≒ｸｳ犧･犧ｱ犧�ｸ≒ｹ謂ｸｭ犧ｪ犧｣犹霞ｸｲ犧�)</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-400 font-bold text-xs mb-2 shadow-sm">Evidence</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ:</b> <i>(犹�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧籾ｸｲ犧吭ｸｰ犧吭ｸｵ犹霞ｹ�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ)</i></li><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�:</b> 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犹≒ｸ≒ｹ霞ｹ�ｸもｹ犧ｪ犧｣犹�ｸ謂ｹ≒ｸ･犧ｰ犧ｪ犹謂ｸ�ｸ｣犧ｹ犧巵ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｹ≒ｸ･犹霞ｸｧ 犧≒ｸｳ犧･犧ｱ犧�ｸ｣犧ｭ犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ≒ｸ･犧ｲ犧�ｹ犧もｹ霞ｸｲ犧｡犧ｲ犧歩ｸ｣犧ｧ犧謂ｸ｣犧ｱ犧� (犧歩ｸｱ犧ｧ犹≒ｸ伶ｸ吭ｹ犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧≒ｸ扉ｸｭ犧ｱ犧巵ｹ犧扉ｸ歩ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｹ�ｸｫ犧｡犹謂ｹ�ｸ扉ｹ霞ｹ犧｣犧ｷ犹謂ｸｭ犧｢犹� 犹�ｸ吭ｸもｸｱ犹霞ｸ吭ｸ歩ｸｭ犧吭ｸ吭ｸｵ犹�)</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-500 font-bold text-xs mb-2 shadow-sm">Rising</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ:</b> 犧ｪ犧�犧ｲ犹犧ｫ犹�ｸ吭ｸ癌ｸｭ犧壟ｸｧ犹謂ｸｲ犹�ｸｭ犹犧扉ｸｵ犧｢犧吭ｸｵ犹霞ｸ扉ｸｵ犹犧･犧ｴ犧ｨ! (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犹�ｸｭ犹犧扉ｸｵ犧｢犧ｪ犧ｳ犹犧｣犹�ｸ� 犹≒ｸ謂ｸ� +5 EXP 犹�ｸｫ犹霞ｸ�ｸ吭ｸ�ｸｴ犧� 犹≒ｸ･犧ｰ犧ｪ犹謂ｸ�ｹ犧｣犧ｷ犹謂ｸｭ犧�ｹ犧巵ｹ�ｸ吭ｸ�犧ｲ犧｣犧≒ｸｴ犧謂ｸ歩ｹ謂ｸｭ犹�ｸ�)</li><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�:</b> 犧ｪ犧�犧ｲ犧歩ｸ｣犧ｧ犧謂ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸ憫ｹ謂ｸｲ犧�! (犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ犧≒ｸｲ犧｣犧･犧�ｸ｡犧ｷ犧ｭ犧伶ｸｳ 犹≒ｸ謂ｸ� +15 EXP 犹�ｸｫ犹霞ｸ�ｸ吭ｸ伶ｸｳ) 犧籾ｸｷ犧ｭ犧ｧ犹謂ｸｲ犧巵ｸｴ犧扉ｸ�犧ｲ犧｣犧≒ｸｴ犧謂ｸｪ犧｡犧壟ｸｹ犧｣犧内ｹ� 100%</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-bold text-xs mb-2 shadow-sm">Ruined</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ:</b> 犹�ｸｭ犹犧扉ｸｵ犧｢犧籾ｸｹ犧≒ｸ巵ｸｱ犧扉ｸ歩ｸ≒ｸ歩ｸｱ犹霞ｸ�ｹ≒ｸ歩ｹ謂ｹ≒ｸ｣犧� 犹�ｸ｡犹謂ｹ�ｸ扉ｹ霞ｸ｣犧ｱ犧壟ｸ≒ｸｲ犧｣犧ｭ犧吭ｸｸ犧｡犧ｱ犧歩ｸｴ</li><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�:</b> 犧ｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｸ≒ｸｲ犧｣犹≒ｸ≒ｹ霞ｹ�ｸもｸ｢犧ｱ犧�ｹ�ｸ｡犹謂ｸ憫ｹ謂ｸｲ犧吭ｹ犧≒ｸ内ｸ隊ｹ� (犧ｪ犧�犧ｲ犧謂ｸｰ犧�ｸｭ犧｡犹犧｡犧吭ｸ歩ｹ呉ｸ謂ｸｸ犧扉ｸ伶ｸｵ犹謂ｸ歩ｹ霞ｸｭ犧�ｹ≒ｸ≒ｹ� 犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犧吭ｸｳ犹�ｸ巵ｸ巵ｸ｣犧ｱ犧壟ｸ巵ｸ｣犧ｸ犧�ｹ≒ｸ･犧ｰ犧ｪ犹謂ｸ�ｸ｣犧ｹ犧巵ｸｫ犧･犧ｱ犧≒ｸ説ｸｲ犧吭ｹ�ｸｫ犧｡犹謂ｹ�ｸ扉ｹ� 犧｣犧ｰ犧壟ｸ壟ｹ�ｸ｡犹謂ｸｫ犧ｱ犧≒ｸ�ｸｰ犹≒ｸ吭ｸ� 犧籾ｸｷ犧ｭ犹犧巵ｹ�ｸ吭ｸｧ犧�ｸ謂ｸ｣ PDCA)</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-500 font-bold text-xs mb-2 shadow-sm">Abandoned</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ:</b> <i>(犹�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧籾ｸｲ犧吭ｸｰ犧吭ｸｵ犹霞ｹ�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｴ犧歩ｸｯ)</i></li><li><b>犹�ｸ吭ｸｫ犧吭ｹ霞ｸｲ犧･犧ｲ犧吭ｸ�犧ｲ犧｣犧≒ｸｴ犧�:</b> 犧�犧ｲ犧｣犧≒ｸｴ犧謂ｸ籾ｸｹ犧≒ｸ巵ｸ･犹謂ｸｭ犧｢犧伶ｸｴ犹霞ｸ�ｸ｣犹霞ｸｲ犧�ｸ吭ｸｲ犧吭ｹ犧≒ｸｴ犧吭ｸ≒ｸｳ犧ｫ犧吭ｸ� 犧ｫ犧ｲ犧≒ｸ憫ｸｹ犹霞ｸ｣犧ｱ犧壟ｸ憫ｸｴ犧扉ｸ癌ｸｭ犧壟ｸ≒ｸ･犧ｱ犧壟ｸ｡犧ｲ犧伶ｸｳ犧謂ｸ吭ｹ犧ｪ犧｣犹�ｸ謂ｹ�ｸ吭ｸ�犧ｲ犧｢犧ｫ犧･犧ｱ犧� 犧ｪ犧�犧ｲ犧謂ｸｰ犧･犧�ｹもｸ伶ｸｩ犹もｸ扉ｸ｢犧･犧扉ｸ｣犧ｲ犧�ｸｧ犧ｱ犧･犹犧ｫ犧･犧ｷ犧ｭ犹犧樅ｸｵ犧｢犧� +5 EXP</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>犧ｪ犧籾ｸｲ犧吭ｸｰ犧樅ｸｴ犹犧ｨ犧ｩ:</b> 犹犧巵ｹ�ｸ吭ｸ≒ｸｲ犧｣犧吭ｸｳ犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸｫ犧｣犧ｷ犧ｭ犧�犧ｲ犧｣犧≒ｸｴ犧謂ｸ伶ｸｵ犹� <b>犧ｪ犧ｳ犹犧｣犹�ｸ謂ｹ�ｸ巵ｹ≒ｸ･犹霞ｸｧ (Rising/Super Rising)</b> 犹�ｸ巵ｹ犧≒ｹ�ｸ壟ｹ�ｸｧ犹霞ｹ�ｸ吭ｸｫ犧ｭ犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ 犹犧樅ｸｷ犹謂ｸｭ犹�ｸｫ犹霞ｸ≒ｸ｣犧ｰ犧扉ｸｲ犧吭ｸｫ犧吭ｹ霞ｸｲ犧謂ｸｭ犧ｫ犧･犧ｱ犧≒ｸｪ犧ｰ犧ｭ犧ｲ犧扉ｸ歩ｸｲ (犧もｹ霞ｸｭ犧｡犧ｹ犧･犹�ｸ｡犹謂ｸｫ犧ｲ犧｢ 犹犧･犹犧ｧ犧･犹�ｸ｡犹謂ｸ･犧� 犹≒ｸ･犧ｰ犧伶ｸｸ犧≒ｸ�ｸ吭ｸ｢犧ｱ犧�ｹもｸｫ犧･犧� CSV 犹�ｸ巵ｸ扉ｸｹ犧巵ｸ｣犧ｰ犧ｧ犧ｱ犧歩ｸｴ犧憫ｸ･犧�ｸｲ犧吭ｹ�ｸ扉ｹ霞ｸ巵ｸ≒ｸ歩ｸｴ)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-400 font-bold text-xs mb-2 shadow-sm">Blueprint</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สาส์นเพิ่งถูกส่งเข้ามา ยังไม่ได้รับการพิจารณาใดๆ (รอสภาเปิดอ่าน)</li><li><b>ในหน้าลานภารกิจ:</b> <i>(ไม่มีสถานะนี้ในลานภารกิจ)</i></li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-400 font-bold text-xs mb-2 shadow-sm">Founding</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเมืองรับเรื่องแล้ว กำลังปรึกษากับอาณาจักรเป้าหมายว่าทำได้จริงไหม (ยังไม่ได้คะแนน)</li><li><b>ในหน้าลานภารกิจ:</b> อาณาจักรเป้าหมายรับเรื่องแล้ว กำลังลงมือแก้ไขหน้างานจริง (กำลังก่อสร้าง)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-400 font-bold text-xs mb-2 shadow-sm">Evidence</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> อาณาจักรเป้าหมายแก้ไขเสร็จและส่งรูปหลักฐานแล้ว กำลังรอสภาเมืองกลางเข้ามาตรวจรับ (ตัวแทนเป้าหมายกดอัปเดตหลักฐานใหม่ได้เรื่อยๆ ในขั้นตอนนี้)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-500 font-bold text-xs mb-2 shadow-sm">Rising</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเห็นชอบว่าไอเดียนี้ดีเลิศ! (อนุมัติไอเดียสำเร็จ แจก +5 EXP ให้คนคิด และส่งเรื่องเป็นภารกิจต่อไป)</li><li><b>ในหน้าลานภารกิจ:</b> สภาตรวจหลักฐานผ่าน! (อนุมัติการลงมือทำ แจก +15 EXP ให้คนทำ) ถือว่าปิดภารกิจสมบูรณ์ 100%</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-bold text-xs mb-2 shadow-sm">Ruined</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> ไอเดียถูกปัดตกตั้งแต่แรก ไม่ได้รับการอนุมัติ</li><li><b>ในหน้าลานภารกิจ:</b> หลักฐานการแก้ไขยังไม่ผ่านเกณฑ์ (สภาจะคอมเมนต์จุดที่ต้องแก้ อาณาจักรเป้าหมายนำไปปรับปรุงและส่งรูปหลักฐานใหม่ได้ ระบบไม่หักคะแนน ถือเป็นวงจร PDCA)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-500 font-bold text-xs mb-2 shadow-sm">Abandoned</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> ภารกิจถูกปล่อยทิ้งร้างนานเกินกำหนด หากผู้รับผิดชอบกลับมาทำจนเสร็จในภายหลัง สภาจะลงโทษโดยลดรางวัลเหลือเพียง +5 EXP</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>สถานะพิเศษ:</b> เป็นการนำสาส์นหรือภารกิจที่ <b>สำเร็จไปแล้ว (Rising/Super Rising)</b> ไปเก็บเข้ากรุ เพื่อให้กระดานหน้าจอหลักสะอาดตา (ข้อมูลไม่หาย เลเวลไม่ลด และทุกคนยังโหลด CSV ไปดูประวัติผลงานได้ปกติ)</li></ul></div>
                                 </div>
                             </section>
                         </div>
                     )}
 
-                    {/* 犹≒ｸ伶ｹ�ｸ� 3: 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸｧ犧ｴ犧籾ｸｵ犧吭ｸｱ犧≒ｸｪ犧｣犹霞ｸｲ犧�ｸｪ犧｣犧｣犧�ｹ� (V.30 The 3 Realms Design) */}
+                    {/* แท็บ 3: คัมภีร์วิถีนักสร้างสรรค์ (V.30 The 3 Realms Design) */}
                     {activeTab === 'alignment' && (
                         <div className="space-y-8 animate-fade-in">
                             <div className="text-center mb-8">
-                                <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-pen-nib"></i> 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸｧ犧ｴ犧籾ｸｵ犧吭ｸｱ犧≒ｸｪ犧｣犹霞ｸｲ犧�ｸｪ犧｣犧｣犧�ｹ� (The Architect's Code)</h2>
-                                <p className="text-sm text-[#8b5a2b] font-bold mt-2">犹≒ｸ吭ｸｧ犧伶ｸｲ犧�ｸ≒ｸｲ犧｣犹犧もｸｵ犧｢犧吭ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｹ�ｸｫ犹霞ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸｭ犹謂ｸｲ犧吭ｹ≒ｸ･犹霞ｸｧ犹犧もｹ霞ｸｲ犹�ｸ� 犹犧樅ｸｷ犹謂ｸｭ犧樅ｸｴ犧癌ｸｴ犧歩ｸ｣犧ｲ犧�ｸｧ犧ｱ犧･犹≒ｸｫ犹謂ｸ�ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧�</p>
+                                <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-pen-nib"></i> คัมภีร์วิถีนักสร้างสรรค์ (The Architect's Code)</h2>
+                                <p className="text-sm text-[#8b5a2b] font-bold mt-2">แนวทางการเขียนสาส์นให้สภาเมืองอ่านแล้วเข้าใจ เพื่อพิชิตรางวัลแห่งแผ่นดิน</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸｪ犧ｧ犧｣犧｣犧�ｹ� (DOs) */}
+                                {/* คัมภีร์สวรรค์ (DOs) */}
                                 <section className="md:col-span-1 bg-gradient-to-br from-sky-50 to-blue-100 border-2 border-sky-300 text-sky-900 rounded-xl p-6 relative overflow-hidden animate-pulse-heaven">
                                     <div className="absolute -right-4 -top-4 text-white opacity-60 text-8xl pointer-events-none drop-shadow-md"><i className="fa-solid fa-cloud"></i></div>
                                     <div className="absolute right-10 top-10 text-sky-200 opacity-50 text-6xl pointer-events-none"><i className="fa-solid fa-dove"></i></div>
                                     <div className="relative z-10">
-                                        <h3 className="text-xl font-bold text-sky-700 mb-4 flex items-center gap-2 border-b border-sky-300 pb-2"><i className="fa-solid fa-feather-pointed text-sky-500"></i> 犧壟ｸｱ犧財ｸ財ｸｱ犧歩ｸｴ犹≒ｸｫ犹謂ｸ�ｸ�ｸｧ犧ｲ犧｡犧｣犧ｸ犹謂ｸ�ｹもｸ｣犧謂ｸ吭ｹ�</h3>
+                                        <h3 className="text-xl font-bold text-sky-700 mb-4 flex items-center gap-2 border-b border-sky-300 pb-2"><i className="fa-solid fa-feather-pointed text-sky-500"></i> บัญญัติแห่งความรุ่งโรจน์</h3>
                                         <ul className="space-y-3 text-sm font-medium">
-                                            <li><b className="text-sky-800">犧｣犧ｰ犧壟ｸｸ犧樅ｸｴ犧≒ｸｱ犧扉ｸ癌ｸｱ犧扉ｹ犧謂ｸ吭ｸ扉ｸｱ犹謂ｸ�ｸ歩ｸｲ犹犧ｫ犹�ｸ�:</b> 犹�ｸ｡犹謂ｹ犧もｸｵ犧｢犧吭ｸ≒ｸｧ犹霞ｸｲ犧�ｹ� 犹犧癌ｹ謂ｸ� <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"犹犧�ｸ｣犧ｷ犹謂ｸｭ犧�ｸ樅ｸｱ犧�ｸ壟ｹ謂ｸｭ犧｢"</strong> 犹≒ｸ歩ｹ謂ｸ｣犧ｰ犧壟ｸｸ犹�ｸｫ犹霞ｹ犧巵ｹ癌ｸｰ犧ｧ犹謂ｸｲ <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"犹犧�ｸ｣犧ｷ犹謂ｸｭ犧� CNC 犹犧壟ｸｭ犧｣犹� 05 犹≒ｸ憫ｸ吭ｸ� Machining 犧｡犧ｵ犧吭ｹ霞ｸｳ犧｡犧ｱ犧吭ｸ｣犧ｱ犹謂ｸｧ犧金ｸｶ犧｡犧歩ｸ｣犧�ｸもｹ霞ｸｭ犧歩ｹ謂ｸｭ"</strong></li>
-                                            <li><b className="text-sky-800">犧｡犧ｵ犧�犧ｲ犧樅ｸ巵ｸ｣犧ｰ犧≒ｸｭ犧壟ｹ犧ｪ犧｡犧ｭ:</b> <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"犧�犧ｲ犧� 1 犧�犧ｲ犧� 犹≒ｸ伶ｸ吭ｸ�ｸｳ犧樅ｸｹ犧扉ｸ樅ｸｱ犧吭ｸ�ｸｳ"</strong> 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ伶ｸｵ犹謂ｸ｡犧ｵ犧�犧ｲ犧樅ｸｫ犧吭ｹ霞ｸｲ犧�ｸｲ犧吭ｸ巵ｸ｣犧ｰ犧≒ｸｭ犧� 犧謂ｸｰ犧伶ｸｳ犹�ｸｫ犹霞ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｹ≒ｸ･犧ｰ犧ｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犹犧巵ｹ霞ｸｲ犧ｫ犧｡犧ｲ犧｢犹犧もｹ霞ｸｲ犹�ｸ謂ｸ巵ｸｱ犧財ｸｫ犧ｲ犹�ｸ扉ｹ霞ｸ伶ｸｱ犧吭ｸ伶ｸｵ犹もｸ扉ｸ｢犹�ｸ｡犹謂ｸ歩ｹ霞ｸｭ犧�ｹ犧扉ｸｴ犧吭ｹ�ｸ巵ｸ扉ｸｹ</li>
-                                            <li><b className="text-sky-800">犹犧ｪ犧吭ｸｭ犧伶ｸｲ犧�ｸｭ犧ｭ犧� 犹�ｸ｡犹謂ｹ�ｸ癌ｹ謂ｹ≒ｸ�ｹ謂ｸ壟ｸｭ犧≒ｸ巵ｸｱ犧財ｸｫ犧ｲ:</b> 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ伶ｸｵ犹謂ｸ扉ｸｵ犧�ｸｧ犧｣犧｡犧ｵ <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"Solution (犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ�)"</strong> 犧歩ｸｴ犧扉ｸ｡犧ｲ犧扉ｹ霞ｸｧ犧｢ 犹≒ｸ｡犹霞ｸ謂ｸｰ犹犧巵ｹ�ｸ吭ｹ≒ｸ�ｹ謂ｸｧ犧ｴ犧倨ｸｵ犧壟ｹ霞ｸｲ犧吭ｹ� 犧ｫ犧｣犧ｷ犧ｭ犹�ｸｭ犹犧扉ｸｵ犧｢犹犧･犹�ｸ≒ｹ� 犹≒ｸ歩ｹ謂ｹ≒ｸｪ犧扉ｸ�ｸ籾ｸｶ犧�ｸ�ｸｧ犧ｲ犧｡犹�ｸｪ犹謂ｹ�ｸ� 犧｡犧ｲ犧≒ｸ≒ｸｧ犹謂ｸｲ犧癌ｸｵ犹霞ｹ犧巵ｹ霞ｸｲ犹≒ｸ･犹霞ｸｧ犧伶ｸｴ犹霞ｸ�ｸ�犧ｲ犧｣犧ｰ犹�ｸｫ犹霞ｸ�ｸ吭ｸｭ犧ｷ犹謂ｸ�</li>
+                                            <li><b className="text-sky-800">ระบุพิกัดชัดเจนดั่งตาเห็น:</b> ไม่เขียนกว้างๆ เช่น <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"เครื่องพังบ่อย"</strong> แต่ระบุให้เป๊ะว่า <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"เครื่อง CNC เบอร์ 05 แผนก Machining มีน้ำมันรั่วซึมตรงข้อต่อ"</strong></li>
+                                            <li><b className="text-sky-800">มีภาพประกอบเสมอ:</b> <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"ภาพ 1 ภาพ แทนคำพูดพันคำ"</strong> สาส์นที่มีภาพหน้างานประกอบ จะทำให้สภาเมืองและอาณาจักรเป้าหมายเข้าใจปัญหาได้ทันทีโดยไม่ต้องเดินไปดู</li>
+                                            <li><b className="text-sky-800">เสนอทางออก ไม่ใช่แค่บอกปัญหา:</b> สาส์นที่ดีควรมี <strong className="text-sky-700 font-bold bg-white/70 px-1 rounded shadow-sm">"Solution (วิธีแก้)"</strong> ติดมาด้วย แม้จะเป็นแค่วิธีบ้านๆ หรือไอเดียเล็กๆ แต่แสดงถึงความใส่ใจ มากกว่าชี้เป้าแล้วทิ้งภาระให้คนอื่น</li>
                                         </ul>
                                     </div>
                                 </section>
 
-                                {/* 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸ吭ｸ｣犧� (DON'Ts) */}
+                                {/* คัมภีร์นรก (DON'Ts) */}
                                 <section className="md:col-span-1 bg-gradient-to-br from-gray-900 to-red-950 border-2 border-red-800 text-gray-300 rounded-xl p-6 relative overflow-hidden animate-pulse-hell">
                                     <div className="absolute -right-4 -top-4 text-red-900 opacity-30 text-8xl pointer-events-none"><i className="fa-solid fa-skull-crossbones"></i></div>
                                     <div className="relative z-10">
-                                        <h3 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2 border-b border-red-800/50 pb-2"><i className="fa-solid fa-fire-flame-curved text-red-600"></i> 犧もｹ霞ｸｭ犧ｫ犹霞ｸｲ犧｡犹≒ｸｫ犹謂ｸ�ｸ�ｸｧ犧ｲ犧｡犹犧ｪ犧ｷ犹謂ｸｭ犧｡</h3>
+                                        <h3 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2 border-b border-red-800/50 pb-2"><i className="fa-solid fa-fire-flame-curved text-red-600"></i> ข้อห้ามแห่งความเสื่อม</h3>
                                         <ul className="space-y-3 text-sm">
-                                            <li><b className="text-red-400">犧≒ｸ｣犧ｰ犧扉ｸｲ犧ｩ犧｣犧ｰ犧壟ｸｲ犧｢犧ｭ犧ｲ犧｣犧｡犧内ｹ�:</b> 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ伶ｸｵ犹謂ｸ｡犧ｵ犹≒ｸ歩ｹ謂ｸ�ｸｳ犧壟ｹ謂ｸ� 犧扉ｹ謂ｸｲ犧伶ｸｭ 犧ｫ犧｣犧ｷ犧ｭ犹�ｸ癌ｹ霞ｸｭ犧ｲ犧｣犧｡犧内ｹ呉ｹもｸ扉ｸ｢犹�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧ｲ犧｣犧ｰ犧もｸｭ犧�ｸ巵ｸｱ犧財ｸｫ犧ｲ犹≒ｸ･犧ｰ犧ｧ犧ｴ犧倨ｸｵ犹≒ｸ≒ｹ� 犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ謂ｸｰ犧巵ｸｱ犧扉ｸ歩ｸ� <strong className="text-red-500 font-bold drop-shadow-[0_0_2px_red]">"Ruined"</strong> 犧伶ｸｱ犧吭ｸ伶ｸｵ</li>
-                                            <li><b className="text-red-400">犧杳ｸｱ犧吭ｹ�ｸｫ犧財ｹ謂ｹ≒ｸ歩ｹ謂ｹ�ｸ｣犹霞ｸ�ｸ�:</b> 犹犧ｪ犧吭ｸｭ犹�ｸｫ犹霞ｸ金ｸｷ犹霞ｸｭ犹犧�ｸ｣犧ｷ犹謂ｸｭ犧�ｸ謂ｸｱ犧≒ｸ｣犹�ｸｫ犧｡犹謂ｸ｣犧ｲ犧�ｸｲ犧ｫ犧･犧ｲ犧｢犧･犹霞ｸｲ犧� 犧ｫ犧｣犧ｷ犧ｭ犧｣犧ｷ犹霞ｸｭ犧｣犧ｰ犧壟ｸ壟ｹ�ｸｫ犧｡犹謂ｸ伶ｸｱ犹霞ｸ�ｸｫ犧｡犧扉ｹもｸ扉ｸ｢犹�ｸ｡犹謂ｸ謂ｸｳ犹犧巵ｹ�ｸ� 犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｹ犧ｫ犧･犹謂ｸｲ犧吭ｸｵ犹霞ｸ｡犧ｱ犧≒ｸ謂ｸｰ犧籾ｸｹ犧≒ｸ巵ｸｱ犧扉ｸ歩ｸ≒ｹ犧樅ｸ｣犧ｲ犧ｰ犹�ｸ｡犹謂ｸｪ犧ｭ犧扉ｸ�ｸ･犹霞ｸｭ犧�ｸ≒ｸｱ犧壟ｸ�ｸ壟ｸ巵ｸ｣犧ｰ犧｡犧ｲ犧� (犧ｪ犧�犧ｲ犧癌ｸｭ犧� <strong className="text-red-500 font-bold drop-shadow-[0_0_2px_red]">"Kaizen"</strong> 犧･犧�ｸ伶ｸｸ犧吭ｸ吭ｹ霞ｸｭ犧｢犹≒ｸ歩ｹ謂ｹ�ｸ扉ｹ霞ｸ憫ｸ･犧｡犧ｲ犧�)</li>
-                                            <li><b className="text-red-400">犹もｸ｢犧吭ｸ�ｸｲ犧吭ｹ�ｸｫ犹霞ｹ犧｡犧ｷ犧ｭ犧�ｸｭ犧ｷ犹謂ｸ�:</b> 犹犧ｪ犧吭ｸｭ犹�ｸｭ犹犧扉ｸｵ犧｢犧伶ｸｵ犹謂ｸ歩ｸｱ犧ｧ犹犧ｭ犧�ｹ�ｸ扉ｹ霞ｸ巵ｸ｣犧ｰ犹もｸ｢犧癌ｸ吭ｹ� 犹≒ｸ歩ｹ謂ｹ�ｸ巵ｹ犧樅ｸｴ犹謂ｸ｡犧もｸｱ犹霞ｸ吭ｸ歩ｸｭ犧吭ｸｫ犧｣犧ｷ犧ｭ犧�ｸｧ犧ｲ犧｡犧･犧ｳ犧壟ｸｲ犧≒ｹ�ｸｫ犹霞ｸｭ犧ｲ犧内ｸｲ犧謂ｸｱ犧≒ｸ｣犧ｭ犧ｷ犹謂ｸ吭ｹもｸ扉ｸ｢犹�ｸ｡犹謂ｸ巵ｸ｣犧ｶ犧≒ｸｩ犧ｲ犧≒ｸｱ犧吭ｸ≒ｹ謂ｸｭ犧�</li>
+                                            <li><b className="text-red-400">กระดาษระบายอารมณ์:</b> สาส์นที่มีแต่คำบ่น ด่าทอ หรือใช้อารมณ์โดยไม่มีสาระของปัญหาและวิธีแก้ สภาเมืองจะปัดตก <strong className="text-red-500 font-bold drop-shadow-[0_0_2px_red]">"Ruined"</strong> ทันที</li>
+                                            <li><b className="text-red-400">ฝันใหญ่แต่ไร้งบ:</b> เสนอให้ซื้อเครื่องจักรใหม่ราคาหลายล้าน หรือรื้อระบบใหม่ทั้งหมดโดยไม่จำเป็น สาส์นเหล่านี้มักจะถูกปัดตกเพราะไม่สอดคล้องกับงบประมาณ (สภาชอบ <strong className="text-red-500 font-bold drop-shadow-[0_0_2px_red]">"Kaizen"</strong> ลงทุนน้อยแต่ได้ผลมาก)</li>
+                                            <li><b className="text-red-400">โยนงานให้เมืองอื่น:</b> เสนอไอเดียที่ตัวเองได้ประโยชน์ แต่ไปเพิ่มขั้นตอนหรือความลำบากให้อาณาจักรอื่นโดยไม่ปรึกษากันก่อน</li>
                                         </ul>
                                     </div>
                                 </section>
 
-                                {/* 犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸ｣犧ｲ犧癌ｸｲ (Super Rising - Gold Pulse) */}
+                                {/* คัมภีร์ราชา (Super Rising - Gold Pulse) */}
                                 <section className="md:col-span-2 bg-gradient-to-br from-yellow-700 via-amber-500 to-yellow-900 border-2 border-yellow-400 text-yellow-50 rounded-xl p-6 relative overflow-hidden animate-pulse-royal">
                                     <div className="absolute -right-4 -top-4 text-yellow-300 opacity-30 text-8xl pointer-events-none drop-shadow-lg"><i className="fa-solid fa-crown"></i></div>
                                     <div className="relative z-10 text-center md:text-left">
-                                        <h3 className="text-xl font-bold text-yellow-200 mb-3 flex items-center justify-center md:justify-start gap-2 border-b border-yellow-400/40 pb-2"><i className="fa-solid fa-gem text-white drop-shadow-md"></i> 犧歩ｸｳ犧吭ｸｲ犧吭ｹ≒ｸｫ犹謂ｸ�ｸ｡犧�ｸ≒ｸｸ犧� (The Rare Legend)</h3>
+                                        <h3 className="text-xl font-bold text-yellow-200 mb-3 flex items-center justify-center md:justify-start gap-2 border-b border-yellow-400/40 pb-2"><i className="fa-solid fa-gem text-white drop-shadow-md"></i> ตำนานแห่งมงกุฎ (The Rare Legend)</h3>
                                         <div className="text-sm leading-relaxed space-y-3 font-medium">
-                                            <p>犧ｫ犧･犧ｲ犧｢犧�ｸ吭ｸｪ犧�ｸｪ犧ｱ犧｢犧ｧ犹謂ｸｲ犧伶ｸｳ犧ｭ犧｢犹謂ｸｲ犧�ｹ�ｸ｣犧謂ｸｶ犧�ｸ謂ｸｰ犹�ｸ扉ｹ霞ｸｪ犧籾ｸｲ犧吭ｸｰ <strong className="text-amber-300 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.8)] text-base">"Super Rising (+10 EXP)"</strong></p>
-                                            <p>犧ｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸもｸｭ犧巵ｸ｣犧ｰ犧≒ｸｲ犧ｨ犧ｧ犹謂ｸｲ <strong className="text-amber-300 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]">"犧｡犧ｱ犧吭ｹ�ｸ｡犹謂ｸ｡犧ｵ犧ｪ犧ｹ犧歩ｸ｣犧歩ｸｲ犧｢犧歩ｸｱ犧ｧ"</strong> 犧｡犧�ｸ≒ｸｸ犧錫ｸ吭ｸｵ犹霞ｸ�ｸｷ犧ｭ犧｣犧ｲ犧�ｸｧ犧ｱ犧･犹犧≒ｸｵ犧｢犧｣犧歩ｸｴ犧｢犧ｨ犧もｸｱ犹霞ｸ吭ｸｪ犧ｸ犧扉ｸ｢犧ｭ犧� (Rare) 犧伶ｸｵ犹謂ｸｪ犧�犧ｲ犹犧｡犧ｷ犧ｭ犧�ｸ謂ｸｰ犧｡犧ｭ犧壟ｹ�ｸｫ犹� "犧吭ｸｲ犧吭ｹ� 犧�ｸ｣犧ｱ犹霞ｸ�" 犧ｪ犧ｳ犧ｫ犧｣犧ｱ犧壟ｸｪ犧ｲ犧ｪ犹呉ｸ吭ｸ伶ｸｵ犹謂ｸｪ犧｣犹霞ｸｲ犧�ｹ≒ｸ｣犧�ｸ≒ｸ｣犧ｰ犹犧樅ｸｷ犹謂ｸｭ犧｡犧｡犧ｫ犧ｲ犧ｨ犧ｲ犧･ 犹犧癌ｹ謂ｸ� 犧癌ｹ謂ｸｧ犧｢犧･犧扉ｸもｸｭ犧�ｹ犧ｪ犧ｵ犧｢ (Defect) 犹�ｸ扉ｹ霞ｹ犧巵ｹ�ｸ吭ｸ謂ｸｳ犧吭ｸｧ犧吭ｸ｡犧ｲ犧�, 犧巵ｹ霞ｸｭ犧�ｸ≒ｸｱ犧吭ｸｭ犧ｸ犧壟ｸｱ犧歩ｸｴ犹犧ｫ犧歩ｸｸ犧｣犹霞ｸｲ犧｢犹≒ｸ｣犧�, 犧ｫ犧｣犧ｷ犧ｭ犧･犧扉ｸ歩ｹ霞ｸ吭ｸ伶ｸｸ犧� (Cost/Cycle Time) 犹�ｸ扉ｹ霞ｸｭ犧｢犹謂ｸｲ犧�ｹ犧巵ｹ�ｸ吭ｸ｣犧ｹ犧巵ｸ倨ｸ｣犧｣犧｡</p>
-                                            <p className="font-bold text-yellow-200 mt-4 text-base italic text-center drop-shadow-md">"犧謂ｸ�ｸｭ犧｢犹謂ｸｲ犹もｸ游ｸ≒ｸｱ犧ｪ犧伶ｸｵ犹謂ｸ≒ｸｲ犧｣犧･犹謂ｸｲ犧｡犧�ｸ≒ｸｸ犧� 犹≒ｸ歩ｹ謂ｸ謂ｸ�ｹもｸ游ｸ≒ｸｱ犧ｪ犧伶ｸｵ犹謂ｸ≒ｸｲ犧｣犧ｪ犧｣犹霞ｸｲ犧�ｸ巵ｸ｣犧ｰ犹もｸ｢犧癌ｸ吭ｹ呉ｹ�ｸｫ犹霞ｹ≒ｸ憫ｹ謂ｸ吭ｸ扉ｸｴ犧� 犹≒ｸ･犹霞ｸｧ犧｡犧�ｸ≒ｸｸ犧錫ｸ謂ｸｰ犹犧･犧ｷ犧ｭ犧≒ｸ憫ｸｹ犹霞ｸ伶ｸｵ犹謂ｸ�ｸｹ犹謂ｸ�ｸｧ犧｣犹犧ｭ犧�!"</p>
+                                            <p>หลายคนสงสัยว่าทำอย่างไรจึงจะได้สถานะ <strong className="text-amber-300 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.8)] text-base">"Super Rising (+10 EXP)"</strong></p>
+                                            <p>สภาเมืองขอประกาศว่า <strong className="text-amber-300 font-bold drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]">"มันไม่มีสูตรตายตัว"</strong> มงกุฎนี้คือรางวัลเกียรติยศขั้นสุดยอด (Rare) ที่สภาเมืองจะมอบให้ "นานๆ ครั้ง" สำหรับสาส์นที่สร้างแรงกระเพื่อมมหาศาล เช่น ช่วยลดของเสีย (Defect) ได้เป็นจำนวนมาก, ป้องกันอุบัติเหตุร้ายแรง, หรือลดต้นทุน (Cost/Cycle Time) ได้อย่างเป็นรูปธรรม</p>
+                                            <p className="font-bold text-yellow-200 mt-4 text-base italic text-center drop-shadow-md">"จงอย่าโฟกัสที่การล่ามงกุฎ แต่จงโฟกัสที่การสร้างประโยชน์ให้แผ่นดิน แล้วมงกุฎจะเลือกผู้ที่คู่ควรเอง!"</p>
                                         </div>
                                     </div>
                                 </section>
@@ -2430,40 +2132,9 @@
                         </div>
                     )}
 
-                    {/* 犹≒ｸ籾ｸ壟ｸ巵ｸｸ犹謂ｸ｡犹犧巵ｸ･犧ｵ犹謂ｸ｢犧吭ｸ壟ｸ伶ｸ扉ｹ霞ｸｲ犧吭ｸ･犹謂ｸｲ犧�ｸｪ犧ｸ犧� (Bottom Chapter Navigation) */}
-                    <div className="flex justify-between items-center gap-3 mt-8 pt-6 border-t border-[#8b5a2b]/30">
-                        {activeTab === 'rules' && (
-                            <button onClick={() => { setActiveTab('lore'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b]/20 hover:bg-[#8b5a2b] text-[#5d3a1a] hover:text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#8b5a2b]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow">
-                                <i className="fa-solid fa-chevron-left text-xs"></i>
-                                <span>犧巵ｸ説ｸ｡犧壟ｸ� & 犧巵ｸ｡犧�ｸｧ犧ｲ犧｡犧もｸｱ犧扉ｹ≒ｸ｢犹霞ｸ�</span>
-                            </button>
-                        )}
-                        {activeTab === 'alignment' && (
-                            <button onClick={() => { setActiveTab('rules'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b]/20 hover:bg-[#8b5a2b] text-[#5d3a1a] hover:text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#8b5a2b]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow">
-                                <i className="fa-solid fa-chevron-left text-xs"></i>
-                                <span>犧≒ｸ錫ｹ≒ｸ･犧ｰ犧樅ｸ謂ｸ吭ｸｲ犧吭ｸｸ犧≒ｸ｣犧｡犹≒ｸｫ犹謂ｸ�ｸｪ犧�犧ｲ</span>
-                            </button>
-                        )}
-
-                        <div className="flex-1"></div>
-
-                        {activeTab === 'lore' && (
-                            <button onClick={() => { setActiveTab('rules'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b] hover:bg-[#5d3a1a] text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#ebdcb9]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
-                                <span>犧≒ｸ錫ｹ≒ｸ･犧ｰ犧樅ｸ謂ｸ吭ｸｲ犧吭ｸｸ犧≒ｸ｣犧｡犹≒ｸｫ犹謂ｸ�ｸｪ犧�犧ｲ</span>
-                                <i className="fa-solid fa-chevron-right text-xs"></i>
-                            </button>
-                        )}
-                        {activeTab === 'rules' && (
-                            <button onClick={() => { setActiveTab('alignment'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b] hover:bg-[#5d3a1a] text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#ebdcb9]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
-                                <span>犧�ｸｱ犧｡犧�犧ｵ犧｣犹呉ｸｧ犧ｴ犧籾ｸｵ犧吭ｸｱ犧≒ｸｪ犧｣犹霞ｸｲ犧�ｸｪ犧｣犧｣犧�ｹ�</span>
-                                <i className="fa-solid fa-chevron-right text-xs"></i>
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="text-center mt-6 pt-4">
+                    <div className="text-center mt-10 pt-6 border-t border-[#8b5a2b]/30">
                         <button onClick={() => onViewChange('worldmap')} className="bg-[#5d3a1a] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8b5a2b] shadow-xl border-2 border-[#ebdcb9] transition duration-200 cursor-pointer">
-                            <i className="fa-solid fa-arrow-left-to-line mr-2"></i> 犧≒ｸ･犧ｱ犧壟ｸｪ犧ｹ犹謂ｹ≒ｸ憫ｸ吭ｸ伶ｸｵ犹謂ｹもｸ･犧� (World Map)
+                            <i className="fa-solid fa-arrow-left-to-line mr-2"></i> กลับสู่แผนที่โลก (World Map)
                         </button>
                     </div>
                 </div>
@@ -2477,7 +2148,7 @@
             const [isAuthorized, setIsAuthorized] = useState(false);
             const [currentView, setCurrentView] = useState('news');
             const [chronicleTab, setChronicleTab] = useState('lore'); 
-            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
             const [isLoaded, setIsLoaded] = useState(false);
             
             const [runningSeq, setRunningSeq] = useState(1);
@@ -2487,36 +2158,20 @@
             const popbossMusicRef = useRef(null);
             const hitSoundRef = useRef(null);
 
-            // �七 Music Player State
+            // 🎵 Music Player State
             const musicTracks = [
-                { id: 1, src: 'Assets/Audio/Music/Music_bg-1.mp3', title: '1. 犹犧伶ｸｨ犧≒ｸｲ犧･犧�ｸｲ犧吭ｸ｣犧ｷ犹謂ｸ吭ｹ犧｣犧ｴ犧�' },
-                { id: 2, src: 'Assets/Audio/Music/Music_bg-2.mp3', title: '2. 犧伶ｸｱ犹謂ｸ�, 犧籾ｹ謂ｸｲ犧吭ｹ≒ｸ･犧ｰ犧ｭ犧ｱ犧�ｸ�ｸｵ' },
-                { id: 3, src: 'Assets/Audio/Music/Music_bg-3.mp3', title: '3. 犧�ｸ｣犧ｱ犹霞ｸ�ｹ犧｢犧ｷ犧ｭ犧吭ｹ≒ｸ扉ｸ吭ｹ犧ｫ犧｡犧ｱ犧吭ｸ歩ｹ�' },
-                { id: 4, src: 'Assets/Audio/Music/Music_bg-4.mp3', title: '4. 犹犧｡犧ｷ犹謂ｸｭ犧游ｸｱ犧吭ｹ犧游ｸｷ犹謂ｸｭ犧�ｸｫ犧｡犧ｸ犧吭ｹ�ｸ�' },
-                { id: 5, src: 'Assets/Audio/Music/Music_bg-5.mp3', title: '5. 犧壟ｸ伶ｹ犧樅ｸ･犧�ｹ�ｸ吭ｸｫ犧｡犧ｹ犹謂ｹ犧｡犧�' }
+                { id: 1, src: 'Assets/Audio/Music/Music_bg-1.mp3', title: '1. เทศกาลงานรื่นเริง' },
+                { id: 2, src: 'Assets/Audio/Music/Music_bg-2.mp3', title: '2. ทั่ง, ถ่านและอัคคี' },
+                { id: 3, src: 'Assets/Audio/Music/Music_bg-3.mp3', title: '3. ครั้งเยือนแดนเหมันต์' },
+                { id: 4, src: 'Assets/Audio/Music/Music_bg-4.mp3', title: '4. เมื่อฟันเฟื่องหมุนไป' },
+                { id: 5, src: 'Assets/Audio/Music/Music_bg-5.mp3', title: '5. บทเพลงในหมู่เมฆ' }
             ];
             const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
             const [isPlaying, setIsPlaying] = useState(false);
             const [isLoopingOne, setIsLoopingOne] = useState(false);
-            const [isKingdomModalOpen, setIsKingdomModalOpen] = useState(false);
-            const [isMobilePortrait, setIsMobilePortrait] = useState(
-                window.innerWidth <= 640 && window.innerHeight > window.innerWidth
-            );
 
             const handleNextTrack = () => setCurrentTrackIndex((prev) => (prev + 1) % musicTracks.length);
             const handlePrevTrack = () => setCurrentTrackIndex((prev) => (prev - 1 + musicTracks.length) % musicTracks.length);
-
-            useEffect(() => {
-                const handleResize = () => {
-                    setIsMobilePortrait(window.innerWidth <= 640 && window.innerHeight > window.innerWidth);
-                };
-                window.addEventListener('resize', handleResize);
-                window.addEventListener('orientationchange', handleResize);
-                return () => {
-                    window.removeEventListener('resize', handleResize);
-                    window.removeEventListener('orientationchange', handleResize);
-                };
-            }, []);
 
             useEffect(() => {
                 const authSession = sessionStorage.getItem('isAuthorized');
@@ -2540,13 +2195,7 @@
 
                 if (currentView === 'popboss') {
                     if (bgMusic) bgMusic.pause();
-                    if (popMusic) {
-                        if (isPlaying && !isMuted) {
-                            popMusic.play().catch(e => console.log("PopBoss music play blocked", e));
-                        } else {
-                            popMusic.pause();
-                        }
-                    }
+                    if (popMusic && !isMuted) popMusic.play().catch(e => console.log(e));
                 } else {
                     if (popMusic) popMusic.pause();
                     if (bgMusic) {
@@ -2585,49 +2234,20 @@
             };
 
             const [projects, setProjects] = useState([]);
-            const [kingdomEXP, setKingdomEXP] = useState({ '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ': 0, '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢': 0, '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�': 0, '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ': 0, '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�': 0 });
-            const [popBossScores, setPopBossScores] = useState({ '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢': 0, '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�': 0, '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ': 0, '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�': 0 });
-            const pendingClicksRef = useRef({});
+            const [editingProject, setEditingProject] = useState(null);
+            const [kingdomEXP, setKingdomEXP] = useState({ 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
+            const [popBossScores, setPopBossScores] = useState({ 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
 
-            // 笞｡ 犧｣犧ｰ犧壟ｸ壟ｸ扉ｸｶ犧�ｸ｢犧ｭ犧扉ｸ｣犧ｧ犧｡犧�ｸｰ犹≒ｸ吭ｸ� POPBOSS 犧･犹謂ｸｲ犧ｪ犧ｸ犧扉ｸ伶ｸｸ犧� 2 犧ｧ犧ｴ犧吭ｸｲ犧伶ｸｵ犹犧｡犧ｷ犹謂ｸｭ犧ｭ犧｢犧ｹ犹謂ｹ�ｸ吭ｸｫ犧吭ｹ霞ｸｲ POPBOSS
-            useEffect(() => {
-                if (currentView !== 'popboss' || !supabase) return;
-                const pollInterval = setInterval(async () => {
-                    try {
-                        const { data, error } = await supabase.from('popboss_scores').select('*');
-                        if (!error && data) {
-                            const scoresMap = {};
-                            data.forEach(row => { scoresMap[row.kingdom] = row.score; });
-                            setPopBossScores(prev => ({ ...prev, ...scoresMap }));
-                        }
-                    } catch (e) { console.log("Poll POPBOSS error", e); }
-                }, 2000);
-                return () => clearInterval(pollInterval);
-            }, [currentView]);
+            const handleStartEdit = (project) => {
+                setEditingProject(project);
+                setCurrentView('suggestion');
+            };
 
-            // 笞｡ 犧｣犧ｰ犧壟ｸ壟ｸ｣犧ｧ犧｡犧｢犧ｭ犧扉ｸｪ犹謂ｸ�ｸ�ｸｰ犹≒ｸ吭ｸ吭ｸ謂ｸｴ犹霞ｸ｡犹�ｸ巵ｸ壟ｸｧ犧≒ｸｪ犧ｰ犧ｪ犧｡犹�ｸ� Supabase 犧伶ｸｸ犧≒ｹ� 1.5 犧ｧ犧ｴ犧吭ｸｲ犧伶ｸｵ (犧壟ｸｧ犧≒ｸｪ犧ｰ犧ｪ犧｡ 犧巵ｹ霞ｸｭ犧�ｸ≒ｸｱ犧吭ｸ≒ｸｲ犧｣犹犧もｸｵ犧｢犧吭ｸ伶ｸｱ犧�)
-            useEffect(() => {
-                if (!supabase) return;
-                const flushInterval = setInterval(async () => {
-                    const kingdoms = Object.keys(pendingClicksRef.current);
-                    for (const k of kingdoms) {
-                        const delta = pendingClicksRef.current[k];
-                        if (delta > 0) {
-                            pendingClicksRef.current[k] = 0;
-                            try {
-                                const { data } = await supabase.from('popboss_scores').select('score').eq('kingdom', k).single();
-                                const currentScore = data ? (data.score || 0) : 0;
-                                await supabase.from('popboss_scores').update({ score: currentScore + delta }).eq('kingdom', k);
-                            } catch (err) {
-                                console.error("Flush click error:", err);
-                            }
-                        }
-                    }
-                }, 1500);
-                return () => clearInterval(flushInterval);
-            }, []);
+            const handleCancelEdit = () => {
+                setEditingProject(null);
+            };
 
-            // �売 犧扉ｸｶ犧�ｸもｹ霞ｸｭ犧｡犧ｹ犧･犧ｪ犧ｲ犧ｪ犹呉ｸ吭ｸ樅ｸｱ犧亭ｸ吭ｸｲ犹≒ｸ･犧ｰ犧�ｸｰ犹≒ｸ吭ｸ� PopBoss 犧謂ｸｲ犧� Supabase 犹犧｡犧ｷ犹謂ｸｭ犹犧巵ｸｴ犧扉ｹ�ｸ癌ｹ霞ｸ�ｸｲ犧�
+            // 🔄 ดึงข้อมูลสาส์นพัฒนาและคะแนน PopBoss จาก Supabase เมื่อเปิดใช้งาน
             useEffect(() => {
                 if (!supabase) return;
 
@@ -2661,22 +2281,6 @@
                                 isSuperRising: item.is_super_rising
                             }));
                             setProjects(mappedProjects);
-
-                            const bkkDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-                            const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
-                            let maxSeq = 0;
-                            projData.forEach(p => {
-                                if (p.id && p.id.includes(`_${dateStr}-`)) {
-                                    const parts = p.id.split('-');
-                                    if (parts.length > 1) {
-                                        const seq = parseInt(parts[parts.length - 1], 10);
-                                        if (!isNaN(seq) && seq > maxSeq) {
-                                            maxSeq = seq;
-                                        }
-                                    }
-                                }
-                            });
-                            setRunningSeq(maxSeq + 1);
                         }
 
                         const { data: bossData, error: bossErr } = await supabase.from('popboss_scores').select('*');
@@ -2694,7 +2298,7 @@
             }, []);
 
             useEffect(() => {
-                const scores = { '犹犧壟ｸｪ犹犧金ｸ吭ｸ歩ｸ｣犹霞ｸｲ': 0, '犹≒ｸ�ｸｪ犹犧伶ｸｭ犹犧｣犧ｵ犧｢': 0, '犹≒ｸ壟ｸ･犧�ｸ�ｹ呉ｹ�ｸｮ犧｡犹呉ｸ≒ｸｲ犧｣犹呉ｸ�': 0, '犹≒ｸ｡犧�ｸ癌ｸｵ犧吭ｹもｸ樅ｸ･犧ｴ犧ｪ': 0, '犹�ｸ游ｸ吭ｸｱ犧･犧倨ｸ｣犧ｭ犧�': 0 };
+                const scores = { 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 };
                 projects.forEach(p => {
                     if (p.ideaApproved && p.status !== 'Deleted') {
                         let originPts = 5;
@@ -2744,35 +2348,12 @@
                 }
             };
 
-            const [editingProject, setEditingProject] = useState(null);
-
-            const handleStartEdit = (project) => {
-                setEditingProject(project);
-                setCurrentView('suggestion');
-            };
-
-            const handleCancelEdit = () => {
-                setEditingProject(null);
-            };
-
             const handleUpdateProject = async (updatedProject) => { 
                 setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); 
 
                 if (supabase) {
                     const { error } = await supabase.from('projects').update({
-                        emp: updatedProject.emp,
-                        name: updatedProject.name,
-                        origin: updatedProject.origin,
-                        target: updatedProject.target,
                         category: updatedProject.category,
-                        factory: updatedProject.factory,
-                        location: updatedProject.location,
-                        pinpoint: updatedProject.pinpoint,
-                        title: updatedProject.title,
-                        problem: updatedProject.problem,
-                        solution: updatedProject.solution,
-                        benefit: updatedProject.benefit,
-                        image_preview: updatedProject.imagePreview,
                         status: updatedProject.status,
                         comment: updatedProject.comment,
                         target_comment: updatedProject.targetComment,
@@ -2787,7 +2368,7 @@
                 }
             };
 
-            const showSidebar = currentView !== 'popboss' && !isKingdomModalOpen; 
+            const showSidebar = currentView !== 'popboss'; 
 
             return (
                 <div className="relative min-h-screen flex flex-col">
@@ -2796,15 +2377,10 @@
                     <audio ref={popbossMusicRef} loop id="popbossMusic"><source src="Assets/Audio/Special_event/Music/Music_popboss.mp3" type="audio/mpeg" /></audio>
                     <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
 
-                    <video 
-                        key={isMobilePortrait ? 'portrait' : 'horizontal'}
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline 
-                        className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    >
-                        <source src={isMobilePortrait ? "Assets/video/bg_portrait.mp4" : "Assets/video/bg_horizontal.mp4"} type="video/mp4" />
+                    <video autoPlay loop muted playsInline className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                        <source src="Assets/video/bg_horizontal.mp4" type="video/mp4" media="(min-width: 768px)" />
+                        <source src="Assets/video/bg_portrait.mp4" type="video/mp4" media="(max-width: 767px)" />
+                        <source src="Assets/video/bg_horizontal.mp4" type="video/mp4" />
                     </video>
 
                     {!isAuthorized ? (
@@ -2822,36 +2398,17 @@
                                     isPlaying={isPlaying} setIsPlaying={setIsPlaying} isLoopingOne={isLoopingOne} setIsLoopingOne={setIsLoopingOne}
                                     handleNextTrack={handleNextTrack} handlePrevTrack={handlePrevTrack}
                                     projects={projects}
-                                    isModalOpen={isKingdomModalOpen}
                                 />
                             )}
 
-                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} onModalToggle={(open) => setIsKingdomModalOpen(open)} />}
+                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} />}
 
                             {currentView !== 'worldmap' && currentView !== 'popboss' && (
-                                <main className={`transition-all duration-500 flex-grow px-3 py-4 pt-16 pb-24 md:p-8 md:pt-8 md:pb-8 ${showSidebar ? (isSidebarCollapsed ? 'md:ml-24 ml-0' : 'md:ml-[18rem] ml-0') : 'ml-0'}`}>
-                                    <div className="max-w-6xl mx-auto py-2 md:py-4">
+                                <main className={`transition-all duration-500 p-4 md:p-8 flex-grow ${showSidebar ? (isSidebarCollapsed ? 'ml-24' : 'ml-[18rem]') : 'ml-0'}`}>
+                                    <div className="max-w-6xl mx-auto py-4">
                                         {currentView === 'news' && <NewsView onViewChange={handleViewChange} />}
-                                        {currentView === 'suggestion' && (
-                                            <SuggestionForm 
-                                                projects={projects} 
-                                                onAddProject={handleAddProject} 
-                                                onUpdateProject={handleUpdateProject}
-                                                onViewChange={handleViewChange} 
-                                                runningSeq={runningSeq} 
-                                                setRunningSeq={setRunningSeq}
-                                                editingProject={editingProject}
-                                                onCancelEdit={handleCancelEdit}
-                                            />
-                                        )}
-                                        {currentView === 'dashboard' && (
-                                            <Dashboard 
-                                                projects={projects} 
-                                                onUpdateProject={handleUpdateProject} 
-                                                kingdomEXP={kingdomEXP} 
-                                                onStartEdit={handleStartEdit}
-                                            />
-                                        )}
+                                        {currentView === 'suggestion' && <SuggestionForm projects={projects} onAddProject={handleAddProject} onViewChange={handleViewChange} runningSeq={runningSeq} setRunningSeq={setRunningSeq} editingProject={editingProject} onUpdateProject={handleUpdateProject} onCancelEdit={handleCancelEdit} />}
+                                        {currentView === 'dashboard' && <Dashboard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} onStartEdit={handleStartEdit} />}
                                         {currentView === 'quests' && <QuestBoard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
                                         {currentView === 'chronicles' && <Chronicles onViewChange={handleViewChange} initialTab={chronicleTab} />}
                                     </div>
@@ -2860,9 +2417,13 @@
 
                             {currentView === 'popboss' && (
                                 <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => {
-                                    if (!kingdom) return;
-                                    setPopBossScores(prev => ({ ...prev, [kingdom]: (prev[kingdom] || 0) + 1 }));
-                                    pendingClicksRef.current[kingdom] = (pendingClicksRef.current[kingdom] || 0) + 1;
+                                    setPopBossScores(prev => {
+                                        const nextScore = (prev[kingdom] || 0) + 1;
+                                        if (supabase) {
+                                            supabase.from('popboss_scores').update({ score: nextScore }).eq('kingdom', kingdom).then();
+                                        }
+                                        return { ...prev, [kingdom]: nextScore };
+                                    });
                                 }} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
                             )}
                         </>
