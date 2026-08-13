@@ -104,6 +104,29 @@
         .music-marquee-container { overflow: hidden; white-space: nowrap; width: 100%; position: relative; }
         .music-marquee-text { display: inline-block; padding-left: 100%; animation: marquee-scroll 10s linear infinite; }
         @keyframes marquee-scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+        /* ================= TOGGLE BADGE ICON ANIMATION ================= */
+        @keyframes toggle-icon {
+            0%, 45% { opacity: 1; transform: scale(1); }
+            50%, 95% { opacity: 0; transform: scale(0.6); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes toggle-badge {
+            0%, 45% { opacity: 0; transform: scale(0.6); }
+            50%, 95% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.6); }
+        }
+        .animate-toggle-icon { animation: toggle-icon 2.5s ease-in-out infinite; }
+        .animate-toggle-badge { animation: toggle-badge 2.5s ease-in-out infinite; }
+
+        /* Mobile Portrait Map Pin alignment for bg_portrait.mp4 */
+        @media (max-width: 640px) and (orientation: portrait) {
+            .pin-blankheimgard { top: 37% !important; left: 28% !important; }
+            .pin-casteria { top: 40% !important; left: 74% !important; }
+            .pin-bascentra { top: 60% !important; left: 50% !important; }
+            .pin-machinepolis { top: 80% !important; left: 26% !important; }
+            .pin-finalthron { top: 78% !important; left: 74% !important; }
+        }
     </style>
 </head>
 <body class="font-sarabun overflow-x-hidden antialiased">
@@ -122,6 +145,14 @@
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
             : null;
 
+        function getFormattedDate() {
+            const bkkDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+            const year = bkkDate.getFullYear().toString();
+            const month = String(bkkDate.getMonth() + 1).padStart(2, '0');
+            const day = String(bkkDate.getDate()).padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
         function calculateLevel(totalExp) {
             let level = 1;
             let requiredExp = 60;
@@ -134,18 +165,49 @@
             return { level, currentExp, requiredExp };
         }
 
-        function getFormattedDate() {
-            const bkkDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-            const year = bkkDate.getFullYear().toString();
-            const month = String(bkkDate.getMonth() + 1).padStart(2, '0');
-            const day = String(bkkDate.getDate()).padStart(2, '0');
-            return `${year}${month}${day}`;
+        function getKingdomBadgeStyle(kName) {
+            if (!kName) return 'bg-stone-700 text-stone-100 border border-stone-400 font-bold';
+            if (kName.includes('เบสเซนตร้า') || kName.includes('Bascentra')) return 'bg-purple-900 text-purple-100 border border-purple-400 font-bold';
+            if (kName.includes('แคสเทอเรีย') || kName.includes('Casteria')) return 'bg-red-800 text-red-100 border border-red-400 font-bold';
+            if (kName.includes('แบลงค์ไฮม์การ์ด') || kName.includes('Blankheimgard')) return 'bg-sky-800 text-sky-100 border border-sky-400 font-bold';
+            if (kName.includes('แมคชีนโพลิส') || kName.includes('Machinepolis')) return 'bg-emerald-800 text-emerald-100 border border-emerald-400 font-bold';
+            if (kName.includes('ไฟนัลธรอน') || kName.includes('Finalthron')) return 'bg-amber-700 text-amber-100 border border-amber-300 font-bold';
+            return 'bg-amber-900 text-amber-100 border border-amber-400 font-bold';
+        }
+
+        function maskEmpId(empId) {
+            if (!empId) return 'xxx';
+            const str = String(empId).trim();
+            if (str.includes('?')) return 'xxx';
+            if (str.length <= 3) return 'xxx';
+            return str.slice(0, str.length - 3) + 'xxx';
+        }
+
+        function isPopBossActive() {
+            const now = new Date();
+            const expiry = new Date('2026-11-01T00:00:00');
+            return now < expiry;
+        }
+
+        function isQualityEventActive() {
+            const now = new Date();
+            const expiry = new Date('2026-12-31T23:59:59');
+            return now <= expiry;
         }
 
         function MapPin({ kingdomKey, kingdom, onClick }) {
             const [imgError, setImgError] = useState(false);
+            const glowFilterMap = {
+                'Bascentra': 'drop-shadow(0 0 12px rgba(168,85,247,0.95)) drop-shadow(0 0 25px rgba(147,51,234,0.85)) drop-shadow(0 0 40px rgba(126,34,206,0.7))',
+                'Blankheimgard': 'drop-shadow(0 0 12px rgba(56,189,248,0.95)) drop-shadow(0 0 25px rgba(2,132,199,0.85)) drop-shadow(0 0 40px rgba(3,105,161,0.7))',
+                'Casteria': 'drop-shadow(0 0 12px rgba(239,68,68,0.95)) drop-shadow(0 0 25px rgba(220,38,38,0.85)) drop-shadow(0 0 40px rgba(185,28,28,0.7))',
+                'Machinepolis': 'drop-shadow(0 0 12px rgba(16,185,129,0.95)) drop-shadow(0 0 25px rgba(5,150,105,0.85)) drop-shadow(0 0 40px rgba(4,120,87,0.7))',
+                'Finalthron': 'drop-shadow(0 0 12px rgba(250,204,21,0.95)) drop-shadow(0 0 25px rgba(217,119,6,0.85)) drop-shadow(0 0 40px rgba(180,83,9,0.7))'
+            };
+            const activeFilter = glowFilterMap[kingdomKey] || 'drop-shadow(0 0 20px rgba(255,255,255,0.8))';
+
             return (
-                <div className="absolute z-20 pointer-events-auto" style={{ top: kingdom.position.top, left: kingdom.position.left }}>
+                <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
                     <div className="absolute transform -translate-x-1/2 -translate-y-1/2">
                         <div onClick={onClick} className="flex flex-col items-center group cursor-pointer animate-float">
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-1 border border-white/30 whitespace-nowrap shadow-lg pointer-events-none">
@@ -160,7 +222,8 @@
                                 <img 
                                     src={kingdom.iconImg} 
                                     alt={kingdomKey} 
-                                    className={`${kingdom.customSize} h-auto object-contain relative z-10 hover:brightness-125 transition-all drop-shadow-[0_5px_15px_rgba(0,0,0,0.6)]`}
+                                    style={{ filter: activeFilter }}
+                                    className={`${kingdom.customSize} h-auto object-contain relative z-10 hover:scale-110 transition-all duration-300`}
                                     onError={() => setImgError(true)}
                                 />
                             )}
@@ -328,8 +391,8 @@
             if (!isVisible) return null;
 
             return (
-                <div className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                    <div className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
+                <div onClick={handleClose} className={`fixed inset-0 flex items-center justify-center z-[70] bg-black/85 p-4 transition-opacity duration-500 ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                    <div onClick={(e) => e.stopPropagation()} className="parchment max-w-lg w-full p-8 rounded-xl text-center border-double border-8 border-[#8b5a2b] shadow-2xl">
                         <h1 className="text-3xl font-bold text-[#5d3a1a] mb-6 font-cinzel tracking-wide">ยินดีต้อนรับสู่ Diecast Kingdoms</h1>
                         <div className="text-[#8b5a2b] space-y-4 mb-8 text-sm md:text-base leading-relaxed">
                             <p className="italic">"ดินแดนแห่งความร่วมมือ ที่ทุกไอเดียของท่านคืออิฐบล็อกที่ช่วยเสริมสร้างอาณาจักรของเราให้แข็งแกร่งยิ่งขึ้น"</p>
@@ -346,8 +409,8 @@
         // ==========================================
         function NewsView({ onViewChange }) {
             return (
-                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm">
-                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm" onClick={() => onViewChange('worldmap')}>
+                    <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => onViewChange('worldmap')} className="absolute top-4 right-5 text-4xl font-bold text-[#8b5a2b] hover:text-red-600 transition cursor-pointer">&times;</button>
                         <div className="text-center border-b-2 border-[#8b5a2b]/30 pb-4 mb-6 mt-4">
                             <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> ประกาศิตข่าวสาร</h1>
@@ -362,6 +425,7 @@
                                         ฉลองการเปิดใช้งานจริง เพื่อให้ความสำคัญกับคุณภาพ! จัดกิจกรรม <b className="text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">EXP x2</b> สำหรับการส่งสาส์นพัฒนาหมวด Quality<br/>
                                         🔥 <b>สำหรับคนเสนอไอเดีย:</b> รับคะแนนเพิ่มจากปกติ 5 EXP เป็น <b className="text-red-700 text-lg">10 EXP</b><br/>
                                         🔥 <b>สำหรับคนลงมือทำ:</b> ได้รับเพิ่มจากปกติ 15 EXP เป็น <b className="text-red-700 text-lg">30 EXP</b><br/>
+                                        <span className="text-yellow-900 font-bold block mt-2 px-3 py-1 bg-yellow-400/40 rounded inline-block border border-yellow-500/50">⏳ ระยะเวลากิจกรรม: ตั้งแต่วันนี้ถึง 31 ธันวาคม 2026</span>
                                     </p>
                                 </div>
                             </div>
@@ -392,102 +456,214 @@
         function Sidebar({ 
             currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
             musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
-            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack
+            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack,
+            projects = [], isModalOpen = false
         }) {
             const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+
+            const blueprintCount = projects.filter(p => p.status === 'Blueprint').length;
+            const evidenceCount = projects.filter(p => p.status === 'Evidence').length;
 
             const menuItems = [
                 { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot' },
                 { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
-                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column' },
-                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
                 { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
                 { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
             ];
 
+            const mobileNavItems = [
+                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
+                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot', isCenter: true },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
+                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
+            ];
+
             return (
-                <div className={`fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
-                    
-                    <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
-                        <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
-                            {!isCollapsed && (
-                                <div className="flex flex-col">
-                                    <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
-                                    <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
+                <>
+                    {/* ================= DESKTOP SIDEBAR (md:flex) ================= */}
+                    <div className={`hidden md:flex fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
+                        
+                        <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
+                            <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
+                                {!isCollapsed && (
+                                    <div className="flex flex-col">
+                                        <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
+                                        <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
+                                    </div>
+                                )}
+                                {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
+                                <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
+                                    <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+                                </button>
+                            </div>
+                            
+                            <nav className="p-3 space-y-2 mt-2 shrink-0">
+                                <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
+                                    <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
+                                    {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
+                                </button>
+                                {menuItems.map((item) => {
+                                    const isActive = currentView === item.id;
+                                    const hasBadge = typeof item.badge === 'number' && item.badge > 0;
+                                    return (
+                                        <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
+                                            <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
+                                                {hasBadge ? (
+                                                    <>
+                                                        <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                        <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
+                                                            {item.badge}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <i className={item.icon}></i>
+                                                )}
+                                            </div>
+                                            {!isCollapsed && (
+                                                <div className="flex items-center justify-between flex-1 truncate">
+                                                    <span className="text-sm font-semibold truncate text-left">{item.label}</span>
+                                                    {hasBadge && (
+                                                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
+                                                            {item.badge} เรื่องใหม่
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+
+                        <div className="mt-auto shrink-0 flex flex-col">
+                            {!isCollapsed ? (
+                                <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
+                                    <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
+                                        {musicTracks.map((t, idx) => (
+                                            <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
+                                                {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
+                                                {t.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div onClick={() => setIsPlaylistOpen(!isPlaylistOpen)} className="p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition select-none">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <i className="fa-solid fa-compact-disc text-yellow-500 animate-spin" style={{ animationDuration: '4s' }}></i>
+                                            <div className="music-marquee-container flex-1">
+                                                <span className="music-marquee-text text-xs text-yellow-200 font-medium">
+                                                    {musicTracks[currentTrackIndex].title}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
+                                    </div>
+                                    <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
+                                        <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
+                                            <i className="fa-solid fa-repeat"></i>
+                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
+                                            <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
+                                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
+                                            </button>
+                                            <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mx-3 mb-4 flex justify-center">
+                                    <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
+                                        <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
+                                    </button>
                                 </div>
                             )}
-                            {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
-                            <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
-                                <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+
+                            <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
+                    <div className={`md:hidden ${isModalOpen ? 'modal-open-hide-sidebar' : ''}`}>
+                        {/* ↖️ Top Left Quick Buttons (📢 News, ⚡ PopBoss, 🎵 Music) */}
+                        <div className="fixed top-3 left-3 z-50 flex flex-col gap-2">
+                            <button
+                                onClick={() => onViewChange('news')}
+                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
+                                    currentView === 'news'
+                                        ? 'bg-blue-900/80 text-blue-200 border-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.6)] scale-105'
+                                        : 'bg-blue-950/60 text-blue-300 border-blue-500/40 hover:bg-blue-900/80'
+                                }`}
+                                title="ประกาศข่าวสาร"
+                            >
+                                <i className="fa-solid fa-bullhorn text-base"></i>
+                            </button>
+                            <button
+                                onClick={() => onViewChange('popboss')}
+                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
+                                    currentView === 'popboss'
+                                        ? 'bg-yellow-900/80 text-yellow-300 border-yellow-400 shadow-[0_0_12px_rgba(250,204,21,0.6)] scale-105'
+                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
+                                }`}
+                                title={isPopBossActive() ? "⚡ เหตุการณ์พิเศษ POPBOSS" : "🔒 สรุปผล PopBoss Season 1 (จบฤดูกาล)"}
+                            >
+                                <i className={`fa-solid ${isPopBossActive() ? 'fa-bolt text-lg animate-pulse' : 'fa-trophy text-base text-yellow-400'}`}></i>
+                            </button>
+                            <button
+                                onClick={() => setIsPlaying(!isPlaying)}
+                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
+                                    isPlaying
+                                        ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-black border-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.7)] scale-105 font-bold'
+                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
+                                }`}
+                                title={isPlaying ? "ปิดเพลงประกอบ" : "เปิดเพลงประกอบ"}
+                            >
+                                <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse text-base' : 'fa-play text-sm ml-0.5'}`}></i>
                             </button>
                         </div>
-                        
-                        <nav className="p-3 space-y-2 mt-2 shrink-0">
-                            <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
-                                <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
-                                {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
-                            </button>
-                            {menuItems.map((item) => {
+
+                        {/* ⚓ Bottom Navigation Dock (5 Circular Buttons) */}
+                        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 glass-panel glow-border px-3.5 py-2 rounded-full flex items-center gap-3 shadow-[0_0_25px_rgba(0,0,0,0.85)] border border-[#ebdcb9]/40 backdrop-blur-xl bg-black/70">
+                            {mobileNavItems.map((item) => {
                                 const isActive = currentView === item.id;
+                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
+                                const isCenter = item.isCenter;
+
                                 return (
-                                    <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
-                                        <div className="flex items-center justify-center w-8 text-center text-lg"><i className={item.icon}></i></div>
-                                        {!isCollapsed && <span className="text-sm font-semibold truncate text-left">{item.label}</span>}
+                                    <button
+                                        key={item.id}
+                                        onClick={() => onViewChange(item.id)}
+                                        className={`relative rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                                            isCenter
+                                                ? 'w-12 h-12 text-xl border-2'
+                                                : 'w-10 h-10 text-base border'
+                                        } ${
+                                            isActive
+                                                ? 'bg-gradient-to-b from-[#8b5a2b] to-[#5d3a1a] text-[#f7e6c4] border-[#ebdcb9] shadow-[0_0_15px_rgba(247,230,196,0.6)] scale-110'
+                                                : 'bg-black/50 text-[#ebdcb9]/70 border-white/10 hover:bg-[#8b5a2b]/30 hover:text-[#ebdcb9]'
+                                        }`}
+                                        title={item.label}
+                                    >
+                                        {hasBadge ? (
+                                            <>
+                                                <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center border border-yellow-300 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-toggle-badge">
+                                                    {item.badge}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <i className={item.icon}></i>
+                                        )}
                                     </button>
                                 );
                             })}
-                        </nav>
-                    </div>
-
-                    <div className="mt-auto shrink-0 flex flex-col">
-                        
-                        {!isCollapsed ? (
-                            <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
-                                <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
-                                    {musicTracks.map((t, idx) => (
-                                        <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
-                                            {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
-                                            {t.title}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="px-3 py-2 bg-[#8b5a2b]/20 flex justify-between items-center cursor-pointer border-t border-[#8b5a2b]/30" onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}>
-                                    <div className="flex flex-col w-[140px] overflow-hidden">
-                                        <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider mb-1">🎵 บทกวีแห่ง 5 ดินแดน</span>
-                                        <div className="music-marquee-container w-full">
-                                            <span className="music-marquee-text text-sm font-bold text-[#f7e6c4]">
-                                                {musicTracks[currentTrackIndex].title}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
-                                </div>
-                                <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
-                                    <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
-                                        <i className="fa-solid fa-repeat"></i>
-                                    </button>
-                                    <div className="flex items-center gap-3">
-                                        <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
-                                        <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
-                                            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
-                                        </button>
-                                        <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="mx-3 mb-4 flex justify-center">
-                                <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
-                                    <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                            {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
                         </div>
                     </div>
-                </div>
+                </>
             );
         }
 
@@ -499,6 +675,7 @@
             const [myScore, setMyScore] = useState(0);
             const [isPopping, setIsPopping] = useState(false);
             const [bossImgError, setBossImgError] = useState(false);
+            const lastPopTimeRef = useRef(0);
 
             const kingdomsList = [
                 { id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
@@ -507,8 +684,60 @@
                 { id: 'Finalthron', name: 'ไฟนัลธรอน', icon: '✨', color: 'rgba(241, 196, 15, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_finalthron_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_finalthron_hit.png' }
             ];
 
+            const isExpired = !isPopBossActive();
+
+            if (isExpired) {
+                const sortedScores = Object.entries(globalScores).sort((a, b) => b[1] - a[1]);
+                const winner = sortedScores[0] ? sortedScores[0][0] : 'เบสเซนตร้า';
+                return (
+                    <div className="fixed inset-0 z-[60] popboss-bg flex flex-col items-center justify-center text-white animate-fade-in p-4 overflow-y-auto">
+                        <button onClick={onClose} className="absolute top-6 right-8 text-white text-4xl font-bold hover:text-red-500 cursor-pointer">&times;</button>
+                        <div className="parchment max-w-2xl w-full p-6 md:p-8 rounded-2xl text-center border-4 border-yellow-500 shadow-2xl bg-black/80 text-[#ebdcb9]">
+                            <div className="text-6xl mb-3 animate-bounce">🏆</div>
+                            <h1 className="text-2xl md:text-4xl font-bold text-yellow-400 font-cinzel mb-2">สรุปผลศึก POP BOSS SEASON 1</h1>
+                            <p className="text-xs md:text-sm text-gray-300 mb-6 bg-red-950/80 px-4 py-1.5 rounded-full inline-block border border-red-500/50">
+                                🔒 กิจกรรมสิ้นสุดลงแล้วเมื่อวันที่ 31 ตุลาคม 2026
+                            </p>
+                            
+                            <div className="bg-gradient-to-r from-amber-600/40 via-yellow-500/40 to-amber-600/40 border-2 border-yellow-400 p-4 rounded-xl mb-6 shadow-lg">
+                                <span className="text-xs font-bold text-yellow-300 uppercase tracking-widest block mb-1">👑 อาณาจักรผู้พิชิตชัยชนะฤดูกาลที่ 1</span>
+                                <h2 className="text-2xl md:text-3xl font-bold text-yellow-200 font-cinzel">✨ {winner} ✨</h2>
+                                <p className="text-xs text-yellow-100 mt-1">ได้รับสิทธิ์จัดพิธีฉลองเทศกาลเกียรติยศประจำฤดูกาล!</p>
+                            </div>
+
+                            <div className="space-y-2 mb-6 text-left text-xs md:text-sm">
+                                {kingdomsList.map(k => {
+                                    const score = globalScores[k.name] || 0;
+                                    const isWinner = k.name === winner;
+                                    return (
+                                        <div key={k.id} className={`p-3 rounded-lg flex items-center justify-between border ${isWinner ? 'bg-yellow-900/60 border-yellow-400 font-bold' : 'bg-black/40 border-white/10'}`}>
+                                            <span className="flex items-center gap-2">
+                                                <span>{k.icon}</span>
+                                                <span>{k.name}</span>
+                                                {isWinner && <span className="bg-yellow-400 text-yellow-950 text-[10px] px-2 py-0.5 rounded font-extrabold ml-2">WINNER 👑</span>}
+                                            </span>
+                                            <span className="font-mono text-yellow-300 font-bold text-base">{score.toLocaleString()} PTS</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <p className="text-xs text-gray-400 italic mb-6">"ขอบคุณชาวเมืองทุกคนที่ร่วมแรงร่วมใจกันใน PopBoss Season 1! โปรดติดตามกิจกรรมเทศกาลใหม่เร็วๆ นี้!"</p>
+                            
+                            <button onClick={onClose} className="bg-[#5d3a1a] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#8b5a2b] shadow-xl border border-yellow-400 transition cursor-pointer">
+                                <i className="fa-solid fa-arrow-left-to-line mr-2"></i> กลับสู่แผนที่โลก (World Map)
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
             const handlePopStart = (e) => {
-                if(e && e.type === 'touchstart') e.preventDefault();
+                if (e && e.cancelable && e.type === 'touchstart') e.preventDefault();
+                const now = Date.now();
+                if (now - lastPopTimeRef.current < 60) return;
+                lastPopTimeRef.current = now;
+
                 setIsPopping(true); setMyScore(s => s + 1); updateGlobalScores(myKingdom); 
                 playHitSound();
             };
@@ -569,12 +798,15 @@
         // ==========================================
         // COMPONENT: WorldMap 
         // ==========================================
-        function WorldMap({ kingdomEXP, projects, onViewChange }) {
+        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle }) {
             const [selectedKingdom, setSelectedKingdom] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null); 
             const [expandedTab, setExpandedTab] = useState(null);
 
-            useEffect(() => { setExpandedTab(null); }, [selectedKingdom]);
+            useEffect(() => { 
+                setExpandedTab(null); 
+                if (onModalToggle) onModalToggle(!!selectedKingdom);
+            }, [selectedKingdom]);
 
             const kingdomsData = {
                 'Bascentra': {
@@ -583,7 +815,7 @@
                     duties: 'ข้อเสนอแนะทั่วไป / สวัสดิการส่วนกลาง / ป่าต้องมนตราลับ',
                     iconImg: 'Assets/Images/Kingdoms/Bascentra_8bit.png', bgImage: 'Assets/Images/Kingdoms/Bascentra_bg.png',
                     barColor: 'bg-gradient-to-r from-emerald-500 to-teal-400',
-                    trophies: [], history: [], position: { top: '78%', left: '50%' },
+                    trophies: [], history: [], position: { top: '76%', left: '50%' },
                     customSize: 'w-[120px] md:w-[180px]'
                 },
                 'Blankheimgard': {
@@ -629,43 +861,43 @@
             if (activeData) levelData = calculateLevel(kingdomEXP[activeData.nameThai] || 0);
 
             return (
-                <div className="fixed inset-0 w-full h-full pointer-events-none z-10">
+                <div className="fixed inset-0 w-full h-full pointer-events-none z-10 pb-20 md:pb-0">
                     {!selectedKingdom && Object.keys(kingdomsData).map(key => {
                         return <MapPin key={key} kingdomKey={key} kingdom={kingdomsData[key]} onClick={() => setSelectedKingdom(key)} />
                     })}
                     
                     {selectedKingdom && (
                         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] animate-fade-in p-4 md:p-8 pointer-events-auto" onClick={() => setSelectedKingdom(null)}>
-                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="relative w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,1)] overflow-hidden border-4 border-[#8b5a2b] bg-black flex flex-col modal-landscape-container" onClick={(e) => e.stopPropagation()}>
                                 <div className="absolute inset-0 z-0 opacity-80" style={{ backgroundImage: `url('${activeData.bgImage}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}></div>
                                 
-                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-4 right-4 bg-black/70 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-30 flex items-center justify-center border border-white/30 shadow-lg cursor-pointer">&times;</button>
+                                <button onClick={() => setSelectedKingdom(null)} className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/80 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-red-600 hover:text-white transition z-50 flex items-center justify-center border border-white/40 shadow-xl cursor-pointer">&times;</button>
                                 
-                                <div className="absolute top-6 left-6 md:top-10 md:left-10 z-40 flex items-center">
-                                    <div className="relative bg-black/50 pr-5 md:pr-8 py-2 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[70px] md:min-h-[100px] pl-[70px] md:pl-[130px]">
+                                <div className="absolute top-3 left-3 md:top-10 md:left-10 z-40 flex items-center modal-header-wrapper">
+                                    <div className="relative bg-black/60 pr-3 md:pr-8 py-1.5 md:py-3 rounded-xl backdrop-blur-sm border border-white/20 shadow-xl flex items-center h-auto min-h-[48px] md:min-h-[100px] pl-[45px] sm:pl-[55px] md:pl-[130px] overflow-hidden modal-landscape-header-box">
                                         <img 
                                             src={activeData.iconImg} 
                                             alt="logo" 
-                                            className="absolute left-[-20px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-24 h-24 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none" 
+                                            className="absolute left-[-10px] md:left-[-30px] top-1/2 transform -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-[180px] md:h-[180px] object-contain drop-shadow-[0_0_20px_rgba(0,0,0,0.9)] z-50 pointer-events-none modal-landscape-logo-img" 
                                         />
-                                        <div className="flex flex-col relative z-10 pt-1">
-                                            <span className="text-3xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-1">{activeData.nameEng}</span>
-                                            <span className="text-sm md:text-xl font-sarabun text-gray-300 font-medium">{activeData.nameThai}</span>
+                                        <div className="flex flex-col relative z-10 pt-0.5 truncate">
+                                            <span className="text-base sm:text-2xl md:text-5xl font-bold text-[#f7e6c4] font-cinzel drop-shadow-[0_2px_4px_rgba(0,0,0,1)] leading-none mb-0.5 truncate modal-landscape-title-text">{activeData.nameEng}</span>
+                                            <span className="text-[10px] sm:text-xs md:text-xl font-sarabun text-gray-300 font-medium truncate modal-landscape-sub-text">{activeData.nameThai}</span>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div className="absolute top-6 right-16 md:top-10 md:right-10 z-20 w-56 md:w-72 bg-black/50 p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl">
-                                    <div className="flex justify-between text-sm md:text-base text-[#f7e6c4] font-bold mb-2">
+                                <div className="absolute top-3 right-14 md:top-10 md:right-16 z-20 w-36 sm:w-48 md:w-72 bg-black/60 p-2 md:p-4 rounded-xl border border-white/20 backdrop-blur-sm shadow-xl modal-exp-bar-stacked">
+                                    <div className="flex justify-between text-[10px] sm:text-xs md:text-base text-[#f7e6c4] font-bold mb-1 md:mb-2">
                                         <span>Level {levelData.level}</span>
-                                        <span>{levelData.currentExp} / {levelData.requiredExp} EXP</span>
+                                        <span>{levelData.currentExp}/{levelData.requiredExp} EXP</span>
                                     </div>
-                                    <div className="w-full bg-black/80 h-3 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
+                                    <div className="w-full bg-black/80 h-2 md:h-4 rounded-full overflow-hidden border border-white/30 shadow-inner">
                                         <div className={`h-full ${activeData.barColor} transition-all duration-1000`} style={{ width: `${(levelData.currentExp / levelData.requiredExp) * 100}%` }}></div>
                                     </div>
                                 </div>
                                 
-                                <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-6 z-20 items-end pointer-events-none mt-auto">
+                                <div className="absolute bottom-3 left-3 right-3 md:bottom-10 md:left-10 md:right-10 flex flex-col md:flex-row gap-3 md:gap-6 z-20 items-end pointer-events-none mt-auto max-h-[60vh] md:max-h-none overflow-y-auto pb-1 md:pb-0">
                                     <div className="flex-1 bg-black/80 p-5 md:p-6 rounded-xl border border-[#8b5a2b]/50 backdrop-blur-md shadow-2xl pointer-events-auto">
                                         <p className="text-gray-100 text-sm md:text-base leading-relaxed mb-4">{activeData.desc}</p>
                                         <div className="text-xs md:text-sm text-[#ebdcb9] bg-black/50 px-4 py-3 rounded-lg border border-white/10">
@@ -673,7 +905,7 @@
                                         </div>
                                     </div>
 
-                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none">
+                                    <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none modal-action-buttons">
                                         <button onClick={() => onViewChange('quests')} className="w-full bg-gradient-to-r from-[#8b5a2b] to-[#5d3a1a] hover:from-[#a06830] hover:to-[#6d4514] text-[#f7e6c4] py-3 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-[#ebdcb9]/40 transition text-sm cursor-pointer flex items-center justify-center gap-2 pointer-events-auto">
                                             <i className="fa-solid fa-door-open text-lg"></i> เข้าสู่ลานภารกิจ
                                         </button>
@@ -714,29 +946,40 @@
         // ==========================================
         // COMPONENT: SuggestionForm 
         // ==========================================
-        function SuggestionForm({ projects, onAddProject, onViewChange, runningSeq, setRunningSeq }) {
-            function maskEmpId(empId) {
-                if (!empId) return 'xxx';
-                const str = String(empId).trim();
-                if (str.includes('?')) return 'xxx';
-                if (str.length <= 3) return 'xxx';
-                return str.slice(0, str.length - 3) + 'xxx';
-            }
-
-            function getFormattedDate() {
-                const bkkDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-                const year = bkkDate.getFullYear().toString();
-                const month = String(bkkDate.getMonth() + 1).padStart(2, '0');
-                const day = String(bkkDate.getDate()).padStart(2, '0');
-                return `${year}${month}${day}`;
-            }
-
+        function SuggestionForm({ projects, onAddProject, onUpdateProject, onViewChange, runningSeq, setRunningSeq, editingProject, onCancelEdit }) {
             const [formData, setFormData] = useState({
                 name: '', empId: '', origin: '', target: '', category: '',
                 process: '', factory: '', pinpoint: '', title: '', problem: '',
-                solution: '', benefit: '', image: null, imagePreview: null
+                solution: '', benefit: '', image: null, imagePreview: null, images: []
             });
             const [notification, setNotification] = useState('');
+
+            useEffect(() => {
+                if (editingProject) {
+                    let catVal = editingProject.category || '';
+                    if (catVal.includes('Quality')) catVal = '💎 Quality (EVENT x2 EXP!)';
+                    else if (catVal.includes('Safety')) catVal = '🛡️ Safety - มนตราแห่งเกราะคุ้มภัย';
+                    else if (catVal.includes('Culture')) catVal = '📜 Culture - คัมภีร์แห่งปัญญา';
+                    
+                    setFormData({
+                        name: editingProject.name || '',
+                        empId: editingProject.emp || '',
+                        origin: editingProject.origin || '',
+                        target: editingProject.target || '',
+                        category: catVal,
+                        process: editingProject.location || editingProject.process || '',
+                        factory: editingProject.factory || '',
+                        pinpoint: editingProject.pinpoint || '',
+                        title: editingProject.title || '',
+                        problem: editingProject.problem || '',
+                        solution: editingProject.solution || '',
+                        benefit: editingProject.benefit || '',
+                        image: null,
+                        imagePreview: editingProject.imagePreview || null,
+                        images: editingProject.images || (editingProject.imagePreview ? [editingProject.imagePreview] : [])
+                    });
+                }
+            }, [editingProject]);
 
             const processMap = {
                 'แคสเทอเรีย': ['Incoming (อินคัมมิ่ง)', 'Casting (แคสติ้ง)'],
@@ -749,9 +992,11 @@
             const defaultNames = { 'เบสเซนตร้า': 'อัญมณีนักปราชญ์', 'แคสเทอเรีย': 'สิงโตเพลิง', 'แบลงค์ไฮม์การ์ด': 'กวางหิมะ', 'แมคชีนโพลิส': 'ม้าบินจักรกล', 'ไฟนัลธรอน': 'นกยูงขาว' };
 
             useEffect(() => {
-                if (formData.origin === 'เบสเซนตร้า') setFormData(prev => ({...prev, category: '🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)'}));
-                else if (formData.category.includes('Secret')) setFormData(prev => ({...prev, category: ''}));
-            }, [formData.origin]);
+                if (!editingProject) {
+                    if (formData.origin === 'เบสเซนตร้า') setFormData(prev => ({...prev, category: '🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)'}));
+                    else if (formData.category.includes('Secret')) setFormData(prev => ({...prev, category: ''}));
+                }
+            }, [formData.origin, editingProject]);
 
             const handleChange = (e) => {
                 const { name, value } = e.target;
@@ -788,37 +1033,149 @@
                 }
             };
 
+            const handleMultiFileChange = (e) => {
+                if (e.target.files) {
+                    const files = Array.from(e.target.files);
+                    const currentCount = (formData.images || []).length;
+                    const availableSlots = 5 - currentCount;
+                    if (availableSlots <= 0) {
+                        alert('แนบรูปภาพได้สูงสุด 5 รูปเท่านั้นค่ะ');
+                        return;
+                    }
+                    const selectedFiles = files.slice(0, availableSlots);
+                    selectedFiles.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_WIDTH = 800;
+                                const MAX_HEIGHT = 800;
+                                let width = img.width;
+                                let height = img.height;
+                                if (width > height) {
+                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                                
+                                setFormData(prev => {
+                                    const newImages = [...(prev.images || []), compressedDataUrl];
+                                    return {
+                                        ...prev,
+                                        images: newImages,
+                                        imagePreview: newImages[0]
+                                    };
+                                });
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            };
+
+            const handleRemoveImage = (indexToRemove) => {
+                setFormData(prev => {
+                    const newImages = (prev.images || []).filter((_, idx) => idx !== indexToRemove);
+                    return {
+                        ...prev,
+                        images: newImages,
+                        imagePreview: newImages.length > 0 ? newImages[0] : null
+                    };
+                });
+            };
+
             const isAnonymous = formData.origin === 'เบสเซนตร้า';
             const isSecret = formData.category.includes('Secret');
+
+            const [showConfirmModal, setShowConfirmModal] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (!isAnonymous && !formData.empId.trim()) { alert('กรุณากรอกรหัสพนักงานเพื่อใช้รับรางวัลและยืนยันตัวตนค่ะ'); return; }
                 if (!formData.origin || !formData.target || !formData.category || !formData.process || !formData.factory || !formData.title || !formData.problem || !formData.benefit) { alert('กรุณากรอกข้อมูลให้ครบถ้วนก่อนส่งสาส์นค่ะ'); return; }
 
-                let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
-                let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
-                
-                const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
-                const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
-                
-                const newId = `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
-                setRunningSeq(prev => prev + 1); 
+                setShowConfirmModal(true);
+            };
 
-                const newProject = {
-                    id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
-                    origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
-                    factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
-                    title: formData.title, problem: formData.problem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
-                    imageText: formData.image ? `📷 รูปแนบ: ${formData.image}` : '📷 รูปจำลองสาส์นปัญหา', imagePreview: formData.imagePreview, 
-                    status: isSecret ? 'Hidden' : 'Blueprint', comment: '', targetComment: '', imageAfterPreview: null,
-                    wasAbandoned: false, ideaApproved: false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality'), isSuperRising: false 
-                };
+            const handleFinalSubmit = async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
 
-                onAddProject(newProject);
-                setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
-                setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null });
-                setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                try {
+                    let finalName = formData.name.trim() || defaultNames[formData.origin] || 'นักผจญภัยนิรนาม';
+                    const imageList = formData.images && formData.images.length > 0 ? formData.images : (formData.imagePreview ? [formData.imagePreview] : []);
+
+                    if (editingProject) {
+                        const updatedProject = {
+                            ...editingProject,
+                            emp: isAnonymous ? '???-????' : formData.empId,
+                            name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                            origin: formData.origin,
+                            target: formData.target,
+                            category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
+                            factory: formData.factory,
+                            location: formData.process,
+                            pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
+                            title: formData.title,
+                            problem: formData.problem,
+                            solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้',
+                            benefit: formData.benefit,
+                            imageText: imageList.length > 0 ? `📷 รูปแนบ: (${imageList.length} รูป)` : '📷 รูปจำลองสาส์นปัญหา',
+                            imagePreview: imageList[0] || null,
+                            images: imageList,
+                            status: 'Blueprint', // Reset to Blueprint so council sees it pulsing!
+                            comment: 'สาส์นถูกแก้ไขข้อมูลมาใหม่ รอสภาเมืองเปิดตรวจซ้ำ',
+                            ideaApproved: false,
+                            isQualityEvent: formData.category.includes('Quality') && isQualityEventActive()
+                        };
+
+                        if (onUpdateProject) await onUpdateProject(updatedProject);
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                        setShowConfirmModal(false);
+                        setNotification(`✅ อัปเดตสาส์น ${editingProject.id} สำเร็จ! เรื่องถูกส่งกลับเข้าสู่สภาเมืองเรียบร้อยแล้ว`);
+                        setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                        if (onCancelEdit) onCancelEdit();
+                        setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                        return;
+                    }
+
+                    let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
+                    const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+                    const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
+                    const newId = `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
+                    setRunningSeq(prev => prev + 1); 
+
+                    const newProject = {
+                        id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                        origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
+                        factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
+                        title: formData.title, problem: formData.problem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
+                        imageText: imageList.length > 0 ? `📷 รูปแนบ: (${imageList.length} รูป)` : '📷 รูปจำลองสาส์นปัญหา', 
+                        imagePreview: imageList[0] || null,
+                        images: imageList,
+                        status: isSecret ? 'Hidden' : 'Blueprint', comment: '', targetComment: '', imageAfterPreview: null,
+                        wasAbandoned: false, ideaApproved: false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality') && isQualityEventActive(), isSuperRising: false 
+                    };
+
+                    await onAddProject(newProject);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    setShowConfirmModal(false);
+                    setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
+                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                    setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการส่งสาส์น กรุณาลองใหม่อีกครั้งค่ะ');
+                } finally {
+                    setIsSubmitting(false);
+                }
             };
 
             const availableProcesses = formData.target ? processMap[formData.target] : [];
@@ -826,17 +1183,46 @@
             return (
                 <div className="parchment max-w-3xl mx-auto p-6 md:p-8 rounded-2xl relative animate-fade-in overflow-hidden mt-4">
                     <div className="absolute top-4 right-4 z-20">
-                        <button onClick={() => onViewChange('chronicles', 'rules')} className="bg-red-800 text-white flex flex-col items-center px-4 py-1.5 rounded-lg border-2 border-red-400 hover:bg-red-700 shadow-xl transition cursor-pointer">
-                            <i className="fa-solid fa-circle-question text-xl mb-0.5"></i>
-                            <span className="text-[10px] md:text-xs font-bold tracking-wider">ปุจฉา-วิสัชนา (FAQ)</span>
+                        {/* Compact Circular Red FAQ Button */}
+                        <button 
+                            type="button"
+                            onClick={() => onViewChange('chronicles', 'rules')} 
+                            className="w-10 h-10 rounded-full bg-red-800 text-white border-2 border-red-300 flex items-center justify-center shadow-lg active:scale-95 hover:bg-red-700 transition cursor-pointer" 
+                            title="ปุจฉา-วิสัชนา (FAQ)"
+                        >
+                            <i className="fa-solid fa-circle-question text-xl"></i>
                         </button>
                     </div>
 
                     {notification && <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 bg-green-800 border-2 border-green-400 text-white font-bold px-6 py-3 rounded-xl shadow-2xl animate-bounce">{notification}</div>}
                     
-                    {formData.category.includes('Quality') && <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg animate-pulse border border-yellow-600 hidden md:block">💎 EVENT: Quality EXP x2</div>}
+                    {formData.category.includes('Quality') && isQualityEventActive() && <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg animate-pulse border border-yellow-600 hidden md:block">💎 EVENT: Quality EXP x2</div>}
                     
-                    <h1 className="text-3xl font-bold text-center mb-6 text-[#5d3a1a] font-cinzel mt-8 md:mt-0">สาส์นพัฒนาแด่อาณาจักร<br /><span className="text-lg italic font-normal font-sans">Kingdom's Decree for Improvement</span></h1>
+                    <h1 className="text-3xl font-bold text-center mb-6 text-[#5d3a1a] font-cinzel mt-4 md:mt-0">
+                        {editingProject ? '✏️ แก้ไขสาส์นพัฒนา' : 'สาส์นพัฒนาแด่อาณาจักร'}<br />
+                        <span className="text-lg italic font-normal font-sans">{editingProject ? 'Update Kingdom\'s Decree' : 'Kingdom\'s Decree for Improvement'}</span>
+                    </h1>
+
+                    {editingProject && (
+                        <div className="bg-amber-100 border-2 border-amber-500 p-3.5 rounded-xl mb-6 flex justify-between items-center text-amber-900 shadow-md animate-fade-in">
+                            <span className="font-bold text-xs md:text-sm flex items-center gap-2">
+                                <i className="fa-solid fa-pen-to-square text-amber-700 text-base"></i>
+                                กำลังอยู่ในโหมดแก้ไขสาส์น (รหัสสาส์น: <strong className="text-amber-950 font-mono">{editingProject.id}</strong>)
+                            </span>
+                            <button 
+                                type="button" 
+                                onClick={() => {
+                                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                                    if (onCancelEdit) onCancelEdit();
+                                    if (onViewChange) onViewChange('dashboard');
+                                }}
+                                className="bg-red-700 hover:bg-red-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-red-400 shadow transition cursor-pointer"
+                            >
+                                ✕ ยกเลิกการแก้ไข
+                            </button>
+                        </div>
+                    )}
+                    
                     {isAnonymous && <div className="bg-gray-800 text-gray-200 border border-gray-600 p-4 rounded-lg mb-6 shadow-inner text-sm font-bold animate-pulse"><i className="fa-solid fa-user-secret mr-2"></i> โหมดสาส์นลับ: ซ่อนข้อมูลประจำตัวคุณแล้ว ส่งตรงถึง HR</div>}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -856,7 +1242,7 @@
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <select name="origin" value={formData.origin} onChange={handleChange} className="input-style font-semibold" required>
+                                <select name="origin" value={formData.origin} onChange={handleChange} className="input-style font-semibold" required disabled={!!editingProject}>
                                     <option value="">อาณาจักรต้นสังกัด / Origin Kingdom</option>
                                     <option value="แคสเทอเรีย">แคสเทอเรีย (สิงโตอัคคี) / Casteria</option>
                                     <option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด (กวางน้ำแข็ง) / Blankheimgard</option>
@@ -877,11 +1263,11 @@
                             <div className="w-full">
                                 <select name="category" value={formData.category} onChange={handleChange} className={`w-full input-style font-bold ${isAnonymous ? 'bg-gray-800 text-white' : ''}`} required>
                                     {isAnonymous ? <option value="🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)">🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)</option> : (
-                                        <><option value="">เลือกพลังของสาส์น / Select Category</option><option value="💎 Quality (EVENT x2 EXP!)">💎 Quality (กิจกรรมพิเศษ x2 EXP!)</option><option value="🛡️ Safety - มนตราแห่งเกราะคุ้มภัย">🛡️ Safety</option><option value="📜 Culture - คัมภีร์แห่งปัญญา">📜 Culture</option></>
+                                        <><option value="">เลือกพลังของสาส์น / Select Category</option><option value="💎 Quality (EVENT x2 EXP!)">{isQualityEventActive() ? "💎 Quality (กิจกรรมพิเศษ x2 EXP!)" : "💎 Quality - มนตราแห่งคุณภาพ"}</option><option value="🛡️ Safety - มนตราแห่งเกราะคุ้มภัย">🛡️ Safety</option><option value="📜 Culture - คัมภีร์แห่งปัญญา">📜 Culture</option></>
                                     )}
                                 </select>
                                 
-                                {formData.category.includes('Quality') && (
+                                {formData.category.includes('Quality') && isQualityEventActive() && (
                                     <div className="mt-2 text-center bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 font-bold px-3 py-2 rounded-lg text-sm shadow-lg animate-pulse border border-yellow-600">
                                         <i className="fa-regular fa-gem mr-1"></i> EVENT: Quality EXP x2
                                     </div>
@@ -902,29 +1288,182 @@
                             <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder="รายละเอียดปัญหาที่พบ / Problem Description" className="input-style h-24 font-sans" required></textarea>
                             <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder="วิธีแก้ไขที่ต้องการ (ถ้ามี) / Proposed Solution" className="input-style h-24 font-sans"></textarea>
                             <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder="ผลลัพธ์ที่คาดหวัง / Expected Benefits" className="input-style h-24 font-sans" required></textarea>
+                            
                             <div className="bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">
-                                <label className="block text-sm font-bold text-[#8b5a2b] mb-1">แนบรูปภาพประกอบ (ถ้ามี):</label>
-                                <input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-[#5d3a1a] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#8b5a2b]/20 hover:file:bg-[#8b5a2b]/35 file:cursor-pointer" />
-                                {formData.imagePreview && <div className="mt-2 h-32 w-48 border-2 border-dashed border-[#8b5a2b] rounded-lg overflow-hidden"><img src={formData.imagePreview} alt="Preview" className="w-full h-full object-cover" /></div>}
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-bold text-[#8b5a2b]">
+                                        แนบรูปภาพประกอบ (สูงสุด 5 รูป):
+                                    </label>
+                                    <span className="text-xs font-bold text-amber-900 bg-amber-200 px-2.5 py-0.5 rounded-full border border-amber-400">
+                                        {(formData.images || []).length} / 5 รูป
+                                    </span>
+                                </div>
+                                
+                                {(formData.images || []).length < 5 && (
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        multiple 
+                                        onChange={handleMultiFileChange} 
+                                        className="w-full text-sm text-[#5d3a1a] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#8b5a2b]/20 hover:file:bg-[#8b5a2b]/35 file:cursor-pointer" 
+                                    />
+                                )}
+                                
+                                {(formData.images || []).length > 0 && (
+                                    <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                        {(formData.images || []).map((imgUrl, idx) => (
+                                            <div key={idx} className="relative h-24 border-2 border-[#8b5a2b] rounded-lg overflow-hidden group shadow-md bg-black/20">
+                                                <img src={imgUrl} alt={`Attachment ${idx+1}`} className="w-full h-full object-cover" />
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleRemoveImage(idx)} 
+                                                    className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shadow cursor-pointer transition" 
+                                                    title="ลบรูปนี้"
+                                                >
+                                                    &times;
+                                                </button>
+                                                <span className="absolute bottom-1 left-1 bg-black/70 text-white text-[9px] px-1 rounded">#{idx+1}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </section>
-                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>{isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}</button>
+
+                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : 'bg-[#8b5a2b]'}`}>
+                            {editingProject ? <><i className="fa-solid fa-floppy-disk mr-2"></i> 💾 อัปเดตข้อมูลสาส์น</> : isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}
+                        </button>
                     </form>
+
+                    {/* 📜 Decree Submission Preview Modal (หน้าต่าง Preview สาส์นฉบับเต็ม) */}
+                    {showConfirmModal && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[99] animate-fade-in overflow-y-auto" onClick={() => setShowConfirmModal(false)}>
+                            <div className="parchment max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto border-4 border-[#8b5a2b] shadow-2xl my-auto text-[#3d2511]" onClick={(e) => e.stopPropagation()}>
+                                <button onClick={() => setShowConfirmModal(false)} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
+
+                                <div className="text-center mb-5 border-b-2 border-[#8b5a2b]/30 pb-4">
+                                    <div className="text-3xl mb-1 animate-bounce">📜</div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-[#5d3a1a] font-cinzel">
+                                        {editingProject ? `ตัวอย่างสาส์นแก้ไข (Decree Update Preview)` : 'ตัวอย่างสาส์นพัฒนาแด่อาณาจักร (Decree Preview)'}
+                                    </h2>
+                                    <p className="text-xs text-[#8b5a2b] font-bold mt-1">
+                                        (โปรดตรวจสอบความถูกต้องของข้อมูลสาส์นก่อนยืนยันส่งเข้าสู่สภาเมือง)
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4 text-xs md:text-sm">
+                                    {/* 1. Identity & Kingdom route */}
+                                    <div className="bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30 space-y-2">
+                                        <div className="flex flex-wrap justify-between items-center gap-2">
+                                            <div>
+                                                <span className="font-bold text-[#5d3a1a]">👤 ผู้เสนอ: </span>
+                                                <span className="font-bold text-[#1e3a8a]">{isAnonymous ? 'นักผจญภัยนิรนาม (สาส์นลับ)' : (formData.name.trim() || 'ผู้เดินทางไร้นาม')}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-bold text-[#5d3a1a]">🪪 รหัสพนักงาน: </span>
+                                                <span className="font-mono font-bold text-[#1e3a8a]">{isAnonymous ? '???-????' : maskEmpId(formData.empId)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 pt-1">
+                                            <span className="font-bold text-[#5d3a1a]">🗺️ เส้นทางสาส์น: </span>
+                                            <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.origin)}`}>
+                                                {formData.origin || 'ไม่ระบุ'}
+                                            </span>
+                                            <i className="fa-solid fa-arrow-right text-[#8b5a2b] text-xs"></i>
+                                            <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.target)}`}>
+                                                {formData.target || 'ไม่ระบุ'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* 2. Location & Category */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30">
+                                        <div><span className="font-bold text-[#5d3a1a]">🏭 โรงงาน: </span><span className="font-medium text-[#1e3a8a]">{formData.factory || '-'}</span></div>
+                                        <div><span className="font-bold text-[#5d3a1a]">⚙️ กระบวนการ: </span><span className="font-medium text-[#1e3a8a]">{formData.process || '-'}</span></div>
+                                        <div><span className="font-bold text-[#5d3a1a]">📍 พิกัดปัญหา: </span><span className="font-medium text-[#1e3a8a]">{formData.pinpoint || 'ไม่ระบุ'}</span></div>
+                                        <div><span className="font-bold text-[#5d3a1a]">💎 หมวดหมู่พลัง: </span><span className="font-medium text-[#1e3a8a]">{formData.category || '-'}</span></div>
+                                    </div>
+
+                                    {/* 3. Title, Problem, Solution, Benefit */}
+                                    <div className="space-y-3 bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">📌 หัวข้อสาส์น (Title):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-bold text-[#1e3a8a] text-sm">
+                                                {formData.title || '-'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">⚠️ รายละเอียดปัญหาหน้างาน (Problem Description):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.problem || '-'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">💡 แนวทางแก้ไขเสนอแนะ (Proposed Solution):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.solution || 'ไม่มีคำอธิบายเสนอแก้'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-[#5d3a1a] mb-1">🏆 ประโยชน์ที่คาดว่าจะได้รับ (Expected Benefit):</div>
+                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.benefit || '-'}
+                                            </div>
+                                        </div>
+
+                                        {/* 4. Images grid (1-5) */}
+                                        {((formData.images && formData.images.length > 0) || formData.imagePreview) && (
+                                            <div>
+                                                <div className="font-bold text-[#5d3a1a] mb-1.5 flex items-center gap-1.5">
+                                                    <i className="fa-solid fa-camera text-red-700"></i>
+                                                    <span>ภาพแนบประกอบสาส์น ({(formData.images || [formData.imagePreview]).length} รูป):</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                                    {(formData.images && formData.images.length > 0 ? formData.images : [formData.imagePreview]).map((imgUrl, idx) => (
+                                                        <div key={idx} className="h-20 border border-[#8b5a2b]/50 rounded-lg overflow-hidden bg-black/20 shadow-inner">
+                                                            <img src={imgUrl} alt={`Preview ${idx+1}`} className="w-full h-full object-cover" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="flex gap-3 mt-6 pt-4 border-t border-[#8b5a2b]/30">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowConfirmModal(false)} 
+                                        disabled={isSubmitting} 
+                                        className="flex-1 py-3 px-3 rounded-xl bg-stone-700 hover:bg-stone-800 text-white font-bold text-xs md:text-sm transition cursor-pointer border border-stone-400 disabled:opacity-50 flex items-center justify-center gap-1.5 shadow"
+                                    >
+                                        <i className="fa-solid fa-pen"></i> ✏️ ย้อนกลับไปแก้ไขข้อมูล
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={handleFinalSubmit} 
+                                        disabled={isSubmitting} 
+                                        className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                    >
+                                        {isSubmitting ? (
+                                            <><span className="inline-block animate-pulse text-base">🐎💨</span> ⏳ กำลังส่งสาส์น...</>
+                                        ) : (
+                                            <><i className="fa-solid fa-paper-plane"></i> 🐎💨 ยืนยันการส่งสาส์น</>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
-
-        const getFormattedDate = () => {
-            const d = new Date();
-            return `${d.getFullYear()}_${String(d.getMonth() + 1).padStart(2, '0')}_${String(d.getDate()).padStart(2, '0')}`;
-        };
-
-        // ==========================================
-        // COMPONENT 5: Dashboard
-        // ==========================================
-        function Dashboard({ projects, onUpdateProject, kingdomEXP }) {
+        function Dashboard({ projects, onUpdateProject, kingdomEXP, onStartEdit }) {
             const [isAdminMode, setIsAdminMode] = useState(false);
+            const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedProject, setSelectedProject] = useState(null);
+            const [zoomedImg, setZoomedImg] = useState(null);
             const [adminStatus, setAdminStatus] = useState('');
             const [adminFeedback, setAdminFeedback] = useState('');
             const [adminCategory, setAdminCategory] = useState(''); 
@@ -940,7 +1479,7 @@
             const handleAdminLogin = () => {
                 if (isAdminMode) { setIsAdminMode(false); alert('ออกจากโหมดสภาเมืองเรียบร้อยแล้ว'); return; }
                 const pass = prompt('🔐 กรุณาใส่รหัสผ่านสภาเมือง:');
-                if (pass === '1234') { setIsAdminMode(true); alert('✅ รหัสผ่านถูกต้อง เข้าสู่โหมดสภาเมือง'); } 
+                if (pass === '9999' || pass === '1234') { setIsAdminMode(true); alert('✅ รหัสผ่านถูกต้อง เข้าสู่โหมดสภาเมือง'); } 
                 else if (pass !== null) alert('❌ รหัสผ่านไม่ถูกต้อง!');
             };
 
@@ -1017,12 +1556,11 @@
                 }
             };
 
+            const [deleteConfirmProject, setDeleteConfirmProject] = useState(null);
+
             const handleSecretAction = (actionType) => {
                 if (actionType === 'Delete') {
-                    if (window.confirm('⚠️ คำเตือน: คุณกำลังจะทำลายสาส์นฉบับนี้แบบถาวร! ข้อมูลจะหายไปจากระบบทั้งหมด ยืนยันการทำลายหรือไม่?')) {
-                        onUpdateProject({ ...selectedProject, status: 'Deleted' });
-                        alert('🔥 เผาทำลายสาส์นเรียบร้อยแล้ว!'); closeModal();
-                    }
+                    setDeleteConfirmProject(selectedProject);
                 } else if (actionType === 'Hide') {
                     if (window.confirm('🔒 ต้องการซ่อนสาส์นนี้จากกระดานสาธารณะหรือไม่? (จะมีแค่แอดมินที่มองเห็น)')) {
                         onUpdateProject({ ...selectedProject, status: 'Hidden' });
@@ -1118,25 +1656,39 @@
                         </div>
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
-                        <div className="space-y-4">
-                            {kingdoms.map(k => {
-                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
-                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
-                                return (
-                                    <div key={k.id}>
-                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
-                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
-                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
-                                        </div>
-                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
-                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                    <div className={`parchment rounded-2xl shadow-xl transition-all duration-300 ${isExpBoardOpen ? 'p-6 bg-gradient-to-b from-[#f4e4bc] to-[#ebdcb9]' : 'p-4 hover:bg-[#e8d6ab]'}`}>
+                        <div 
+                            onClick={() => setIsExpBoardOpen(!isExpBoardOpen)}
+                            className="flex justify-between items-center cursor-pointer select-none"
+                            title={isExpBoardOpen ? "คลิกเพื่อพับเก็บ" : "คลิกเพื่อแสดงสถานะความก้าวหน้า"}
+                        >
+                            <h3 className="text-lg md:text-xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
+                                <span>สถานะความก้าวหน้าแต่ละอาณาจักร</span>
+                            </h3>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isExpBoardOpen ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.9)] scale-110' : 'bg-[#8b5a2b]/20 text-[#5d3a1a]'}`}>
+                                <i className="fa-solid fa-chevron-down text-base"></i>
+                            </div>
                         </div>
+
+                        {isExpBoardOpen && (
+                            <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
+                                {kingdoms.map(k => {
+                                    const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                    const percent = (levelData.currentExp / levelData.requiredExp) * 100;
+                                    return (
+                                        <div key={k.id}>
+                                            <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                                <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                                <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
+                                            </div>
+                                            <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                                <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1171,7 +1723,14 @@
                         <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID, ชื่อ, รหัส..." className="w-full md:w-64 custom-select text-xs font-medium" />
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
+                    {/* Mobile Scroll Hint Badge */}
+                    <div className="md:hidden text-center mb-2">
+                        <span className="text-[11px] font-bold text-[#8b5a2b] bg-[#f4e4bc] px-3 py-1 rounded-full border border-[#8b5a2b]/30 shadow-sm animate-pulse inline-flex items-center gap-1.5">
+                            👈 ปัดนิ้วซ้าย-ขวาเพื่อดูตาราง 👉
+                        </span>
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                         <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
                             <thead>
                                 <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
@@ -1201,7 +1760,7 @@
                                                 {p.isSuperRising && <span className="ml-1 text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
                                             </td>
                                             <td className="py-3.5 px-2 font-semibold max-w-[200px] truncate">{p.title}</td>
-                                            <td className="py-3.5 px-2">{p.emp}</td>
+                                            <td className="py-3.5 px-2 font-mono font-bold text-gray-700">{maskEmpId(p.emp)}</td>
                                             <td className="py-3.5 px-2">{p.name}</td>
                                             <td className="py-3.5 px-2 font-bold">{p.origin}</td>
                                             <td className="py-3.5 px-2 font-bold">{p.target}</td>
@@ -1232,8 +1791,8 @@
                     </div>
 
                     {selectedProject && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
-                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto">
+                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+                            <div className="decree-modal max-w-2xl w-full p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                                 <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
                                 <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
                                     <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">📜 สาส์นพัฒนาแด่อาณาจักร 📜</h2>
@@ -1241,33 +1800,47 @@
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mb-6 text-[#5d3a1a] text-xs">
                                     {isAdminMode && <p><strong>รหัสพนักงาน (Admin Only):</strong> <span className="text-red-700 font-bold">{selectedProject.emp}</span></p>}
-                                    <p className={!isAdminMode ? "col-span-2" : ""}><strong>ผู้เสนอ (นามแฝง):</strong> {selectedProject.name}</p>
-                                    <p><strong>อาณาจักรต้นสังกัด:</strong> <span className="font-bold text-blue-700">{selectedProject.origin}</span></p>
-                                    <p><strong>อาณาจักรเป้าหมาย:</strong> <span className="font-bold text-red-700">{selectedProject.target}</span></p>
-                                    <p className="col-span-2"><strong>ประเภทพลังสาสน์:</strong> <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded font-bold border border-blue-300">{selectedProject.category}</span></p>
+                                    <p className={!isAdminMode ? "col-span-2" : ""}><strong>ผู้เสนอ (นามแฝง):</strong> <span className="font-bold text-[#1e3a8a]">{selectedProject.name}</span></p>
+                                    <p className="flex items-center gap-1.5"><strong>อาณาจักรต้นสังกัด:</strong> <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(selectedProject.origin)}`}>{selectedProject.origin}</span></p>
+                                    <p className="flex items-center gap-1.5"><strong>อาณาจักรเป้าหมาย:</strong> <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(selectedProject.target)}`}>{selectedProject.target}</span></p>
+                                    <p className="col-span-2 flex items-center gap-1.5"><strong>ประเภทพลังสาสน์:</strong> <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold border border-blue-300">{selectedProject.category}</span></p>
                                 </div>
                                 <div className="space-y-4 text-[#5d3a1a] bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
                                     <p><strong>โรงงาน / สถานที่:</strong> <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">{selectedProject.factory}</span></p>
-                                    <p><strong>กระบวนการที่พัฒนา:</strong> {selectedProject.location}</p>
-                                    <p><strong>พิกัดปัญหา:</strong> {selectedProject.pinpoint}</p>
-                                    <p><strong>ชื่อโครงการ:</strong> <span className="font-bold text-[#5d3a1a] text-base">{selectedProject.title}</span></p>
+                                    <p><strong>กระบวนการที่พัฒนา:</strong> <span className="font-bold text-[#1e3a8a]">{selectedProject.location}</span></p>
+                                    <p><strong>พิกัดปัญหา:</strong> <span className="font-bold text-[#1e3a8a]">{selectedProject.pinpoint}</span></p>
+                                    <p><strong>ชื่อโครงการ:</strong> <span className="font-bold text-[#1e3a8a] text-base">{selectedProject.title}</span></p>
                                     <div>
-                                        <p className="font-bold">รายละเอียดปัญหา/ข้อร้องเรียน:</p>
-                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.problem}</p>
+                                        <p className="font-bold text-[#5d3a1a] mb-1">รายละเอียดปัญหา/ข้อร้องเรียน:</p>
+                                        <p className="text-[#1e3a8a] font-medium bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 text-xs leading-relaxed whitespace-pre-wrap">{selectedProject.problem}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold">วิธีแก้ไข (ที่เสนอ):</p>
-                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.solution}</p>
+                                        <p className="font-bold text-[#5d3a1a] mb-1">วิธีแก้ไข (ที่เสนอ):</p>
+                                        <p className="text-[#1e3a8a] font-medium bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 text-xs leading-relaxed whitespace-pre-wrap">{selectedProject.solution}</p>
                                     </div>
                                     <div>
-                                        <p className="font-bold">ประโยชน์ที่คาดว่าจะได้รับ:</p>
-                                        <p className="text-[#8b5a2b] ml-4 bg-white p-3 rounded-lg border border-[#8b5a2b]/20 italic">{selectedProject.benefit}</p>
+                                        <p className="font-bold text-[#5d3a1a] mb-1">ประโยชน์ที่คาดว่าจะได้รับ:</p>
+                                        <p className="text-[#1e3a8a] font-medium bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 text-xs leading-relaxed whitespace-pre-wrap">{selectedProject.benefit}</p>
                                     </div>
                                     <div>
                                         <p className="font-bold text-red-800"><i className="fa-solid fa-camera mr-1"></i> ภาพพิกัดปัญหา (Before):</p>
-                                        {selectedProject.imagePreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner">
-                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain" />
+                                        {(selectedProject.images && selectedProject.images.length > 0) ? (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
+                                                {selectedProject.images.map((imgUrl, idx) => (
+                                                    <div key={idx} className="bg-black/10 rounded-lg border border-gray-400 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
+                                                        <img src={imgUrl} alt={`Before ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                                            <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> คลิกขยาย
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : selectedProject.imagePreview ? (
+                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedProject.imagePreview)}>
+                                                <img src={selectedProject.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
+                                                    <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
+                                                </div>
                                             </div>
                                         ) : (
                                             <div className="bg-gray-200 h-24 mt-1.5 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 font-bold"><span>{selectedProject.imageText}</span></div>
@@ -1293,6 +1866,47 @@
                                         {selectedProject.status !== 'Blueprint' && selectedProject.status !== 'Hidden' && selectedProject.status !== 'Hall of fame' && selectedProject.comment && <span dangerouslySetInnerHTML={{ __html: selectedProject.comment }}></span>}
                                     </div>
                                 </div>
+
+                                {(selectedProject.status === 'Blueprint' || (selectedProject.status === 'Founding' && !selectedProject.ideaApproved)) && (
+                                    <div className="mt-4 p-3.5 bg-amber-100/90 border border-amber-400 rounded-xl text-center shadow-sm">
+                                        <p className="text-xs text-amber-900 font-bold mb-2.5">
+                                            ⚙️ ต้องการจัดการสาส์นพัฒนาฉบับนี้ใช่ไหมคะ?
+                                        </p>
+                                        <div className="flex flex-col sm:flex-row gap-2.5">
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const pass = prompt('🗝️ กรุณากรอกรหัสพนักงานฉบับเต็มเพื่อยืนยันสิทธิ์แก้ไขสาส์น:');
+                                                    if (!pass) return;
+                                                    if (pass.trim().toLowerCase() === String(selectedProject.emp).trim().toLowerCase()) {
+                                                        closeModal();
+                                                        if (onStartEdit) onStartEdit(selectedProject);
+                                                    } else {
+                                                        alert('❌ รหัสพนักงานไม่ถูกต้อง คุณไม่มีสิทธิ์แก้ไขสาส์นนี้ค่ะ');
+                                                    }
+                                                }} 
+                                                className="flex-1 py-2.5 px-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm rounded-lg shadow transition cursor-pointer border border-yellow-300 flex items-center justify-center gap-1.5"
+                                            >
+                                                <i className="fa-solid fa-pen-to-square"></i> ✏️ ขอแก้ไขสาส์น
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const pass = prompt('🗝️ กรุณากรอกรหัสพนักงานฉบับเต็มเพื่อยืนยันสิทธิ์ขอยกเลิกสาส์น:');
+                                                    if (!pass) return;
+                                                    if (pass.trim().toLowerCase() === String(selectedProject.emp).trim().toLowerCase()) {
+                                                        setDeleteConfirmProject(selectedProject);
+                                                    } else {
+                                                        alert('❌ รหัสพนักงานไม่ถูกต้อง คุณไม่มีสิทธิ์ขอยกเลิกสาส์นนี้ค่ะ');
+                                                    }
+                                                }} 
+                                                className="flex-1 py-2.5 px-3 bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-600 hover:to-rose-600 text-white font-bold text-xs md:text-sm rounded-lg shadow transition cursor-pointer border border-red-300 flex items-center justify-center gap-1.5"
+                                            >
+                                                <i className="fa-solid fa-trash-can"></i> 🗑️ ขอยกเลิกสาส์น
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {isAdminMode && (
                                     <div className="mt-6 p-4 bg-gray-800 border border-gray-600 rounded-xl space-y-3 shadow-inner">
@@ -1332,6 +1946,42 @@
                             </div>
                         </div>
                     )}
+
+                    {deleteConfirmProject && (
+                        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in pointer-events-auto">
+                            <div className="bg-[#2a1215] border-4 border-red-700 p-6 md:p-8 rounded-2xl max-w-md w-full text-center shadow-2xl text-red-100 relative">
+                                <div className="text-5xl mb-3 animate-bounce">🔥</div>
+                                <h3 className="text-xl md:text-2xl font-bold text-red-400 font-cinzel mb-2">ยืนยันการเผาทำลายสาส์น?</h3>
+                                <p className="text-xs md:text-sm text-gray-300 mb-2 leading-relaxed">
+                                    อ้างอิงสาส์น: <strong className="text-white">{deleteConfirmProject.id}</strong> ({deleteConfirmProject.title})
+                                </p>
+                                <p className="text-xs text-red-300 font-bold mb-6">
+                                    ⚠️ ข้อมูลสาส์นฉบับนี้จะถูกทำลายถาวรจากระบบ ไม่สามารถกู้คืนกลับมาได้นะคะ!
+                                </p>
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setDeleteConfirmProject(null)} className="flex-1 py-3 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-xs md:text-sm transition cursor-pointer border border-white/20">
+                                        <i className="fa-solid fa-xmark mr-1.5"></i> ยกเลิก
+                                    </button>
+                                    <button type="button" onClick={() => {
+                                        onUpdateProject({ ...deleteConfirmProject, status: 'Deleted' });
+                                        alert('🔥 เผาทำลายสาส์นเรียบร้อยแล้ว!');
+                                        setDeleteConfirmProject(null);
+                                        closeModal();
+                                    }} className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-red-400">
+                                        <i className="fa-solid fa-trash-can mr-1.5"></i> ยืนยันทำลายสาส์น
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {zoomedImg && (
+                        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
+                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
+                            <img src={zoomedImg} alt="Zoomed" className="max-h-[85vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] rounded-lg border border-white/20" onClick={(e) => e.stopPropagation()} />
+                            <p className="absolute bottom-6 text-gray-400 text-sm italic bg-black/60 px-4 py-1 rounded-full border border-white/10">คลิกที่ใดก็ได้เพื่อปิด</p>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1341,6 +1991,7 @@
         // ==========================================
         function QuestBoard({ projects, onUpdateProject, kingdomEXP }) {
             const [currentRole, setCurrentRole] = useState('none');
+            const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedQuest, setSelectedQuest] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null);
             const [targetCommentText, setTargetCommentText] = useState('');
@@ -1359,35 +2010,46 @@
             const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
             useEffect(() => { setCurrentPage(1); }, [filters]);
 
-            const handleRoleLogin = (role) => {
-                if (role === 'target') {
-                    if (currentRole !== 'none' && currentRole !== 'central') { setCurrentRole('none'); alert('ออกจากระบบตัวแทนอาณาจักรเรียบร้อย'); return; }
-                    const pass = prompt('🗝️ ใส่รหัสผ่านตัวแทนอาณาจักร:');
-                    if (pass === '1111') { setCurrentRole('เบสเซนตร้า'); alert("✅ ล็อกอินเป็นตัวแทน 'เบสเซนตร้า' เรียบร้อย"); }
-                    else if (pass === '2222') { setCurrentRole('แคสเทอเรีย'); alert("✅ ล็อกอินเป็นตัวแทน 'แคสเทอเรีย' เรียบร้อย"); }
-                    else if (pass === '3333') { setCurrentRole('แบลงค์ไฮม์การ์ด'); alert("✅ ล็อกอินเป็นตัวแทน 'แบลงค์ไฮม์การ์ด' เรียบร้อย"); }
-                    else if (pass === '4444') { setCurrentRole('แมคชีนโพลิส'); alert("✅ ล็อกอินเป็นตัวแทน 'แมคชีนโพลิส' เรียบร้อย"); }
-                    else if (pass === '5555') { setCurrentRole('ไฟนัลธรอน'); alert("✅ ล็อกอินเป็นตัวแทน 'ไฟนัลธรอน' เรียบร้อย"); }
-                    else if (pass) alert('❌ รหัสผ่านไม่ถูกต้อง!');
-                } else if (role === 'central') {
-                    if (currentRole === 'central') { setCurrentRole('none'); alert('ออกจากระบบสภาเมืองส่วนกลาง'); return; }
-                    const pass = prompt('🔐 ใส่รหัสผ่านสภาเมืองกลาง:');
-                    if (pass === '9999' || pass === '1234') { setCurrentRole('central'); alert("✅ ล็อกอินเป็น 'สภาเมืองส่วนกลาง' เรียบร้อย"); }
-                    else if (pass) alert('❌ รหัสผิด!');
+            const handleRoleLogin = (type) => {
+                if (type === 'target') {
+                    if (currentRole !== 'none' && currentRole !== 'central') {
+                        setCurrentRole('none');
+                        alert('🚪 ออกจากระบบตัวแทนอาณาจักรเรียบร้อยแล้ว');
+                        return;
+                    }
+                    const pass = prompt('🗝️ กรุณาใส่รหัสผ่านตัวแทนอาณาจักรของคุณ:');
+                    if (!pass) return;
+                    
+                    const passMap = {
+                        '1111': 'เบสเซนตร้า',
+                        '2222': 'แคสเทอเรีย',
+                        '3333': 'แบลงค์ไฮม์การ์ด',
+                        '4444': 'แมคชีนโพลิส',
+                        '5555': 'ไฟนัลธรอน'
+                    };
+                    
+                    const matchedKingdom = passMap[pass.trim()];
+                    if (matchedKingdom) {
+                        setCurrentRole(matchedKingdom);
+                        alert(`✅ ล็อกอินเข้าสู่สิทธิสภาตัวแทนอาณาจักร "${matchedKingdom}" เรียบร้อยแล้ว!`);
+                    } else {
+                        alert('❌ รหัสผ่านตัวแทนอาณาจักรไม่ถูกต้อง!');
+                    }
+                } else if (type === 'central') {
+                    if (currentRole === 'central') {
+                        setCurrentRole('none');
+                        alert('🚪 ออกจากระบบสภาเมืองส่วนกลางเรียบร้อยแล้ว');
+                        return;
+                    }
+                    const pass = prompt('🔐 กรุณาใส่รหัสผ่านสภาเมืองส่วนกลาง:');
+                    if (pass === '9999' || pass === '1234') {
+                        setCurrentRole('central');
+                        alert('✅ ล็อกอินเข้าสู่สิทธิสภาเมืองส่วนกลางเรียบร้อยแล้ว!');
+                    } else if (pass !== null) {
+                        alert('❌ รหัสผ่านสภาเมืองไม่ถูกต้อง!');
+                    }
                 }
             };
-
-            const activeQuests = (projects || []).filter(p => p && p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p && p.status !== 'Hall of fame');
-            
-            const filteredQuests = visibleQuests.filter(q => {
-                if (!q) return false;
-                const matchTarget = !filters.target || (q.target && q.target.includes(filters.target));
-                const matchStatus = !filters.status || q.status === filters.status;
-                const rowText = `${q.id || ''} ${q.title || ''} ${q.origin || ''} ${q.target || ''}`.toLowerCase();
-                const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
-                return matchTarget && matchStatus && matchSearch;
-            });
 
             const handleExportCSV = () => {
                 const exportQuests = (filteredQuests && filteredQuests.length > 0) ? filteredQuests : visibleQuests;
@@ -1396,18 +2058,16 @@
                     return; 
                 }
                 
-                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'รายละเอียดปัญหา', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'รูปภาพหลักฐานประกอบ', 'สถานะภารกิจ', 'ความคิดเห็นสภาเมือง'];
+                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สถานะภารกิจ', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'ความคิดเห็นสภาเมือง'];
                 const csvRows = exportQuests.map(q => [
                     q.id || '', 
                     q.title || '', 
                     q.origin || '', 
                     q.target || '', 
-                    q.problem || '',
+                    q.status || '', 
                     q.targetComment || '', 
                     q.expense || '0', 
                     q.actualResult || '', 
-                    ((q.imagesAfter && q.imagesAfter.length > 0) || !!q.imageAfterPreview) ? 'มี' : 'ไม่มี',
-                    q.status || '',
                     q.adminComment || ''
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
@@ -1422,6 +2082,42 @@
                 setTimeout(() => {
                     if (document.body.contains(link)) document.body.removeChild(link);
                 }, 200);
+            };
+
+            const handleMultiEvidenceChange = (e) => {
+                if (e.target.files) {
+                    const files = Array.from(e.target.files);
+                    const currentCount = targetImages.length;
+                    const availableSlots = 5 - currentCount;
+                    if (availableSlots <= 0) {
+                        alert('แนบภาพหลักฐานได้สูงสุด 5 รูปเท่านั้นค่ะ');
+                        return;
+                    }
+                    const selectedFiles = files.slice(0, availableSlots);
+                    selectedFiles.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width, height = img.height;
+                                if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
+                                else { if (height > 800) { width *= 800 / height; height = 800; } }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                                setTargetImages(prev => [...prev, compressedDataUrl]);
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            };
+
+            const handleRemoveEvidence = (indexToRemove) => {
+                setTargetImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
             };
 
             const openQuestModal = (quest) => { 
@@ -1454,23 +2150,41 @@
                 setTargetImages([]);
             };
 
+            const [showQuestConfirm, setShowQuestConfirm] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+
             const handleTargetSubmit = () => {
                 if (!targetCommentText) { alert('กรุณากรอกข้อความอธิบายด้วยค่ะ'); return; }
-                const imageList = targetImages.length > 0 ? targetImages : (targetImagePreview ? [targetImagePreview] : []);
-                const updatedQuest = { 
-                    ...selectedQuest, 
-                    status: 'Evidence', 
-                    targetComment: targetCommentText, 
-                    expense: targetExpenseText,
-                    actualResult: targetResultText,
-                    imageAfterText: imageList.length > 0 ? `📸 ภาพหลักฐาน: (${imageList.length} รูป)` : '📸 ภาพหลักฐานการแก้ไข (After)', 
-                    imageAfterPreview: imageList[0] || null,
-                    imagesAfter: imageList,
-                    adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' 
-                };
-                onUpdateProject(updatedQuest);
-                alert("อัปโหลดหลักฐานสำเร็จ!");
-                closeModal();
+                setShowQuestConfirm(true);
+            };
+
+            const handleFinalTargetSubmit = async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
+                try {
+                    setShowQuestConfirm(false);
+                    const imageList = targetImages.length > 0 ? targetImages : (targetImagePreview ? [targetImagePreview] : []);
+                    const updatedQuest = { 
+                        ...selectedQuest, 
+                        status: 'Evidence', 
+                        targetComment: targetCommentText, 
+                        expense: targetExpenseText,
+                        actualResult: targetResultText,
+                        imageAfterText: imageList.length > 0 ? `📸 ภาพหลักฐาน: (${imageList.length} รูป)` : '📸 ภาพหลักฐานการแก้ไข (After)', 
+                        imageAfterPreview: imageList[0] || null,
+                        imagesAfter: imageList,
+                        adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' 
+                    };
+                    await onUpdateProject(updatedQuest);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    setShowQuestConfirm(false);
+                    alert("อัปโหลดหลักฐานสำเร็จ!");
+                    closeModal();
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการส่งมอบหลักฐาน กรุณาลองใหม่อีกครั้งค่ะ');
+                } finally {
+                    setIsSubmitting(false);
+                }
             };
 
             const handleCentralSubmit = () => {
@@ -1497,13 +2211,14 @@
                 }
             };
 
-            const activeQuests = projects.filter(p => p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
-            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p.status !== 'Hall of fame');
+            const activeQuests = (projects || []).filter(p => p && p.ideaApproved === true && p.status !== 'Deleted' && p.status !== 'Hidden');
+            const visibleQuests = currentRole === 'central' ? activeQuests : activeQuests.filter(p => p && p.status !== 'Hall of fame');
             
             const filteredQuests = visibleQuests.filter(q => {
-                const matchTarget = !filters.target || q.target.includes(filters.target);
+                if (!q) return false;
+                const matchTarget = !filters.target || (q.target && q.target.includes(filters.target));
                 const matchStatus = !filters.status || q.status === filters.status;
-                const rowText = `${q.id} ${q.title} ${q.origin} ${q.target}`.toLowerCase();
+                const rowText = `${q.id || ''} ${q.title || ''} ${q.origin || ''} ${q.target || ''}`.toLowerCase();
                 const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
                 return matchTarget && matchStatus && matchSearch;
             });
@@ -1511,9 +2226,10 @@
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
             const currentItems = filteredQuests.slice(indexOfFirstItem, indexOfLastItem);
-            const totalPages = Math.ceil(filteredQuests.length / itemsPerPage);
+            const totalPages = Math.max(1, Math.ceil(filteredQuests.length / itemsPerPage));
 
             const getStatusBadge = (q) => {
+                if (!q) return null;
                 if (q.status === 'Founding') return <span className="px-3 py-1 rounded-full bg-yellow-200 text-yellow-800 border border-yellow-400 text-xs font-bold w-[80px] inline-block text-center">Founding</span>;
                 if (q.status === 'Evidence') return <span className="px-3 py-1 rounded-full bg-purple-200 text-purple-800 border border-purple-400 text-xs font-bold w-[80px] inline-block text-center">Evidence</span>;
                 if (q.status === 'Rising') {
@@ -1558,25 +2274,40 @@
                         </div>
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b]/30 pb-2 mb-4 font-cinzel">สถานะความก้าวหน้าแต่ละอาณาจักร</h3>
-                        <div className="space-y-4">
-                            {kingdoms.map(k => {
-                                const levelData = calculateLevel(kingdomEXP[k.name] || 0);
-                                const percent = (levelData.currentExp / levelData.requiredExp) * 100;
-                                return (
-                                    <div key={k.id}>
-                                        <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
-                                            <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
-                                            <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
-                                        </div>
-                                        <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
-                                            <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                    <div className={`parchment rounded-2xl shadow-xl transition-all duration-300 ${isExpBoardOpen ? 'p-6 bg-gradient-to-b from-[#f4e4bc] to-[#ebdcb9]' : 'p-4 hover:bg-[#e8d6ab]'}`}>
+                        <div 
+                            onClick={() => setIsExpBoardOpen(!isExpBoardOpen)}
+                            className="flex justify-between items-center cursor-pointer select-none"
+                            title={isExpBoardOpen ? "คลิกเพื่อพับเก็บ" : "คลิกเพื่อแสดงสถานะความก้าวหน้า"}
+                        >
+                            <h3 className="text-lg md:text-xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
+                                <span>สถานะความก้าวหน้าแต่ละอาณาจักร</span>
+                            </h3>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isExpBoardOpen ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.9)] scale-110' : 'bg-[#8b5a2b]/20 text-[#5d3a1a]'}`}>
+                                <i className="fa-solid fa-chevron-down text-base"></i>
+                            </div>
                         </div>
+
+                        {isExpBoardOpen && (
+                            <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
+                                {kingdoms.map(k => {
+                                    const expVal = (kingdomEXP && kingdomEXP[k.name]) ? kingdomEXP[k.name] : 0;
+                                    const levelData = calculateLevel(expVal);
+                                    const percent = levelData.requiredExp > 0 ? (levelData.currentExp / levelData.requiredExp) * 100 : 0;
+                                    return (
+                                        <div key={k.id}>
+                                            <div className="flex justify-between text-[#8b5a2b] font-bold mb-1 items-end text-sm">
+                                                <span>{k.name} <span className="text-xs font-normal text-[#5d3a1a] ml-2">(Level {levelData.level})</span></span>
+                                                <span className="text-xs font-semibold">{percent.toFixed(0)}% ({levelData.currentExp}/{levelData.requiredExp}) to Level {levelData.level + 1}</span>
+                                            </div>
+                                            <div className="w-full bg-stone-300 h-4 rounded-full overflow-hidden border border-[#8b5a2b]/40">
+                                                <div className="h-full transition-all duration-1000" style={{ width: `${percent}%`, backgroundColor: k.hexColor }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
@@ -1639,117 +2370,202 @@
                     </div>
 
                     {selectedQuest && (
-                        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
-                            <div className="decree-modal max-w-4xl w-full p-6 md:p-8 rounded-2xl relative max-h-[95vh] overflow-y-auto">
-                                <button onClick={closeModal} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-3xl font-bold cursor-pointer transition">&times;</button>
-                                <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">🛡️ รายละเอียดภารกิจ 🛡️</h2>
-                                    <p className="text-[#8b5a2b] mt-1 italic font-bold">อ้างอิงสาส์น: {selectedQuest.id}</p>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
-                                        <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> สาส์นตั้งต้น (สิ่งที่ต้องแก้ไข)</h3>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> {selectedQuest.factory}</p>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> {selectedQuest.location}</p>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> {selectedQuest.pinpoint}</p>
-                                        <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">ผู้เสนอ (Origin):</strong> {selectedQuest.origin}</p>
-                                        <div className="mb-3 mt-3 text-[#3f2a14]">
-                                            <strong className="font-bold">รายละเอียดปัญหา:</strong>
-                                            <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.problem}</p>
-                                        </div>
-                                        <div className="mb-3 text-[#3f2a14]">
-                                            <p className="font-bold flex items-center justify-between">วิธีแก้ไข (ที่เสนอมา):</p>
-                                            <p className="text-[#8b5a2b] ml-4 bg-white p-2 mt-1 rounded-lg border border-[#8b5a2b]/20 italic">{selectedQuest.solution}</p>
-                                        </div>
-                                        {selectedQuest.imagePreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain" /></div>
-                                        ) : (
-                                            <div className="bg-gray-200 h-32 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 text-xs font-bold shadow-inner"><span>{selectedQuest.imageText}</span></div>
-                                        )}
+                        <div className="fixed inset-0 bg-black/85 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4 pt-4 sm:pt-6" onClick={closeModal}>
+                            <div className="decree-modal max-w-4xl w-full rounded-2xl relative max-h-[88vh] sm:max-h-[85vh] h-full flex flex-col overflow-hidden shadow-2xl border-4 border-[#8b5a2b]" onClick={(e) => e.stopPropagation()}>
+                                {/* Fixed Sticky Header with Close Button */}
+                                <div className="sticky top-0 bg-[#f4e4bc] z-30 px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-[#8b5a2b]/40 flex justify-between items-center shrink-0 shadow-md">
+                                    <div>
+                                        <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel flex items-center gap-2">
+                                            <span>🛡️ รายละเอียดภารกิจ 🛡️</span>
+                                        </h2>
+                                        <p className="text-[#8b5a2b] text-[11px] sm:text-xs italic font-bold">อ้างอิงสาส์น: {selectedQuest.id}</p>
                                     </div>
-
-                                    <div className="proof-box p-4 text-xs relative rounded-xl">
-                                        <div className="absolute top-2 right-2">{getStatusBadge(selectedQuest)}</div>
-                                        <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> หลักฐานจากหน้างาน (ผลลัพธ์)</h3>
-                                        <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> {selectedQuest.target}</p>
-                                        <div className="mb-3 text-[#3f2a14]">
-                                            <strong className="font-bold">ข้อความจากทีมงาน:</strong>
-                                            <p className="text-black font-semibold italic ml-2 mt-1 bg-white/70 p-2 rounded-lg border border-black/10">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
-                                        </div>
-                                        {selectedQuest.imageAfterPreview ? (
-                                            <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner"><img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain" /></div>
-                                        ) : (
-                                            <div className="bg-white h-32 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '📸 ภาพหลักฐานการแก้ไข (After)'}</span></div>
-                                        )}
-                                        <div className="mt-3 bg-[#fff8e7] p-2.5 rounded-lg border border-gray-300 text-xs text-gray-600">
-                                            <strong className="text-amber-800">👑 สภาเมืองกลางคอมเมนต์:</strong>
-                                            <p className="italic mt-0.5">{selectedQuest.adminComment || '-'}</p>
-                                        </div>
-                                    </div>
+                                    <button 
+                                        onClick={closeModal} 
+                                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-800/20 hover:bg-red-800 text-red-900 hover:text-white text-xl sm:text-2xl font-bold flex items-center justify-center transition cursor-pointer border border-red-800/40 shadow"
+                                        title="ปิดหน้าต่างภารกิจ"
+                                    >
+                                        &times;
+                                    </button>
                                 </div>
 
-                                {currentRole === selectedQuest.target && (selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Evidence') && (
-                                    <div className="mt-6 p-4 target-panel space-y-3">
-                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-upload"></i> ส่งมอบ/แก้ไขหลักฐาน (สำหรับอาณาจักรเป้าหมาย)</p>
-                                        <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="อธิบายสิ่งที่ได้ลงมือแก้ไขไปแล้ว..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
-                                        <input type="file" accept="image/*" onChange={(e) => { 
-                                            if(e.target.files && e.target.files[0]) { 
-                                                const file = e.target.files[0]; 
-                                                setTargetImageFile(file.name); 
-                                                const reader = new FileReader();
-                                                reader.onload = (event) => {
-                                                    const img = new Image();
-                                                    img.onload = () => {
-                                                        const canvas = document.createElement('canvas');
-                                                        let width = img.width, height = img.height;
-                                                        if (width > height) { if (width > 800) { height *= 800 / width; width = 800; } }
-                                                        else { if (height > 800) { width *= 800 / height; height = 800; } }
-                                                        canvas.width = width; canvas.height = height;
-                                                        const ctx = canvas.getContext('2d');
-                                                        ctx.drawImage(img, 0, 0, width, height);
-                                                        setTargetImagePreview(canvas.toDataURL('image/jpeg', 0.7));
-                                                    };
-                                                    img.src = event.target.result;
-                                                };
-                                                reader.readAsDataURL(file);
-                                            }
-                                        }} className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
-                                        {targetImageFile && <p className="text-xs text-blue-800 font-bold">📎 ไฟล์ที่แนบ: {targetImageFile}</p>}
-                                        <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
-                                            {selectedQuest.status === 'Evidence' ? 'แก้ไขและอัปโหลดหลักฐานใหม่ (Update)' : 'ส่งมอบหลักฐาน (เปลี่ยนสถานะเป็น Evidence)'}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {currentRole === 'central' && (selectedQuest.status === 'Evidence' || selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Rising' || selectedQuest.status === 'Hall of fame') && (
-                                    <div className="mt-6 p-4 central-panel space-y-3">
-                                        <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> พิพากษาผลงาน (สำหรับสภาเมืองส่วนกลาง)</p>
-                                        
-                                        {selectedQuest.status !== 'Hall of fame' && selectedQuest.status !== 'Rising' && (
-                                            <>
-                                                <select value={centralStatus} onChange={(e) => setCentralStatus(e.target.value)} className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
-                                                    <option value="">-- เลือกคำพิพากษา --</option>
-                                                    <option value="Rising">{selectedQuest.wasAbandoned || selectedQuest.status === 'Abandoned' ? '⭐ Rising (อนุมัติแจก +5 EXP เนื่องจากส่งล่าช้า)' : `⭐ Rising (อนุมัติแจกคะแนนเต็ม)`}</option>
-                                                    <option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน ให้กลับไปทำใหม่)</option>
-                                                    <option value="Abandoned">👻 Abandoned (ทิ้งร้าง ปล่อยไว้นานเกินกำหนด)</option>
-                                                </select>
-                                                <textarea rows={2} value={centralComment} onChange={(e) => setCentralComment(e.target.value)} placeholder="เหตุผลประกอบคำพิจารณา..." className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs bg-white text-slate-800 outline-none font-sans"></textarea>
-                                                <button onClick={handleCentralSubmit} className="w-full bg-[#b45309] text-white font-bold py-2.5 rounded-lg hover:bg-[#92400e] shadow transition cursor-pointer text-xs mb-2">บันทึกคำพิจารณา</button>
-                                            </>
-                                        )}
-
-                                        <div className="flex gap-2 pt-2 border-t border-[#d97706]/30">
-                                            {selectedQuest.status === 'Hall of fame' ? (
-                                                <button onClick={() => handleCentralQuestAction('Restore')} className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> ดึงกลับกระดานหลัก (Restore)</button>
+                                {/* Scrollable Body */}
+                                <div className="p-4 sm:p-6 md:p-8 overflow-y-auto space-y-6 flex-1 min-h-0">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
+                                            <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> สาส์นตั้งต้น (สิ่งที่ต้องแก้ไข)</h3>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.factory}</span></p>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.location}</span></p>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.pinpoint}</span></p>
+                                            <p className="mb-1 text-[#3f2a14] mt-3"><strong className="font-bold">ผู้เสนอ (Origin):</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.origin}</span></p>
+                                            <div className="mb-3 mt-3 text-[#3f2a14]">
+                                                <strong className="font-bold">รายละเอียดปัญหา:</strong>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.problem}</p>
+                                            </div>
+                                            <div className="mb-3 text-[#3f2a14]">
+                                                <p className="font-bold flex items-center justify-between">วิธีแก้ไข (ที่เสนอมา):</p>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.solution}</p>
+                                            </div>
+                                            {selectedQuest.imagePreview ? (
+                                                <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imagePreview)}>
+                                                    <img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
+                                                        <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
+                                                    </div>
+                                                </div>
                                             ) : (
-                                                (selectedQuest.status === 'Rising' || selectedQuest.ideaApproved) && (
-                                                    <button onClick={() => handleCentralQuestAction('HallOfFame')} className="w-full bg-yellow-600 text-black font-bold py-2 rounded hover:bg-yellow-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-star mr-1"></i> บรรจุเข้า Hall of fame (ซ่อนจากหน้าหลัก)</button>
-                                                )
+                                                <div className="bg-gray-200 h-32 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 text-xs font-bold shadow-inner"><span>{selectedQuest.imageText}</span></div>
                                             )}
                                         </div>
+
+                                        <div className="proof-box p-4 text-xs relative rounded-xl space-y-3">
+                                            <div className="absolute top-2 right-2">{getStatusBadge(selectedQuest)}</div>
+                                            <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-1 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> หลักฐานจากหน้างาน (ผลลัพธ์)</h3>
+                                            <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.target}</span></p>
+                                            <div>
+                                                <strong className="font-bold text-[#3f2a14]">📝 สิ่งที่ได้ลงมือแก้ไข:</strong>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.targetComment ? `"${selectedQuest.targetComment}"` : '-'}</p>
+                                            </div>
+                                            <div>
+                                                <strong className="font-bold text-[#3f2a14]">💰 งบประมาณ/ค่าใช้จ่ายที่ใช้จริง:</strong>
+                                                <span className="font-bold text-[#1e3a8a] bg-sky-100/90 px-2 py-0.5 rounded border border-sky-300 ml-2 shadow-sm">
+                                                    {selectedQuest.expense ? `${selectedQuest.expense} บาท` : '0 บาท (ไม่เสียค่าใช้จ่าย)'}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong className="font-bold text-[#3f2a14]">📈 ผลลัพธ์ที่เกิดขึ้นจริงหลังปรับปรุง:</strong>
+                                                <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.actualResult || '-'}</p>
+                                            </div>
+                                            {(selectedQuest.imagesAfter && selectedQuest.imagesAfter.length > 0) ? (
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
+                                                    {selectedQuest.imagesAfter.map((imgUrl, idx) => (
+                                                        <div key={idx} className="bg-black/10 rounded-lg border border-green-500 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
+                                                            <img src={imgUrl} alt={`After ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                                                <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> คลิกขยาย
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : selectedQuest.imageAfterPreview ? (
+                                                <div className="bg-gray-200 mt-1.5 rounded-lg border border-green-500 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imageAfterPreview)}>
+                                                    <img src={selectedQuest.imageAfterPreview} alt="After Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
+                                                        <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-white h-24 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '📸 ภาพหลักฐานการแก้ไข (After)'}</span></div>
+                                            )}
+                                            <div className="mt-2 bg-[#fff8e7] p-2.5 rounded-lg border border-gray-300 text-xs text-gray-600">
+                                                <strong className="text-amber-800">👑 สภาเมืองกลางคอมเมนต์:</strong>
+                                                <p className="text-[#1e3a8a] font-bold italic mt-0.5">{selectedQuest.adminComment || '-'}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
+
+                                    {currentRole === selectedQuest.target && (selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Evidence') && (
+                                        <div className="mt-6 p-4 target-panel space-y-3 bg-[#e0f2fe]/80 border-2 border-[#0284c7] rounded-xl">
+                                            <p className="font-bold flex items-center gap-1.5 text-xs text-sky-950"><i className="fa-solid fa-upload text-sky-700"></i> ส่งมอบ/แก้ไขหลักฐาน (สำหรับอาณาจักรเป้าหมาย)</p>
+                                            
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-sky-900 mb-1">📝 1. สิ่งที่ได้ลงมือแก้ไขปรับปรุง (Action Taken):</label>
+                                                <textarea rows={2} value={targetCommentText} onChange={(e) => setTargetCommentText(e.target.value)} placeholder="เช่น ติดตั้งแผ่นการ์ดใสกันน้ำมันกระเด็นรอบเครื่องจักร และปรับตำแหน่งโต๊ะวางชิ้นงานใหม่ออกแบบ 5ส..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-sky-900 mb-1">💰 2. งบประมาณ/ค่าใช้จ่ายที่ใช้จริง (บาท):</label>
+                                                <input type="text" value={targetExpenseText} onChange={(e) => setTargetExpenseText(e.target.value)} placeholder="ระบุตัวเลข เช่น 0 (หากเป็นงานปรับปรุงที่ไม่เสียเงิน) หรือ 1500" className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans font-bold" />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-sky-900 mb-1">📈 3. ผลลัพธ์ที่เกิดขึ้นจริงหลังปรับปรุง (Outcome):</label>
+                                                <textarea rows={2} value={targetResultText} onChange={(e) => setTargetResultText(e.target.value)} placeholder="เช่น ป้องกันน้ำมันรั่วซึมลงพื้นได้ 100% และประหยัดเวลาทำความสะอาดพื้นลง 20 นาที/วัน..." className="w-full p-2.5 bg-white border border-[#0ea5e9] rounded-lg text-xs outline-none text-slate-800 font-sans"></textarea>
+                                            </div>
+
+                                            <div className="bg-white/90 p-3 rounded-lg border border-sky-300">
+                                                <div className="flex justify-between items-center mb-1.5">
+                                                    <span className="text-xs font-bold text-sky-900">📷 4. แนบภาพหลักฐานการแก้ไข (สูงสุด 5 รูป):</span>
+                                                    <span className="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-300">
+                                                        {targetImages.length} / 5 รูป
+                                                    </span>
+                                                </div>
+
+                                                {targetImages.length < 5 && (
+                                                    <input type="file" accept="image/*" multiple onChange={handleMultiEvidenceChange} className="text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 file:cursor-pointer" />
+                                                )}
+
+                                                {targetImages.length > 0 && (
+                                                    <div className="mt-2.5 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                                        {targetImages.map((imgUrl, idx) => (
+                                                            <div key={idx} className="relative h-20 border border-sky-400 rounded overflow-hidden group bg-black/20 shadow">
+                                                                <img src={imgUrl} alt={`Evidence ${idx+1}`} className="w-full h-full object-cover" />
+                                                                <button type="button" onClick={() => handleRemoveEvidence(idx)} className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shadow cursor-pointer">&times;</button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {showQuestConfirm ? (
+                                                <div className="bg-[#2c1d11] border-2 border-[#8b5a2b] p-3 rounded-lg text-center shadow-xl text-[#ebdcb9] animate-fade-in mt-2">
+                                                    <p className="text-xs font-bold text-[#f7e6c4] mb-1">🛡️ ยืนยันการส่งมอบภารกิจนี้?</p>
+                                                    <div className="flex gap-2 mt-2">
+                                                        <button type="button" onClick={() => setShowQuestConfirm(false)} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-[11px] transition cursor-pointer border border-white/20 disabled:opacity-50">
+                                                            <i className="fa-solid fa-rotate-left mr-1"></i> ตรวจสอบซ้ำ
+                                                        </button>
+                                                        <button type="button" onClick={handleFinalTargetSubmit} disabled={isSubmitting} className="flex-1 py-1.5 px-2 rounded bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-[11px] transition cursor-pointer shadow border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1">
+                                                            {isSubmitting ? <><span className="inline-block animate-pulse text-xs">🐎💨</span> ⏳ กำลังควบม้าส่งมอบหลักฐาน...</> : <><i className="fa-solid fa-check"></i> ยืนยันส่งมอบงาน</>}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button onClick={handleTargetSubmit} className="w-full bg-[#0284c7] text-white font-bold py-2.5 rounded-lg hover:bg-[#0369a1] shadow transition cursor-pointer text-xs">
+                                                    {selectedQuest.status === 'Evidence' ? 'แก้ไขและอัปโหลดหลักฐานใหม่ (Update)' : 'ส่งมอบหลักฐาน (เปลี่ยนสถานะเป็น Evidence)'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {currentRole === 'central' && (selectedQuest.status === 'Evidence' || selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Rising' || selectedQuest.status === 'Hall of fame') && (
+                                        <div className="mt-6 p-4 central-panel space-y-3">
+                                            <p className="font-bold flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> พิพากษาผลงาน (สำหรับสภาเมืองส่วนกลาง)</p>
+                                            
+                                            {selectedQuest.status !== 'Hall of fame' && selectedQuest.status !== 'Rising' && (
+                                                <>
+                                                    <select value={centralStatus} onChange={(e) => setCentralStatus(e.target.value)} className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
+                                                        <option value="">-- เลือกคำพิพากษา --</option>
+                                                        <option value="Rising">{selectedQuest.wasAbandoned || selectedQuest.status === 'Abandoned' ? '⭐ Rising (อนุมัติแจก +5 EXP เนื่องจากส่งล่าช้า)' : `⭐ Rising (อนุมัติแจกคะแนนเต็ม)`}</option>
+                                                        <option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน ให้กลับไปทำใหม่)</option>
+                                                        <option value="Abandoned">👻 Abandoned (ทิ้งร้าง ปล่อยไว้นานเกินกำหนด)</option>
+                                                    </select>
+                                                    <textarea rows={2} value={centralComment} onChange={(e) => setCentralComment(e.target.value)} placeholder="เหตุผลประกอบคำพิจารณา..." className="w-full p-2.5 border border-[#d97706] rounded-lg text-xs bg-white text-slate-800 outline-none font-sans"></textarea>
+                                                    <button onClick={handleCentralSubmit} className="w-full bg-[#b45309] text-white font-bold py-2.5 rounded-lg hover:bg-[#92400e] shadow transition cursor-pointer text-xs mb-2">บันทึกคำพิจารณา</button>
+                                                </>
+                                            )}
+
+                                            <div className="flex gap-2 pt-2 border-t border-[#d97706]/30">
+                                                {selectedQuest.status === 'Hall of fame' ? (
+                                                    <button onClick={() => handleCentralQuestAction('Restore')} className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-rotate-left mr-1"></i> ดึงกลับกระดานหลัก (Restore)</button>
+                                                ) : (
+                                                    (selectedQuest.status === 'Rising' || selectedQuest.ideaApproved) && (
+                                                        <button onClick={() => handleCentralQuestAction('HallOfFame')} className="w-full bg-yellow-600 text-black font-bold py-2 rounded hover:bg-yellow-500 shadow transition cursor-pointer text-xs"><i className="fa-solid fa-star mr-1"></i> บรรจุเข้า Hall of fame (ซ่อนจากหน้าหลัก)</button>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+                        </div>
+                    )}
+
+
+                    {zoomedImg && (
+                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 animate-fade-in pointer-events-auto" onClick={() => setZoomedImg(null)}>
+                            <button className="absolute top-6 right-8 text-white text-4xl hover:text-red-500 transition cursor-pointer">&times;</button>
+                            <img src={zoomedImg} alt="Zoomed" className="max-h-[85vh] max-w-[90vw] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] rounded-lg border border-white/20" onClick={(e) => e.stopPropagation()} />
+                            <p className="absolute bottom-6 text-gray-400 text-sm italic bg-black/60 px-4 py-1 rounded-full border border-white/10">คลิกที่ใดก็ได้เพื่อปิด</p>
                         </div>
                     )}
                 </div>
@@ -1847,7 +2663,7 @@
                                     <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>⚙️ อคติของ Machinepolis (จักรกลไฮเทค)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่สบอารณ์ Casteria:</b> "พวกใช้แต่วิธีล้าหลังโบราณ ดื้อดึงดักดานไม่พัฒนา ปัดปฏิเสธระบบอัตโนมัติที่รวดเร็วและแม่นยำกว่า!"</p><p>🚫 <b>ไม่ชอบ Blankheimgard:</b> "พวกสโลว์ไลฟ์เฉื่อยชา ชักช้าไร้ประสิทธิภาพ มีดีแค่ทำตัวสงบเสงี่ยมรักษารูปการแต่ถ่วงเวลาแห่งการพัฒนา!"</p><p>🚫 <b>เกลียด Finalthron:</b> "พวกงมงายอ้อนวอนพึ่งพาแต่พระเจ้าและสิ่งศักดิ์สิทธิ์ ทั้งที่ความจริงที่พิสูจน์ได้ทางวิทยาศาสตร์และตรรกะต่างหากคือสัจธรรม!"</p></div></details>
                                     <details className="group bg-[#e5d3a6] rounded-lg overflow-hidden border border-[#8b5a2b]/30 cursor-pointer"><summary className="p-4 font-bold text-[#5d3a1a] flex justify-between items-center select-none"><span>✨ อคติของ Finalthron (วิหารแสงศักดิ์สิทธิ์)</span><span className="group-open:rotate-180 transition-transform duration-200"><i className="fa-solid fa-chevron-down"></i></span></summary><div className="p-4 grudge-box text-sm leading-relaxed text-[#4a2e15] space-y-2"><p>🚫 <b>ไม่ชอบ Casteria:</b> "พวกป่าเถื่อน ดิบหยาบ เปื้อนมอมไปด้วยคราบเถ้าถ่านสกปรก ทำลายจารีตแห่งความบริสุทธิ์สง่างาม!"</p><p>🚫 <b>ไม่ชอบ Machinepolis:</b> "พวกหยิ่งยโสคิดค้นจักรกลฝืนกฎท้าทายธรรมชาติ ท้าทายอำนาจเทพสวรรค์ มันช่างบาปหนาและหยาบคาย!"</p><p>🚫 <b>เบื่อหน่าย Blankheimgard:</b> "พวกปฏิเสธไม่ยอมน้อมรับแสงอันอบอุ่น ดันชอบจมปลักอยู่ในความมืดมิดอันเหน็บหนาวและศรัทธาธรรมชาติอย่างไร้กฎเกณฑ์!"</p></div></details>
                                 </div>
-</section>
+                            </section>
                             
                             <section className="text-justify border-t-2 border-[#8b5a2b]/30 pt-8 mt-8">
                                 <h2 className="text-2xl font-bold text-[#5d3a1a] mb-4 flex items-center gap-2 font-cinzel"><i className="fa-solid fa-scroll"></i> 4. ภารกิจพังทลายกำแพงแห่งอคติ (Your Mission)</h2>
@@ -1928,7 +2744,7 @@
                                     <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-500 font-bold text-xs mb-2 shadow-sm">Rising</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเห็นชอบว่าไอเดียนี้ดีเลิศ! (อนุมัติไอเดียสำเร็จ แจก +5 EXP ให้คนคิด และส่งเรื่องเป็นภารกิจต่อไป)</li><li><b>ในหน้าลานภารกิจ:</b> สภาตรวจหลักฐานผ่าน! (อนุมัติการลงมือทำ แจก +15 EXP ให้คนทำ) ถือว่าปิดภารกิจสมบูรณ์ 100%</li></ul></div>
                                     <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-bold text-xs mb-2 shadow-sm">Ruined</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> ไอเดียถูกปัดตกตั้งแต่แรก ไม่ได้รับการอนุมัติ</li><li><b>ในหน้าลานภารกิจ:</b> หลักฐานการแก้ไขยังไม่ผ่านเกณฑ์ (สภาจะคอมเมนต์จุดที่ต้องแก้ อาณาจักรเป้าหมายนำไปปรับปรุงและส่งรูปหลักฐานใหม่ได้ ระบบไม่หักคะแนน ถือเป็นวงจร PDCA)</li></ul></div>
                                     <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-500 font-bold text-xs mb-2 shadow-sm">Abandoned</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> ภารกิจถูกปล่อยทิ้งร้างนานเกินกำหนด หากผู้รับผิดชอบกลับมาทำจนเสร็จในภายหลัง สภาจะลงโทษโดยลดรางวัลเหลือเพียง +5 EXP</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>สถานะพิเศษ:</b> เป็นการนำสาส์นหรือภารกิจที่ <b>สำเร็จไปแล้ว (Rising/Super Rising)</b> ไปเก็บเข้ากรุ เพื่อให้กระดานหน้าจอหลักสะอาดตา (ข้อมูลไม่หาย เลเวลไม่ลด และทุกคนยังโหลด CSV ไปดูประวัติผลงานได้ปกติ)</li></ul></div>
+                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>สถานะพิเศษ:</b> เป็นการนำสาส์นหรือภารกิจที่ <b>สำเร็จไปแล้ว (Rising/Super Rising)</b> ไปเก็บไว้ในหอเกียรติยศ เพื่อให้กระดานหน้าจอหลักสะอาดตา (ข้อมูลไม่หาย เลเวลไม่ลด และทุกคนยังโหลด CSV ไปดูประวัติผลงานได้ปกติ)</li></ul></div>
                                 </div>
                             </section>
                         </div>
@@ -1986,7 +2802,38 @@
                         </div>
                     )}
 
-                    <div className="text-center mt-10 pt-6 border-t border-[#8b5a2b]/30">
+                    {/* แถบปุ่มเปลี่ยนบทด้านล่างสุด (Bottom Chapter Navigation) */}
+                    <div className="flex justify-between items-center gap-3 mt-8 pt-6 border-t border-[#8b5a2b]/30">
+                        {activeTab === 'rules' && (
+                            <button onClick={() => { setActiveTab('lore'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b]/20 hover:bg-[#8b5a2b] text-[#5d3a1a] hover:text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#8b5a2b]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow">
+                                <i className="fa-solid fa-chevron-left text-xs"></i>
+                                <span>ปฐมบท & ปมความขัดแย้ง</span>
+                            </button>
+                        )}
+                        {activeTab === 'alignment' && (
+                            <button onClick={() => { setActiveTab('rules'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b]/20 hover:bg-[#8b5a2b] text-[#5d3a1a] hover:text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#8b5a2b]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow">
+                                <i className="fa-solid fa-chevron-left text-xs"></i>
+                                <span>กฎและพจนานุกรมแห่งสภา</span>
+                            </button>
+                        )}
+
+                        <div className="flex-1"></div>
+
+                        {activeTab === 'lore' && (
+                            <button onClick={() => { setActiveTab('rules'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b] hover:bg-[#5d3a1a] text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#ebdcb9]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
+                                <span>กฎและพจนานุกรมแห่งสภา</span>
+                                <i className="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        )}
+                        {activeTab === 'rules' && (
+                            <button onClick={() => { setActiveTab('alignment'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-[#8b5a2b] hover:bg-[#5d3a1a] text-[#f7e6c4] px-3.5 py-2.5 rounded-xl font-bold border border-[#ebdcb9]/40 text-xs md:text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
+                                <span>คัมภีร์วิถีนักสร้างสรรค์</span>
+                                <i className="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="text-center mt-6 pt-4">
                         <button onClick={() => onViewChange('worldmap')} className="bg-[#5d3a1a] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8b5a2b] shadow-xl border-2 border-[#ebdcb9] transition duration-200 cursor-pointer">
                             <i className="fa-solid fa-arrow-left-to-line mr-2"></i> กลับสู่แผนที่โลก (World Map)
                         </button>
@@ -2002,7 +2849,7 @@
             const [isAuthorized, setIsAuthorized] = useState(false);
             const [currentView, setCurrentView] = useState('news');
             const [chronicleTab, setChronicleTab] = useState('lore'); 
-            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
             const [isLoaded, setIsLoaded] = useState(false);
             
             const [runningSeq, setRunningSeq] = useState(1);
@@ -2023,9 +2870,25 @@
             const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
             const [isPlaying, setIsPlaying] = useState(false);
             const [isLoopingOne, setIsLoopingOne] = useState(false);
+            const [isKingdomModalOpen, setIsKingdomModalOpen] = useState(false);
+            const [isMobilePortrait, setIsMobilePortrait] = useState(
+                window.innerWidth <= 640 && window.innerHeight > window.innerWidth
+            );
 
             const handleNextTrack = () => setCurrentTrackIndex((prev) => (prev + 1) % musicTracks.length);
             const handlePrevTrack = () => setCurrentTrackIndex((prev) => (prev - 1 + musicTracks.length) % musicTracks.length);
+
+            useEffect(() => {
+                const handleResize = () => {
+                    setIsMobilePortrait(window.innerWidth <= 640 && window.innerHeight > window.innerWidth);
+                };
+                window.addEventListener('resize', handleResize);
+                window.addEventListener('orientationchange', handleResize);
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    window.removeEventListener('orientationchange', handleResize);
+                };
+            }, []);
 
             useEffect(() => {
                 const authSession = sessionStorage.getItem('isAuthorized');
@@ -2049,7 +2912,13 @@
 
                 if (currentView === 'popboss') {
                     if (bgMusic) bgMusic.pause();
-                    if (popMusic && !isMuted) popMusic.play().catch(e => console.log(e));
+                    if (popMusic) {
+                        if (isPlaying && !isMuted) {
+                            popMusic.play().catch(e => console.log("PopBoss music play blocked", e));
+                        } else {
+                            popMusic.pause();
+                        }
+                    }
                 } else {
                     if (popMusic) popMusic.pause();
                     if (bgMusic) {
@@ -2090,6 +2959,45 @@
             const [projects, setProjects] = useState([]);
             const [kingdomEXP, setKingdomEXP] = useState({ 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
             const [popBossScores, setPopBossScores] = useState({ 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
+            const pendingClicksRef = useRef({});
+
+            // ⚡ ระบบดึงยอดรวมคะแนน POPBOSS ล่าสุดทุก 2 วินาทีเมื่ออยู่ในหน้า POPBOSS
+            useEffect(() => {
+                if (currentView !== 'popboss' || !supabase) return;
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const { data, error } = await supabase.from('popboss_scores').select('*');
+                        if (!error && data) {
+                            const scoresMap = {};
+                            data.forEach(row => { scoresMap[row.kingdom] = row.score; });
+                            setPopBossScores(prev => ({ ...prev, ...scoresMap }));
+                        }
+                    } catch (e) { console.log("Poll POPBOSS error", e); }
+                }, 2000);
+                return () => clearInterval(pollInterval);
+            }, [currentView]);
+
+            // ⚡ ระบบรวมยอดส่งคะแนนจิ้มไปบวกสะสมใน Supabase ทุกๆ 1.5 วินาที (บวกสะสม ป้องกันการเขียนทับ)
+            useEffect(() => {
+                if (!supabase) return;
+                const flushInterval = setInterval(async () => {
+                    const kingdoms = Object.keys(pendingClicksRef.current);
+                    for (const k of kingdoms) {
+                        const delta = pendingClicksRef.current[k];
+                        if (delta > 0) {
+                            pendingClicksRef.current[k] = 0;
+                            try {
+                                const { data } = await supabase.from('popboss_scores').select('score').eq('kingdom', k).single();
+                                const currentScore = data ? (data.score || 0) : 0;
+                                await supabase.from('popboss_scores').update({ score: currentScore + delta }).eq('kingdom', k);
+                            } catch (err) {
+                                console.error("Flush click error:", err);
+                            }
+                        }
+                    }
+                }, 1500);
+                return () => clearInterval(flushInterval);
+            }, []);
 
             // 🔄 ดึงข้อมูลสาส์นพัฒนาและคะแนน PopBoss จาก Supabase เมื่อเปิดใช้งาน
             useEffect(() => {
@@ -2117,6 +3025,8 @@
                                 status: item.status,
                                 comment: item.comment,
                                 targetComment: item.target_comment,
+                                expense: item.expense || '',
+                                actualResult: item.actual_result || item.actualResult || '',
                                 imageAfterPreview: item.image_after_preview,
                                 wasAbandoned: item.was_abandoned,
                                 ideaApproved: item.idea_approved,
@@ -2125,6 +3035,22 @@
                                 isSuperRising: item.is_super_rising
                             }));
                             setProjects(mappedProjects);
+
+                            const bkkDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+                            const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
+                            let maxSeq = 0;
+                            projData.forEach(p => {
+                                if (p.id && p.id.includes(`_${dateStr}-`)) {
+                                    const parts = p.id.split('-');
+                                    if (parts.length > 1) {
+                                        const seq = parseInt(parts[parts.length - 1], 10);
+                                        if (!isNaN(seq) && seq > maxSeq) {
+                                            maxSeq = seq;
+                                        }
+                                    }
+                                }
+                            });
+                            setRunningSeq(maxSeq + 1);
                         }
 
                         const { data: bossData, error: bossErr } = await supabase.from('popboss_scores').select('*');
@@ -2181,9 +3107,8 @@
                         status: newProject.status,
                         comment: newProject.comment,
                         target_comment: newProject.targetComment,
-                        expense: newProject.expense || '',
-                        actual_result: newProject.actualResult || '',
-                        images_after: newProject.imagesAfter ? JSON.stringify(newProject.imagesAfter) : null,
+                        expense: newProject.expense,
+                        actual_result: newProject.actualResult,
                         image_after_preview: newProject.imageAfterPreview,
                         was_abandoned: newProject.wasAbandoned,
                         idea_approved: newProject.ideaApproved,
@@ -2195,18 +3120,49 @@
                 }
             };
 
+            const [editingProject, setEditingProject] = useState(null);
+
+            const handleStartEdit = (project) => {
+                setEditingProject(project);
+                setCurrentView('suggestion');
+            };
+
+            const handleCancelEdit = () => {
+                setEditingProject(null);
+            };
+
             const handleUpdateProject = async (updatedProject) => { 
+                if (updatedProject.status === 'Deleted') {
+                    setProjects(prev => prev.filter(p => p.id !== updatedProject.id));
+                    if (supabase) {
+                        const { error } = await supabase.from('projects').delete().eq('id', updatedProject.id);
+                        if (error) console.error("Supabase delete error:", error);
+                    }
+                    return;
+                }
+
                 setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); 
 
                 if (supabase) {
                     const { error } = await supabase.from('projects').update({
+                        emp: updatedProject.emp,
+                        name: updatedProject.name,
+                        origin: updatedProject.origin,
+                        target: updatedProject.target,
                         category: updatedProject.category,
+                        factory: updatedProject.factory,
+                        location: updatedProject.location,
+                        pinpoint: updatedProject.pinpoint,
+                        title: updatedProject.title,
+                        problem: updatedProject.problem,
+                        solution: updatedProject.solution,
+                        benefit: updatedProject.benefit,
+                        image_preview: updatedProject.imagePreview,
                         status: updatedProject.status,
                         comment: updatedProject.comment,
                         target_comment: updatedProject.targetComment,
-                        expense: updatedProject.expense || '',
-                        actual_result: updatedProject.actualResult || '',
-                        images_after: updatedProject.imagesAfter ? JSON.stringify(updatedProject.imagesAfter) : null,
+                        expense: updatedProject.expense,
+                        actual_result: updatedProject.actualResult,
                         image_after_preview: updatedProject.imageAfterPreview,
                         was_abandoned: updatedProject.wasAbandoned,
                         idea_approved: updatedProject.ideaApproved,
@@ -2218,7 +3174,7 @@
                 }
             };
 
-            const showSidebar = currentView !== 'popboss'; 
+            const showSidebar = currentView !== 'popboss' && !isKingdomModalOpen; 
 
             return (
                 <div className="relative min-h-screen flex flex-col">
@@ -2227,8 +3183,15 @@
                     <audio ref={popbossMusicRef} loop id="popbossMusic"><source src="Assets/Audio/Special_event/Music/Music_popboss.mp3" type="audio/mpeg" /></audio>
                     <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
 
-                    <video autoPlay loop muted playsInline className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-                        <source src="Assets/video/Diecast_kingdoms_level_1.mp4" type="video/mp4" />
+                    <video 
+                        key={isMobilePortrait ? 'portrait' : 'horizontal'}
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    >
+                        <source src={isMobilePortrait ? "Assets/video/bg_portrait.mp4" : "Assets/video/bg_horizontal.mp4"} type="video/mp4" />
                     </video>
 
                     {!isAuthorized ? (
@@ -2245,17 +3208,37 @@
                                     musicTracks={musicTracks} currentTrackIndex={currentTrackIndex} setCurrentTrackIndex={setCurrentTrackIndex}
                                     isPlaying={isPlaying} setIsPlaying={setIsPlaying} isLoopingOne={isLoopingOne} setIsLoopingOne={setIsLoopingOne}
                                     handleNextTrack={handleNextTrack} handlePrevTrack={handlePrevTrack}
+                                    projects={projects}
+                                    isModalOpen={isKingdomModalOpen}
                                 />
                             )}
 
-                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} />}
+                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} onModalToggle={(open) => setIsKingdomModalOpen(open)} />}
 
                             {currentView !== 'worldmap' && currentView !== 'popboss' && (
-                                <main className={`transition-all duration-500 p-4 md:p-8 flex-grow ${showSidebar ? (isSidebarCollapsed ? 'ml-24' : 'ml-[18rem]') : 'ml-0'}`}>
-                                    <div className="max-w-6xl mx-auto py-4">
+                                <main className={`transition-all duration-500 flex-grow px-3 py-4 pt-16 pb-24 md:p-8 md:pt-8 md:pb-8 ${showSidebar ? (isSidebarCollapsed ? 'md:ml-24 ml-0' : 'md:ml-[18rem] ml-0') : 'ml-0'}`}>
+                                    <div className="max-w-6xl mx-auto py-2 md:py-4">
                                         {currentView === 'news' && <NewsView onViewChange={handleViewChange} />}
-                                        {currentView === 'suggestion' && <SuggestionForm projects={projects} onAddProject={handleAddProject} onViewChange={handleViewChange} runningSeq={runningSeq} setRunningSeq={setRunningSeq} />}
-                                        {currentView === 'dashboard' && <Dashboard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
+                                        {currentView === 'suggestion' && (
+                                            <SuggestionForm 
+                                                projects={projects} 
+                                                onAddProject={handleAddProject} 
+                                                onUpdateProject={handleUpdateProject}
+                                                onViewChange={handleViewChange} 
+                                                runningSeq={runningSeq} 
+                                                setRunningSeq={setRunningSeq}
+                                                editingProject={editingProject}
+                                                onCancelEdit={handleCancelEdit}
+                                            />
+                                        )}
+                                        {currentView === 'dashboard' && (
+                                            <Dashboard 
+                                                projects={projects} 
+                                                onUpdateProject={handleUpdateProject} 
+                                                kingdomEXP={kingdomEXP} 
+                                                onStartEdit={handleStartEdit}
+                                            />
+                                        )}
                                         {currentView === 'quests' && <QuestBoard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
                                         {currentView === 'chronicles' && <Chronicles onViewChange={handleViewChange} initialTab={chronicleTab} />}
                                     </div>
@@ -2264,13 +3247,9 @@
 
                             {currentView === 'popboss' && (
                                 <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => {
-                                    setPopBossScores(prev => {
-                                        const nextScore = (prev[kingdom] || 0) + 1;
-                                        if (supabase) {
-                                            supabase.from('popboss_scores').update({ score: nextScore }).eq('kingdom', kingdom).then();
-                                        }
-                                        return { ...prev, [kingdom]: nextScore };
-                                    });
+                                    if (!kingdom) return;
+                                    setPopBossScores(prev => ({ ...prev, [kingdom]: (prev[kingdom] || 0) + 1 }));
+                                    pendingClicksRef.current[kingdom] = (pendingClicksRef.current[kingdom] || 0) + 1;
                                 }} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
                             )}
                         </>
