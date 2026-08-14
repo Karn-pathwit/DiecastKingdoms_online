@@ -2004,11 +2004,12 @@
             const [centralComment, setCentralComment] = useState('');
 
             const [filters, setFilters] = useState({ target: '', status: '', search: '' });
+            const [cardStatusFilter, setCardStatusFilter] = useState('Evidence');
             const [currentPage, setCurrentPage] = useState(1);
             const itemsPerPage = 5;
 
             const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
-            useEffect(() => { setCurrentPage(1); }, [filters]);
+            useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter]);
 
             const handleRoleLogin = (type) => {
                 if (type === 'target') {
@@ -2058,16 +2059,17 @@
                     return; 
                 }
                 
-                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สถานะภารกิจ', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'ความคิดเห็นสภาเมือง'];
+                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'สถานะภารกิจ', 'ความคิดเห็นสภาเมือง'];
                 const csvRows = exportQuests.map(q => [
                     q.id || '', 
                     q.title || '', 
+                    q.problem || '',
                     q.origin || '', 
                     q.target || '', 
-                    q.status || '', 
                     q.targetComment || '', 
                     q.expense || '0', 
                     q.actualResult || '', 
+                    q.status || '', 
                     q.adminComment || ''
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
@@ -2223,6 +2225,18 @@
                 return matchTarget && matchStatus && matchSearch;
             });
 
+            const totalFilteredQuests = filteredQuests.length;
+            const countCardStatusQuests = filteredQuests.filter(q => {
+                if (!q) return false;
+                if (cardStatusFilter === 'Evidence') return q.status === 'Evidence';
+                if (cardStatusFilter === 'Rising') return q.status === 'Rising' || q.isSuperRising;
+                if (cardStatusFilter === 'Founding') return q.status === 'Founding' && !q.ideaApproved;
+                if (cardStatusFilter === 'Ruined') return q.status === 'Ruined';
+                return false;
+            }).length;
+
+            const questPercentage = totalFilteredQuests > 0 ? ((countCardStatusQuests / totalFilteredQuests) * 100).toFixed(1) : '0.0';
+
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
             const currentItems = filteredQuests.slice(indexOfFirstItem, indexOfLastItem);
@@ -2308,6 +2322,26 @@
                                 })}
                             </div>
                         )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="stat-card p-5 rounded-2xl text-center flex flex-col justify-center">
+                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">ภารกิจตามฟิลเตอร์<br />(Filtered Quests)</p>
+                            <h2 className="text-4xl font-bold text-[#5d3a1a] font-cinzel">{totalFilteredQuests}</h2>
+                        </div>
+                        <div className="stat-card p-4 rounded-2xl text-center flex flex-col items-center justify-center">
+                            <select value={cardStatusFilter} onChange={(e) => setCardStatusFilter(e.target.value)} className="custom-select text-xs font-bold text-[#5d3a1a] mb-1 w-full text-center bg-[#f4e4bc]">
+                                <option value="Evidence">📤 Evidence (ส่งมอบหลักฐานแล้ว)</option>
+                                <option value="Rising">⭐ Rising (ภารกิจสำเร็จแล้ว)</option>
+                                <option value="Founding">🏗️ Founding (กำลังดำเนินการแก้ไข)</option>
+                                <option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน/รอกลับไปแก้)</option>
+                            </select>
+                            <h2 className={`text-4xl font-bold font-cinzel ${cardStatusFilter === 'Evidence' ? 'text-purple-700' : cardStatusFilter === 'Rising' ? 'text-emerald-700' : cardStatusFilter === 'Founding' ? 'text-yellow-700' : 'text-red-700'}`}>{countCardStatusQuests}</h2>
+                        </div>
+                        <div className="stat-card p-5 rounded-2xl text-center flex flex-col justify-center">
+                            <p className="text-xs font-bold text-[#8b5a2b] mb-1">สัดส่วนจากภารกิจทั้งหมด<br />(Percentage)</p>
+                            <h2 className="text-4xl font-bold text-[#5d3a1a] font-cinzel">{questPercentage}%</h2>
+                        </div>
                     </div>
 
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
