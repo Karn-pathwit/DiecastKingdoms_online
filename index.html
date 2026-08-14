@@ -2983,6 +2983,7 @@
             };
 
             const handleViewChange = (view, extraParam) => {
+                setIsKingdomModalOpen(false);
                 setCurrentView(view);
                 if (view === 'chronicles') {
                     if (extraParam) setChronicleTab(extraParam); 
