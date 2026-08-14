@@ -1736,7 +1736,7 @@
                     {/* Mobile Scroll Hint Badge */}
                     <div className="md:hidden text-center mb-2">
                         <span className="text-[11px] font-bold text-[#8b5a2b] bg-[#f4e4bc] px-3 py-1 rounded-full border border-[#8b5a2b]/30 shadow-sm animate-pulse inline-flex items-center gap-1.5">
-                            👈 ปัดนิ้วซ้าย-ขวาเพื่อดูตาราง 👉
+                            👈 เลื่อนซ้าย-ขวาเพื่อดูข้อมูล 👉
                         </span>
                     </div>
 
@@ -2363,7 +2363,14 @@
                         <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID สาส์น..." className="w-full md:w-64 custom-select text-xs font-medium" />
                     </div>
 
-                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto">
+                    {/* Mobile Scroll Hint Badge */}
+                    <div className="md:hidden text-center mb-2">
+                        <span className="text-[11px] font-bold text-[#8b5a2b] bg-[#f4e4bc] px-3 py-1 rounded-full border border-[#8b5a2b]/30 shadow-sm animate-pulse inline-flex items-center gap-1.5">
+                            👈 เลื่อนซ้าย-ขวาเพื่อดูข้อมูล 👉
+                        </span>
+                    </div>
+
+                    <div className="parchment p-6 rounded-2xl shadow-xl overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                         <table className="w-full text-left whitespace-nowrap text-xs md:text-sm">
                             <thead>
                                 <tr className="text-[#5d3a1a] border-b border-[#8b5a2b] font-bold">
