@@ -686,6 +686,7 @@
             const [isPopping, setIsPopping] = useState(false);
             const [bossImgError, setBossImgError] = useState(false);
             const lastPopTimeRef = useRef(0);
+            const lastTouchTimeRef = useRef(0);
 
             const kingdomsList = [
                 { id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
@@ -743,7 +744,15 @@
             }
 
             const handlePopStart = (e) => {
-                if (e && e.cancelable && e.type === 'touchstart') e.preventDefault();
+                if (e) {
+                    if (e.type === 'touchstart') {
+                        lastTouchTimeRef.current = Date.now();
+                    } else if (e.type === 'mousedown') {
+                        if (Date.now() - lastTouchTimeRef.current < 500) {
+                            return;
+                        }
+                    }
+                }
                 const now = Date.now();
                 if (now - lastPopTimeRef.current < 60) return;
                 lastPopTimeRef.current = now;
