@@ -50,6 +50,7 @@
         .stat-card { background: #dcd0b0; border: 2px solid #8b5a2b; color: #5d3a1a; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.2s ease; }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15); }
         .custom-select { background-color: #fff8e7; border: 1px solid #8b5a2b; border-radius: 6px; padding: 0.5rem; color: #5d3a1a; outline: none; }
+        .custom-select option { background-color: #fdfbf7 !important; color: #3d2511 !important; font-weight: 600; padding: 6px; }
         .decree-modal { background-color: #f4e4bc; border: 8px double #8b5a2b; box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); color: #3d2511; }
         .comment-box { border-left: 4px solid #8b5a2b; background-color: #e5d8b8; }
         .proof-box { background-color: #e5d8b8; border: 2px dashed #8b5a2b; border-radius: 8px; }
@@ -592,7 +593,7 @@
                             )}
 
                             <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms v30.0</p>)}
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.1.0</p>)}
                             </div>
                         </div>
                     </div>
@@ -685,14 +686,45 @@
             const [myScore, setMyScore] = useState(0);
             const [isPopping, setIsPopping] = useState(false);
             const [bossImgError, setBossImgError] = useState(false);
+            const [isPortrait, setIsPortrait] = useState(window.innerWidth < window.innerHeight);
             const lastPopTimeRef = useRef(0);
             const lastTouchTimeRef = useRef(0);
 
+            useEffect(() => {
+                const handleResize = () => setIsPortrait(window.innerWidth < window.innerHeight);
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+
             const kingdomsList = [
-                { id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png' },
-                { id: 'Casteria', name: 'แคสเทอเรีย', icon: '🔥', color: 'rgba(243, 156, 18, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_casteria_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_casteria_hit.png' },
-                { id: 'Machinepolis', name: 'แมคชีนโพลิส', icon: '⚙️', color: 'rgba(46, 204, 113, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_hit.png' },
-                { id: 'Finalthron', name: 'ไฟนัลธรอน', icon: '✨', color: 'rgba(241, 196, 15, 0.95)', imgClose: 'Assets/Images/Special_event/Bosses/Boss_finalthron_close.png', imgHit: 'Assets/Images/Special_event/Bosses/Boss_finalthron_hit.png' }
+                { 
+                    id: 'Blankheimgard', name: 'แบลงค์ไฮม์การ์ด', icon: '❄️', color: 'rgba(52, 152, 219, 0.95)', 
+                    imgClose: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_close.png', 
+                    imgHit: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_hit.png',
+                    imgClosePortrait: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_portrait_close.jpg',
+                    imgHitPortrait: 'Assets/Images/Special_event/Bosses/Boss_blankheimgard_portrait_hit.jpg'
+                },
+                { 
+                    id: 'Casteria', name: 'แคสเทอเรีย', icon: '🔥', color: 'rgba(243, 156, 18, 0.95)', 
+                    imgClose: 'Assets/Images/Special_event/Bosses/Boss_casteria_close.png', 
+                    imgHit: 'Assets/Images/Special_event/Bosses/Boss_casteria_hit.png',
+                    imgClosePortrait: 'Assets/Images/Special_event/Bosses/Boss_casteria_portrait_close.jpg',
+                    imgHitPortrait: 'Assets/Images/Special_event/Bosses/Boss_casteria_portrait_hit.jpg'
+                },
+                { 
+                    id: 'Machinepolis', name: 'แมคชีนโพลิส', icon: '⚙️', color: 'rgba(46, 204, 113, 0.95)', 
+                    imgClose: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_close.png', 
+                    imgHit: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_hit.png',
+                    imgClosePortrait: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_portrait_close.jpg',
+                    imgHitPortrait: 'Assets/Images/Special_event/Bosses/Boss_machinepolis_portrait_hit.jpg'
+                },
+                { 
+                    id: 'Finalthron', name: 'ไฟนัลธรอน', icon: '✨', color: 'rgba(241, 196, 15, 0.95)', 
+                    imgClose: 'Assets/Images/Special_event/Bosses/Boss_finalthron_close.png', 
+                    imgHit: 'Assets/Images/Special_event/Bosses/Boss_finalthron_hit.png',
+                    imgClosePortrait: 'Assets/Images/Special_event/Bosses/Boss_finalthron_portrait_close.jpg',
+                    imgHitPortrait: 'Assets/Images/Special_event/Bosses/Boss_finalthron_portrait_hit.jpg'
+                }
             ];
 
             const isExpired = !isPopBossActive();
@@ -781,6 +813,8 @@
 
             const maxScore = Math.max(...Object.values(globalScores), 0);
             const activeKingdomData = kingdomsList.find(k => k.name === myKingdom);
+            const activeImgClose = (isPortrait && activeKingdomData.imgClosePortrait) ? activeKingdomData.imgClosePortrait : activeKingdomData.imgClose;
+            const activeImgHit = (isPortrait && activeKingdomData.imgHitPortrait) ? activeKingdomData.imgHitPortrait : activeKingdomData.imgHit;
 
             return (
                 <div className="fixed inset-0 z-[60] overflow-hidden animate-fade-in bg-black">
@@ -790,24 +824,33 @@
                             {bossImgError ? (
                                 <div className={`text-9xl bg-red-800 flex items-center justify-center transition-transform w-full h-full ${isPopping ? 'scale-95' : ''} select-none`}>👿</div>
                             ) : (
-                                <img src={isPopping ? activeKingdomData.imgHit : activeKingdomData.imgClose} className={isPopping ? 'popping' : ''} alt="BOSS" onError={() => setBossImgError(true)} />
+                                <img src={isPopping ? activeImgHit : activeImgClose} className={isPopping ? 'popping' : ''} alt="BOSS" onError={() => setBossImgError(true)} />
                             )}
                         </div>
 
                         {kingdomsList.map((k, idx) => {
                             const isLeader = maxScore > 0 && globalScores[k.name] === maxScore;
+                            const scoreVal = (globalScores[k.name] || 0).toLocaleString();
                             const positionClass = idx === 0 ? 'top-left' : idx === 1 ? 'top-right' : idx === 2 ? 'bottom-left' : 'bottom-right';
                             return (
-                                <div key={k.id} className={`corner-badge ${positionClass} ${isLeader ? 'leader-kingdom' : myKingdom === k.name ? 'selected-kingdom' : 'opponent-kingdom'}`} style={!isLeader ? {backgroundColor: k.color} : {}}>
-                                    {isLeader && <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-4xl animate-bounce">👑</div>}
-                                    {k.icon} {k.id} : {globalScores[k.name] || 0}
+                                <div 
+                                    key={k.id} 
+                                    className={`corner-badge ${positionClass} ${isLeader ? 'leader-kingdom' : myKingdom === k.name ? 'selected-kingdom' : 'opponent-kingdom'} ${isPortrait ? 'text-xs md:text-sm px-2.5 py-1.5' : ''}`} 
+                                    style={!isLeader ? {backgroundColor: k.color} : {}}
+                                >
+                                    {isLeader && <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-2xl md:text-4xl animate-bounce">👑</div>}
+                                    {isPortrait ? (
+                                        <span className="font-bold whitespace-nowrap">{k.icon} {scoreVal}</span>
+                                    ) : (
+                                        <>{k.icon} {k.id} : {scoreVal}</>
+                                    )}
                                 </div>
                             );
                         })}
 
                         <div className="score-container">{myScore}</div>
-                        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4 z-20">
-                            <button onClick={() => {setMyKingdom(null); setMyScore(0); setBossImgError(false);}} className="bg-[rgba(83,53,74,0.9)] text-white px-8 py-3 rounded-lg border-2 border-white hover:bg-[rgba(83,53,74,1)] cursor-pointer font-bold shadow-xl text-lg transition">เปลี่ยนอาณาจักร</button>
+                        <div className="absolute bottom-8 md:bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4 z-20">
+                            <button onClick={() => {setMyKingdom(null); setMyScore(0); setBossImgError(false);}} className="bg-[rgba(83,53,74,0.9)] text-white px-6 md:px-8 py-2.5 md:py-3 rounded-lg border-2 border-white hover:bg-[rgba(83,53,74,1)] cursor-pointer font-bold shadow-xl text-sm md:text-lg transition">เปลี่ยนอาณาจักร</button>
                         </div>
                     </div>
                 </div>
@@ -925,9 +968,22 @@
                                     </div>
 
                                     <div className="w-full md:w-96 shrink-0 flex flex-col items-end gap-3 pointer-events-none modal-action-buttons">
-                                        <button onClick={() => onViewChange('quests')} className="w-full bg-gradient-to-r from-[#8b5a2b] to-[#5d3a1a] hover:from-[#a06830] hover:to-[#6d4514] text-[#f7e6c4] py-3 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-[#ebdcb9]/40 transition text-sm cursor-pointer flex items-center justify-center gap-2 pointer-events-auto">
-                                            <i className="fa-solid fa-door-open text-lg"></i> เข้าสู่ลานภารกิจ
-                                        </button>
+                                        <div className="w-full flex gap-2 pointer-events-auto">
+                                            <button 
+                                                onClick={() => onViewChange('dashboard', { origin: activeData.nameThai })} 
+                                                className="flex-1 bg-gradient-to-r from-[#8b5a2b] via-[#a06830] to-[#5d3a1a] hover:from-[#a06830] hover:to-[#7c4d1d] text-[#f7e6c4] py-3 px-2 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-[#ebdcb9]/50 transition text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5 truncate"
+                                                title={`ดูประกาศิตแผ่นดินที่เสนอโดย ${activeData.nameThai}`}
+                                            >
+                                                <i className="fa-solid fa-scroll text-base"></i> ดูประกาศิต
+                                            </button>
+                                            <button 
+                                                onClick={() => onViewChange('quests', { target: activeData.nameThai })} 
+                                                className="flex-1 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-100 py-3 px-2 rounded-lg font-bold shadow-[0_5px_15px_rgba(0,0,0,0.8)] border border-slate-300/50 transition text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5 truncate"
+                                                title={`เข้าสู่ลานภารกิจที่รับผิดชอบโดย ${activeData.nameThai}`}
+                                            >
+                                                <i className="fa-solid fa-shield-halved text-base"></i> ลานภารกิจ
+                                            </button>
+                                        </div>
 
                                         <div className="w-full bg-black/80 border border-[#8b5a2b]/50 rounded-xl p-3 md:p-4 backdrop-blur-md shadow-2xl pointer-events-auto flex flex-col transition-all duration-300">
                                             <div className="flex gap-2">
@@ -1169,8 +1225,30 @@
                     let catPrefix = formData.category.includes('Safety') ? 'DKS' : formData.category.includes('Quality') ? 'DKQ' : formData.category.includes('Secret') ? 'SEC' : 'DKC';
                     const bkkDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
                     const dateStr = bkkDate.getFullYear().toString() + String(bkkDate.getMonth() + 1).padStart(2, '0') + String(bkkDate.getDate()).padStart(2, '0');
-                    const newId = `${catPrefix}_${dateStr}-${String(runningSeq).padStart(3, '0')}`; 
-                    setRunningSeq(prev => prev + 1); 
+                    
+                    let latestSeq = runningSeq;
+                    if (supabase) {
+                        try {
+                            const { data: latestData } = await supabase.from('projects').select('id').like('id', `%_${dateStr}-%`);
+                            if (latestData && latestData.length > 0) {
+                                let maxFound = 0;
+                                latestData.forEach(p => {
+                                    if (p.id) {
+                                        const parts = p.id.split('-');
+                                        if (parts.length > 1) {
+                                            const num = parseInt(parts[parts.length - 1], 10);
+                                            if (!isNaN(num) && num > maxFound) maxFound = num;
+                                        }
+                                    }
+                                });
+                                latestSeq = Math.max(latestSeq, maxFound + 1);
+                            }
+                        } catch (e) {
+                            console.error("Realtime sequence check error:", e);
+                        }
+                    }
+                    const newId = `${catPrefix}_${dateStr}-${String(latestSeq).padStart(3, '0')}`; 
+                    setRunningSeq(latestSeq + 1); 
 
                     const newProject = {
                         id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
@@ -1478,7 +1556,7 @@
                 </div>
             );
         }
-        function Dashboard({ projects, onUpdateProject, kingdomEXP, onStartEdit }) {
+        function Dashboard({ projects, onUpdateProject, kingdomEXP, onStartEdit, initialFilter }) {
             const [isAdminMode, setIsAdminMode] = useState(false);
             const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedProject, setSelectedProject] = useState(null);
@@ -1487,13 +1565,31 @@
             const [adminFeedback, setAdminFeedback] = useState('');
             const [adminCategory, setAdminCategory] = useState(''); 
 
-            const [filters, setFilters] = useState({ origin: '', target: '', location: '', category: '', status: '', search: '' });
+            const [filters, setFilters] = useState({ 
+                origin: (initialFilter && initialFilter.origin) ? initialFilter.origin : '', 
+                target: (initialFilter && initialFilter.target) ? initialFilter.target : '', 
+                location: '', 
+                category: '', 
+                status: '', 
+                search: '' 
+            });
             const [cardStatusFilter, setCardStatusFilter] = useState('Blueprint');
+            const [sortBy, setSortBy] = useState('recent');
             const [currentPage, setCurrentPage] = useState(1);
             const itemsPerPage = 5; 
 
             const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
-            useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter]);
+            useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter, sortBy]);
+
+            useEffect(() => {
+                if (initialFilter) {
+                    setFilters(prev => ({
+                        ...prev,
+                        origin: initialFilter.origin || '',
+                        target: initialFilter.target || ''
+                    }));
+                }
+            }, [initialFilter]);
 
             const handleAdminLogin = () => {
                 if (isAdminMode) { setIsAdminMode(false); alert('ออกจากโหมดสภาเมืองเรียบร้อยแล้ว'); return; }
@@ -1644,6 +1740,81 @@
 
             const percentage = totalFiltered > 0 ? ((countCardStatus / totalFiltered) * 100).toFixed(1) : '0.0';
 
+            const isRecentlyUpdated = (p) => {
+                if (!p) return false;
+                if (p.wasRecentlyUpdated) return true;
+                if (p.updated_at) {
+                    const updateTime = new Date(p.updated_at).getTime();
+                    const isWithin24Hours = (Date.now() - updateTime) < 24 * 60 * 60 * 1000;
+                    if (p.created_at) {
+                        const createTime = new Date(p.created_at).getTime();
+                        return isWithin24Hours && (updateTime - createTime > 10000);
+                    }
+                    return isWithin24Hours;
+                }
+                return false;
+            };
+
+            const parseIdTimestamp = (id) => {
+                if (!id) return 0;
+                const match = id.match(/(\d{8})-(\d+)/);
+                if (match) {
+                    return parseInt(match[1], 10) * 10000 + parseInt(match[2], 10);
+                }
+                const numOnly = parseInt(id.replace(/\D/g, ''), 10);
+                return isNaN(numOnly) ? 0 : numOnly;
+            };
+
+            const sortedProjects = [...filteredProjects].sort((a, b) => {
+                const timeA = parseIdTimestamp(a.id);
+                const timeB = parseIdTimestamp(b.id);
+
+                if (sortBy === 'newest') return timeB - timeA;
+                if (sortBy === 'oldest') return timeA - timeB;
+                
+                const scoreA = isRecentlyUpdated(a) ? 1 : 0;
+                const scoreB = isRecentlyUpdated(b) ? 1 : 0;
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                return timeB - timeA;
+            });
+
+            const getKingdomSelectClass = (val) => {
+                if (!val) return "custom-select text-xs font-semibold";
+                if (val === 'เบสเซนตร้า') return "custom-select text-xs font-bold bg-[#7c3aed] text-white border-[#6d28d9] shadow-sm";
+                if (val === 'แคสเทอเรีย') return "custom-select text-xs font-bold bg-[#dc2626] text-white border-[#b91c1c] shadow-sm";
+                if (val === 'แบลงค์ไฮม์การ์ด') return "custom-select text-xs font-bold bg-[#0284c7] text-white border-[#0369a1] shadow-sm";
+                if (val === 'แมคชีนโพลิส') return "custom-select text-xs font-bold bg-[#16a34a] text-white border-[#15803d] shadow-sm";
+                if (val === 'ไฟนัลธรอน') return "custom-select text-xs font-bold bg-[#d97706] text-white border-[#b45309] shadow-sm";
+                return "custom-select text-xs font-bold bg-[#5d3a1a] text-white";
+            };
+
+            const getLocationSelectClass = (val) => {
+                if (!val) return "custom-select text-xs font-semibold";
+                if (val === 'โรจนะ') return "custom-select text-xs font-bold bg-[#2563eb] text-white border-[#1d4ed8] shadow-sm";
+                if (val === 'บางปะอิน') return "custom-select text-xs font-bold bg-[#0d9488] text-white border-[#0f766e] shadow-sm";
+                if (val === 'บ้านหว้า 2') return "custom-select text-xs font-bold bg-[#db2777] text-white border-[#be185d] shadow-sm";
+                return "custom-select text-xs font-bold bg-[#5d3a1a] text-white";
+            };
+
+            const getCategorySelectClass = (val) => {
+                if (!val) return "custom-select text-xs font-semibold";
+                if (val === 'Safety') return "custom-select text-xs font-bold bg-[#ca8a04] text-white border-[#a16207] shadow-sm";
+                if (val === 'Quality') return "custom-select text-xs font-bold bg-[#1d4ed8] text-white border-[#1e40af] shadow-sm";
+                if (val === 'Culture') return "custom-select text-xs font-bold bg-[#65a30d] text-white border-[#4d7c0f] shadow-sm";
+                return "custom-select text-xs font-bold bg-[#5d3a1a] text-white";
+            };
+
+            const getStatusSelectClass = (val) => {
+                if (!val) return "custom-select text-xs font-semibold";
+                if (val === 'Blueprint') return "custom-select text-xs font-bold bg-blue-200 text-blue-900 border-blue-400 shadow-sm";
+                if (val === 'Founding') return "custom-select text-xs font-bold bg-yellow-200 text-yellow-900 border-yellow-400 shadow-sm";
+                if (val === 'Rising') return "custom-select text-xs font-bold bg-green-200 text-green-900 border-green-500 shadow-sm";
+                if (val === 'Ruined') return "custom-select text-xs font-bold bg-red-200 text-red-900 border-red-400 shadow-sm";
+                return "custom-select text-xs font-bold bg-[#5d3a1a] text-white";
+            };
+
+            const hasActiveFilter = !!(filters.origin || filters.target || filters.location || filters.category || filters.status || filters.search);
+
             const kingdoms = [
                 { name: 'เบสเซนตร้า', id: 'bes', hexColor: '#10b981' },
                 { name: 'แคสเทอเรีย', id: 'cas', hexColor: '#ef4444' },
@@ -1654,8 +1825,8 @@
 
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-            const currentItems = filteredProjects.slice(indexOfFirstItem, indexOfLastItem);
-            const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+            const currentItems = sortedProjects.slice(indexOfFirstItem, indexOfLastItem);
+            const totalPages = Math.max(1, Math.ceil(sortedProjects.length / itemsPerPage));
 
             return (
                 <div className="space-y-6 animate-fade-in">
@@ -1732,14 +1903,59 @@
 
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
                         <div className="flex flex-wrap gap-2 items-center">
-                            <span className="font-bold text-[#5d3a1a] mr-1">FILTERS:</span>
-                            <select name="origin" value={filters.origin} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Origin (ผู้เสนอ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
-                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (ผู้ถูกเสนอ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
-                            <select name="location" value={filters.location} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Location (สถานที่)</option><option value="โรจนะ">โรจนะ</option><option value="บางปะอิน">บางปะอิน</option><option value="บ้านหว้า 2">บ้านหว้า 2</option></select>
-                            <select name="category" value={filters.category} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Category (หมวดหมู่)</option><option value="Safety">Safety</option><option value="Quality">Quality</option><option value="Culture">Culture</option></select>
-                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Status (สถานะไอเดีย)</option><option value="Blueprint">Blueprint</option><option value="Founding">Founding</option><option value="Rising">Rising</option><option value="Ruined">Ruined</option></select>
+                            <span className="font-bold text-[#5d3a1a] mr-1">ฟิลเตอร์:</span>
+                            <select name="origin" value={filters.origin} onChange={handleFilterChange} className={getKingdomSelectClass(filters.origin)}>
+                                <option value="">ผู้เสนอ</option>
+                                <option value="เบสเซนตร้า">🟣 เบสเซนตร้า</option>
+                                <option value="แคสเทอเรีย">🔥 แคสเทอเรีย</option>
+                                <option value="แบลงค์ไฮม์การ์ด">❄️ แบลงค์ไฮม์การ์ด</option>
+                                <option value="แมคชีนโพลิส">⚙️ แมคชีนโพลิส</option>
+                                <option value="ไฟนัลธรอน">✨ ไฟนัลธรอน</option>
+                            </select>
+                            <select name="target" value={filters.target} onChange={handleFilterChange} className={getKingdomSelectClass(filters.target)}>
+                                <option value="">ผู้รับผิดชอบ</option>
+                                <option value="เบสเซนตร้า">🟣 เบสเซนตร้า</option>
+                                <option value="แคสเทอเรีย">🔥 แคสเทอเรีย</option>
+                                <option value="แบลงค์ไฮม์การ์ด">❄️ แบลงค์ไฮม์การ์ด</option>
+                                <option value="แมคชีนโพลิส">⚙️ แมคชีนโพลิส</option>
+                                <option value="ไฟนัลธรอน">✨ ไฟนัลธรอน</option>
+                            </select>
+                            <select name="location" value={filters.location} onChange={handleFilterChange} className={getLocationSelectClass(filters.location)}>
+                                <option value="">สถานที่</option>
+                                <option value="โรจนะ">🌊 โรจนะ</option>
+                                <option value="บางปะอิน">🌲 บางปะอิน</option>
+                                <option value="บ้านหว้า 2">🌸 บ้านหว้า 2</option>
+                            </select>
+                            <select name="category" value={filters.category} onChange={handleFilterChange} className={getCategorySelectClass(filters.category)}>
+                                <option value="">หมวดหมู่</option>
+                                <option value="Safety">⚠️ Safety</option>
+                                <option value="Quality">💎 Quality</option>
+                                <option value="Culture">🍃 Culture</option>
+                            </select>
+                            <select name="status" value={filters.status} onChange={handleFilterChange} className={getStatusSelectClass(filters.status)}>
+                                <option value="">สถานะ</option>
+                                <option value="Blueprint">📌 Blueprint</option>
+                                <option value="Founding">🏗️ Founding</option>
+                                <option value="Rising">⭐ Rising</option>
+                                <option value="Ruined">❌ Ruined</option>
+                            </select>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="custom-select text-xs font-bold border-[#8b5a2b] bg-[#f4e4bc]">
+                                <option value="recent">🔄 เรียง: อัปเดตล่าสุด</option>
+                                <option value="newest">📅 เรียง: สาส์นใหม่ ➔ เก่า</option>
+                                <option value="oldest">📅 เรียง: สาส์นเก่า ➔ ใหม่</option>
+                            </select>
+                            {hasActiveFilter && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => setFilters({ origin: '', target: '', location: '', category: '', status: '', search: '' })}
+                                    className="px-2.5 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-white font-bold text-xs shadow transition cursor-pointer flex items-center gap-1 border border-red-400 animate-fade-in"
+                                    title="ล้างการตั้งค่าตัวกรองทั้งหมด"
+                                >
+                                    <i className="fa-solid fa-xmark"></i> ล้างตัวกรอง
+                                </button>
+                            )}
                         </div>
-                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID, ชื่อ, รหัส..." className="w-full md:w-64 custom-select text-xs font-medium" />
+                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID, ชื่อ, รหัส..." className="w-full md:w-52 custom-select text-xs font-medium" />
                     </div>
 
                     {/* Mobile Scroll Hint Badge */}
@@ -1774,9 +1990,16 @@
                                         return (
                                         <tr key={p.id} className={`border-b border-[#8b5a2b]/25 hover:bg-[#e7d5a5]/50 transition duration-150 ${isHiddenRow ? 'bg-gray-800/10 opacity-75' : ''}`}>
                                             <td className="py-3.5 px-2 font-bold text-slate-800">
-                                                {p.id} 
-                                                {p.isQualityEvent && <span className="ml-1 text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
-                                                {p.isSuperRising && <span className="ml-1 text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span>{p.id}</span>
+                                                    {isRecentlyUpdated(p) && (
+                                                        <span className="text-[10px] bg-gradient-to-r from-amber-500 to-red-500 text-white px-1.5 py-0.5 rounded-full font-extrabold shadow-sm animate-pulse whitespace-nowrap" title="มีการอัปเดตข้อมูลหรือคอมเมนต์ใหม่">
+                                                            🔔 UPDATED
+                                                        </span>
+                                                    )}
+                                                    {p.isQualityEvent && <span className="text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
+                                                    {p.isSuperRising && <span className="text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
+                                                </div>
                                             </td>
                                             <td className="py-3.5 px-2 font-semibold max-w-[200px] truncate">{p.title}</td>
                                             <td className="py-3.5 px-2 font-mono font-bold text-gray-700">{maskEmpId(p.emp)}</td>
@@ -1785,7 +2008,11 @@
                                             <td className="py-3.5 px-2 font-bold">{p.target}</td>
                                             <td className="py-3.5 px-2 font-bold text-[#5d3a1a]">{p.factory}</td>
                                             <td className="py-3.5 px-2">
-                                                {p.category.includes('Secret') ? <span className="text-gray-800 font-bold"><i className="fa-solid fa-user-secret"></i> Secret</span> : p.category}
+                                                {p.category.includes('Secret') ? (
+                                                    <span className="text-gray-800 font-bold"><i className="fa-solid fa-user-secret"></i> Secret</span>
+                                                ) : (
+                                                    p.category.replace(/\s*\(EVENT\s*x2\s*EXP!\)/gi, '').trim()
+                                                )}
                                             </td>
                                             <td className="py-3.5 px-2 text-center">{getStatusBadge(p)}</td>
                                             <td className="py-3.5 px-2 text-center">
@@ -2008,7 +2235,7 @@
         // ==========================================
         // COMPONENT 6: QuestBoard
         // ==========================================
-        function QuestBoard({ projects, onUpdateProject, kingdomEXP }) {
+        function QuestBoard({ projects, onUpdateProject, kingdomEXP, initialFilter }) {
             const [currentRole, setCurrentRole] = useState('none');
             const [isExpBoardOpen, setIsExpBoardOpen] = useState(false);
             const [selectedQuest, setSelectedQuest] = useState(null);
@@ -2022,13 +2249,29 @@
             const [centralStatus, setCentralStatus] = useState('');
             const [centralComment, setCentralComment] = useState('');
 
-            const [filters, setFilters] = useState({ target: '', status: '', search: '' });
+            const [filters, setFilters] = useState({ 
+                origin: (initialFilter && initialFilter.origin) ? initialFilter.origin : '', 
+                target: (initialFilter && initialFilter.target) ? initialFilter.target : '', 
+                status: '', 
+                search: '' 
+            });
             const [cardStatusFilter, setCardStatusFilter] = useState('Evidence');
+            const [sortBy, setSortBy] = useState('recent');
             const [currentPage, setCurrentPage] = useState(1);
             const itemsPerPage = 5;
 
             const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
-            useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter]);
+            useEffect(() => { setCurrentPage(1); }, [filters, cardStatusFilter, sortBy]);
+
+            useEffect(() => {
+                if (initialFilter) {
+                    setFilters(prev => ({
+                        ...prev,
+                        origin: initialFilter.origin || '',
+                        target: initialFilter.target || ''
+                    }));
+                }
+            }, [initialFilter]);
 
             const handleRoleLogin = (type) => {
                 if (type === 'target') {
@@ -2237,11 +2480,12 @@
             
             const filteredQuests = visibleQuests.filter(q => {
                 if (!q) return false;
+                const matchOrigin = !filters.origin || (q.origin && q.origin.includes(filters.origin));
                 const matchTarget = !filters.target || (q.target && q.target.includes(filters.target));
                 const matchStatus = !filters.status || q.status === filters.status;
                 const rowText = `${q.id || ''} ${q.title || ''} ${q.origin || ''} ${q.target || ''}`.toLowerCase();
                 const matchSearch = !filters.search || rowText.includes(filters.search.toLowerCase());
-                return matchTarget && matchStatus && matchSearch;
+                return matchOrigin && matchTarget && matchStatus && matchSearch;
             });
 
             const totalFilteredQuests = filteredQuests.length;
@@ -2256,10 +2500,70 @@
 
             const questPercentage = totalFilteredQuests > 0 ? ((countCardStatusQuests / totalFilteredQuests) * 100).toFixed(1) : '0.0';
 
+            const isRecentlyUpdatedQuest = (q) => {
+                if (!q) return false;
+                if (q.wasRecentlyUpdated) return true;
+                if (q.updated_at) {
+                    const updateTime = new Date(q.updated_at).getTime();
+                    const isWithin24Hours = (Date.now() - updateTime) < 24 * 60 * 60 * 1000;
+                    if (q.created_at) {
+                        const createTime = new Date(q.created_at).getTime();
+                        return isWithin24Hours && (updateTime - createTime > 10000);
+                    }
+                    return isWithin24Hours;
+                }
+                return false;
+            };
+
+            const parseIdTimestamp = (id) => {
+                if (!id) return 0;
+                const match = id.match(/(\d{8})-(\d+)/);
+                if (match) {
+                    return parseInt(match[1], 10) * 10000 + parseInt(match[2], 10);
+                }
+                const numOnly = parseInt(id.replace(/\D/g, ''), 10);
+                return isNaN(numOnly) ? 0 : numOnly;
+            };
+
+            const sortedQuests = [...filteredQuests].sort((a, b) => {
+                const timeA = parseIdTimestamp(a.id);
+                const timeB = parseIdTimestamp(b.id);
+
+                if (sortBy === 'newest') return timeB - timeA;
+                if (sortBy === 'oldest') return timeA - timeB;
+                
+                const scoreA = isRecentlyUpdatedQuest(a) ? 1 : 0;
+                const scoreB = isRecentlyUpdatedQuest(b) ? 1 : 0;
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                return timeB - timeA;
+            });
+
             const indexOfLastItem = currentPage * itemsPerPage;
             const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-            const currentItems = filteredQuests.slice(indexOfFirstItem, indexOfLastItem);
-            const totalPages = Math.max(1, Math.ceil(filteredQuests.length / itemsPerPage));
+            const currentItems = sortedQuests.slice(indexOfFirstItem, indexOfLastItem);
+            const totalPages = Math.max(1, Math.ceil(sortedQuests.length / itemsPerPage));
+
+            const getKingdomSelectClass = (val) => {
+                if (!val) return "custom-select text-xs font-semibold";
+                if (val === 'เบสเซนตร้า') return "custom-select text-xs font-bold bg-[#7c3aed] text-white border-[#6d28d9] shadow-sm";
+                if (val === 'แคสเทอเรีย') return "custom-select text-xs font-bold bg-[#dc2626] text-white border-[#b91c1c] shadow-sm";
+                if (val === 'แบลงค์ไฮม์การ์ด') return "custom-select text-xs font-bold bg-[#0284c7] text-white border-[#0369a1] shadow-sm";
+                if (val === 'แมคชีนโพลิส') return "custom-select text-xs font-bold bg-[#16a34a] text-white border-[#15803d] shadow-sm";
+                if (val === 'ไฟนัลธรอน') return "custom-select text-xs font-bold bg-[#d97706] text-white border-[#b45309] shadow-sm";
+                return "custom-select text-xs font-bold bg-[#5d3a1a] text-white";
+            };
+
+            const getStatusSelectClass = (val) => {
+                if (!val) return "custom-select text-xs font-semibold";
+                if (val === 'Founding') return "custom-select text-xs font-bold bg-yellow-200 text-yellow-900 border-yellow-400 shadow-sm";
+                if (val === 'Evidence') return "custom-select text-xs font-bold bg-purple-200 text-purple-900 border-purple-400 shadow-sm";
+                if (val === 'Rising') return "custom-select text-xs font-bold bg-green-200 text-green-900 border-green-500 shadow-sm";
+                if (val === 'Ruined') return "custom-select text-xs font-bold bg-red-200 text-red-900 border-red-400 shadow-sm";
+                if (val === 'Abandoned') return "custom-select text-xs font-bold bg-gray-300 text-gray-900 border-gray-400 shadow-sm";
+                return "custom-select text-xs font-bold bg-[#5d3a1a] text-white";
+            };
+
+            const hasActiveFilter = !!(filters.origin || filters.target || filters.status || filters.search);
 
             const getStatusBadge = (q) => {
                 if (!q) return null;
@@ -2365,11 +2669,48 @@
 
                     <div className="bg-[#dcd0b0] p-4 rounded-2xl border border-[#8b5a2b]/50 flex flex-wrap gap-3 items-center justify-between shadow-md text-sm">
                         <div className="flex flex-wrap gap-2 items-center">
-                            <span className="font-bold text-[#5d3a1a] mr-1">FILTERS ภารกิจ:</span>
-                            <select name="target" value={filters.target} onChange={handleFilterChange} className="custom-select text-xs font-semibold"><option value="">Target (อาณาจักรที่ต้องรับผิดชอบ)</option><option value="เบสเซนตร้า">เบสเซนตร้า</option><option value="แคสเทอเรีย">แคสเทอเรีย</option><option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด</option><option value="แมคชีนโพลิส">แมคชีนโพลิส</option><option value="ไฟนัลธรอน">ไฟนัลธรอน</option></select>
-                            <select name="status" value={filters.status} onChange={handleFilterChange} className="custom-select text-xs font-bold border-blue-600"><option value="">Status (สถานะภารกิจ)</option><option value="Founding">🏗️ Founding (กำลังดำเนินการแก้ไข)</option><option value="Evidence">📤 Evidence (ส่งมอบหลักฐานแล้ว)</option><option value="Rising">⭐ Rising (ตรวจสอบผ่าน รับ EXP)</option><option value="Ruined">❌ Ruined (แก้ไขไม่ผ่าน/รอกลับไปแก้ใหม่)</option><option value="Abandoned">👻 Abandoned (ทิ้งร้าง)</option></select>
+                            <span className="font-bold text-[#5d3a1a] mr-1">ฟิลเตอร์:</span>
+                            <select name="origin" value={filters.origin} onChange={handleFilterChange} className={getKingdomSelectClass(filters.origin)}>
+                                <option value="">ผู้เสนอ</option>
+                                <option value="เบสเซนตร้า">🟣 เบสเซนตร้า</option>
+                                <option value="แคสเทอเรีย">🔥 แคสเทอเรีย</option>
+                                <option value="แบลงค์ไฮม์การ์ด">❄️ แบลงค์ไฮม์การ์ด</option>
+                                <option value="แมคชีนโพลิส">⚙️ แมคชีนโพลิส</option>
+                                <option value="ไฟนัลธรอน">✨ ไฟนัลธรอน</option>
+                            </select>
+                            <select name="target" value={filters.target} onChange={handleFilterChange} className={getKingdomSelectClass(filters.target)}>
+                                <option value="">ผู้รับผิดชอบ</option>
+                                <option value="เบสเซนตร้า">🟣 เบสเซนตร้า</option>
+                                <option value="แคสเทอเรีย">🔥 แคสเทอเรีย</option>
+                                <option value="แบลงค์ไฮม์การ์ด">❄️ แบลงค์ไฮม์การ์ด</option>
+                                <option value="แมคชีนโพลิส">⚙️ แมคชีนโพลิส</option>
+                                <option value="ไฟนัลธรอน">✨ ไฟนัลธรอน</option>
+                            </select>
+                            <select name="status" value={filters.status} onChange={handleFilterChange} className={getStatusSelectClass(filters.status)}>
+                                <option value="">สถานะ</option>
+                                <option value="Founding">🏗️ Founding</option>
+                                <option value="Evidence">📤 Evidence</option>
+                                <option value="Rising">⭐ Rising</option>
+                                <option value="Ruined">❌ Ruined</option>
+                                <option value="Abandoned">👻 Abandoned</option>
+                            </select>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="custom-select text-xs font-bold border-blue-600 bg-[#f4e4bc]">
+                                <option value="recent">🔄 เรียง: อัปเดตล่าสุด</option>
+                                <option value="newest">📅 เรียง: ภารกิจใหม่ ➔ เก่า</option>
+                                <option value="oldest">📅 เรียง: ภารกิจเก่า ➔ ใหม่</option>
+                            </select>
+                            {hasActiveFilter && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => setFilters({ origin: '', target: '', status: '', search: '' })}
+                                    className="px-2.5 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-white font-bold text-xs shadow transition cursor-pointer flex items-center gap-1 border border-red-400 animate-fade-in"
+                                    title="ล้างการตั้งค่าตัวกรองทั้งหมด"
+                                >
+                                    <i className="fa-solid fa-xmark"></i> ล้างตัวกรอง
+                                </button>
+                            )}
                         </div>
-                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID สาส์น..." className="w-full md:w-64 custom-select text-xs font-medium" />
+                        <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="🔍 ค้นหา ID สาส์น..." className="w-full md:w-52 custom-select text-xs font-medium" />
                     </div>
 
                     {/* Mobile Scroll Hint Badge */}
@@ -2404,7 +2745,16 @@
                                         return (
                                             <tr key={q.id} className={`border-b border-[#8b5a2b]/25 hover:bg-[#e7d5a5]/50 transition duration-150 ${rowBg}`}>
                                                 <td className="py-4 px-2 font-bold text-slate-800">
-                                                    {q.id} {q.isQualityEvent && <span className="ml-1 text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
+                                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                                        <span>{q.id}</span>
+                                                        {isRecentlyUpdatedQuest(q) && (
+                                                            <span className="text-[10px] bg-gradient-to-r from-amber-500 to-red-500 text-white px-1.5 py-0.5 rounded-full font-extrabold shadow-sm animate-pulse whitespace-nowrap" title="มีการอัปเดตข้อมูลหรือส่งหลักฐานใหม่">
+                                                                🔔 UPDATED
+                                                            </span>
+                                                        )}
+                                                        {q.isQualityEvent && <span className="text-[10px] bg-yellow-400 text-yellow-900 px-1 rounded font-bold" title="Event Quality x2">x2</span>}
+                                                        {q.isSuperRising && <span className="text-[10px] bg-purple-500 text-white px-1 rounded font-bold" title="Super Rising Bonus">👑</span>}
+                                                    </div>
                                                 </td>
                                                 <td className="py-4 px-2 font-semibold max-w-[200px] truncate">{q.title}</td>
                                                 <td className="py-4 px-2">{q.origin}</td>
@@ -2737,26 +3087,35 @@
                         <div className="space-y-10 animate-fade-in">
                             <section className="text-justify">
                                 <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel">
-                                    <i className="fa-solid fa-swords"></i> 1. กฎแห่งการสถาปนา (Workflow & System)
+                                    <i className="fa-solid fa-swords"></i> 1. กฎแห่งการสถาปนาและขั้นตอนการทำงาน (Workflow & System)
                                 </h2>
                                 <p className="text-sm text-[#8b5a2b] mb-4 font-bold">ระบบนี้ถูกแบ่งบทบาทออกเป็น 3 ฝ่าย เพื่อให้การพัฒนาเป็นไปอย่างยุติธรรม: "ผู้เสนอ (Origin)", "ผู้ลงมือทำ (Target)" และ "สภาเมือง (Central Admin)"</p>
                                 <div className="space-y-6">
                                     <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-blue-600 shadow">
                                         <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-lightbulb text-yellow-600 mr-2"></i> เฟสที่ 1: เสนอไอเดีย (หน้า ประกาศิตแห่งแผ่นดิน)</h3>
                                         <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
-                                            <li><b>ยื่นสาส์น:</b> พบปัญหาหน้างาน ให้กรอก "สาส์นพัฒนาแด่อาณาจักร" พร้อมระบุเมืองเป้าหมาย สาส์นจะแสดงผลที่กระดานประกาศิตฯ (สถานะ Blueprint)</li>
-                                            <li><b>สภาอนุมัติ:</b> แอดมินสภาเมืองจะพิจารณาความเหมาะสม หากทำได้จริงจะปรับสถานะเป็น <b>Rising</b> (อนุมัติผ่าน) หรือ <b>Founding</b> (อยู่ระหว่างพิจารณา)</li>
-                                            <li><b>Super Rising:</b> หากเป็นไอเดียที่ยอดเยี่ยมระดับช่วยลดต้นทุน (Cost/Cycle Time) สภาอาจพิจารณาอัปเกรดเป็น <b className="text-yellow-700">👑 Super Rising</b> ทันที!</li>
+                                            <li><b>ยื่นสาส์น:</b> เมื่อพบปัญหาหน้างาน ให้กรอก "สาส์นพัฒนาแด่อาณาจักร" พร้อมระบุเมืองเป้าหมาย สาส์นจะแสดงผลที่กระดานประกาศิตฯ (สถานะ 📌 Blueprint)</li>
+                                            <li><b>สภาตรวจและพูดคุย:</b> แอดมินสภาเมืองจะเปิดอ่านเพื่อพิจารณาความเหมาะสม หากต้องการสอบถามข้อมูล รูปภาพ หรือรายละเอียดเพิ่มเติม สภาจะปรับเป็นสถานะ 🏗️ Founding พร้อมพิมพ์ข้อความคุยกับผู้เสนอ</li>
+                                            <li><b>การแก้ไขสาส์น (Edit Decree):</b> หากสภาขอข้อมูลเพิ่ม หรือผู้เสนอต้องการอัปเดตข้อมูล สามารถกดปุ่ม "แก้ไขสาส์น" เพื่อเพิ่มรูปภาพหรือปรับปรุงข้อความได้ สาส์นจะกลับมาเป็นสถานะ 📌 Blueprint พร้อมส่งสัญญาณไฟกะพริบแจ้งเตือนสภาเมืองให้เปิดตรวจซ้ำทันที</li>
+                                            <li><b>สภาอนุมัติ:</b> หากทำได้จริง สภาจะปรับสถานะเป็น <b>⭐ Rising</b> (อนุมัติผ่านไอเดีย) แต่หากไม่สอดคล้องกับหลักเกณฑ์หรืองบประมาณ สภาจะปรับเป็น <b>❌ Ruined</b> (ปัดตก)</li>
+                                            <li><b>👑 Super Rising:</b> หากเป็นไอเดียที่ยอดเยี่ยมระดับช่วยลดต้นทุน (Cost) หรือลดเวลาทำงาน (Cycle Time) สภาอาจพิจารณาอัปเกรดเป็น <b className="text-yellow-700">👑 Super Rising</b> ทันที!</li>
                                             <li className="text-blue-700 font-bold bg-blue-100 p-2 rounded inline-block mt-2 shadow-inner">🏆 รางวัลผู้เสนอ: อนุมัติปกติรับ +5 EXP / หากได้ Super Rising รับเบิ้ลเป็น +10 EXP!</li>
                                         </ul>
                                     </div>
                                     <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-red-600 shadow">
                                         <h3 className="font-bold text-[#5d3a1a] text-lg mb-3 border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-hammer text-gray-600 mr-2"></i> เฟสที่ 2: ลงมือปฏิบัติ (หน้า ลานส่งมอบภารกิจ)</h3>
                                         <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
-                                            <li><b>รับเควสต์และแก้ไข:</b> เมื่อสาส์นอนุมัติแล้ว จะมาโผล่ที่ลานภารกิจ (สถานะ Founding) ตัวแทนเมืองเป้าหมายต้องนำไปลงมือแก้ไขหน้างานจริง</li>
-                                            <li><b>ส่งหลักฐาน:</b> ทำเสร็จแล้วให้อัปโหลดภาพผลลัพธ์ (After) เพื่อเปลี่ยนสถานะเป็น <b>Evidence</b> รอสภากลางมาตรวจ</li>
-                                            <li><b>สภาตรวจงาน:</b> สภากลางประเมินหลักฐาน หากผ่านเกณฑ์จะปรับสถานะขั้นสุดยอดเป็น <b>Rising</b> หากไม่ผ่าน จะปัดตกเป็น <b>Ruined</b> ให้กลับไปแก้ใหม่</li>
+                                            <li><b>รับเควสต์และแก้ไข:</b> เมื่อสาส์นอนุมัติแล้ว จะถูกส่งต่อมาเป็นเควสต์ที่ลานภารกิจ (สถานะ 🏗️ Founding) ตัวแทนเมืองเป้าหมายต้องนำไปลงมือแก้ไขหน้างานจริง</li>
+                                            <li><b>ส่งหลักฐาน:</b> เมื่อปรับปรุงเสร็จแล้ว ให้กดส่งหลักฐาน กรอกค่าใช้จ่าย/ผลลัพธ์จริง และอัปโหลดภาพผลลัพธ์ (After) เพื่อเปลี่ยนสถานะเป็น <b>📤 Evidence</b> รอสภากลางมาตรวจรับงาน (สามารถกดอัปเดตหลักฐานเพิ่มเติมได้เรื่อยๆ ในขั้นตอนนี้)</li>
+                                            <li><b>สภาตรวจงาน:</b> สภากลางประเมินหลักฐานหน้างาน หากผ่านเกณฑ์จะปรับสถานะขั้นสุดยอดเป็น <b>⭐ Rising</b> (ภารกิจสำเร็จสมบูรณ์) หากหลักฐานยังไม่ผ่าน จะปรับเป็น <b>❌ Ruined</b> พร้อมคอมเมนต์จุดที่ต้องแก้ เพื่อให้เมืองเป้าหมายนำกลับไปแก้ไขและส่งหลักฐานใหม่ได้</li>
                                             <li className="text-green-700 font-bold bg-green-100 p-2 rounded inline-block mt-2 shadow-inner">🏆 รางวัลผู้ทำ: เมื่อสภาตรวจผ่าน อาณาจักรเป้าหมายที่ลงมือทำรับทันที +15 EXP!</li>
+                                        </ul>
+                                    </div>
+                                    <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-amber-600 shadow space-y-3">
+                                        <h3 className="font-bold text-[#5d3a1a] text-lg border-b border-[#8b5a2b]/30 pb-2"><i className="fa-solid fa-toolbox text-amber-700 mr-2"></i> เครื่องมืออำนวยความสะดวกในระบบ</h3>
+                                        <ul className="list-disc list-inside text-sm text-[#3d2511] space-y-2 ml-2">
+                                            <li><b>🔔 ป้ายแจ้งเตือน UPDATED:</b> เมื่อสาส์นมีคนเข้ามาแก้ไขข้อมูล หรือสภาเมืองเข้ามาพิมพ์คอมเมนต์ตอบใหม่ สาส์นนั้นจะติดป้ายกะพริบ <b>🔔 UPDATED</b> เป็นเวลา 24 ชม. และลอยขึ้นมาอยู่แถวบนสุดของตารางทันที เพื่อให้ติดตามความเคลื่อนไหวได้สะดวก</li>
+                                            <li><b>📥 การเบิกบันทึกสภา (Export CSV):</b> ผู้ใช้งานและสภาเมืองสามารถกดปุ่ม "เบิกบันทึกสภา (Export CSV)" ที่หน้าประกาศิตแผ่นดิน เพื่อดาวน์โหลดข้อมูลสรุปสาส์นการพัฒนาทั้งหมด และหน้าลานส่งมอบภารกิจ เพื่อดูความสำเร็จที่ผ่านมาและกำลังทำอยู่ ไปเปิดดูหรือทำรายงานวิเคราะห์ต่อใน Microsoft Excel ได้อย่างอิสระ</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -2788,7 +3147,7 @@
                                     <div className="p-4 bg-gray-800 rounded border border-gray-600">
                                         <span className="inline-block px-3 py-1 rounded-full bg-gray-600 text-white border border-gray-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> สาส์นลับแห่งเงา (Secret Message)</span>
                                         <p className="text-sm text-gray-300 leading-relaxed">
-                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ไม่ต้องการเปิดเผยชื่อ ท่าน ক্ষমতায়เลือกส่งสาส์นในนามแคว้น <b>"Bascentra (เบสเซนตร้า)"</b> ได้ ระบบจะปิดบังตัวตนของท่านเป็นความลับขั้นสูงสุด และส่งสาส์นฉบับนี้ตรงถึงสภากลาง (HR) โดยที่ผู้อื่นจะไม่มีสิทธิ์มองเห็นในกระดานสาธารณะโดยเด็ดขาด!
+                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ไม่ต้องการเปิดเผยชื่อ ท่านสามารถเลือกส่งสาส์นในนามแคว้น <b>"Bascentra (เบสเซนตร้า)"</b> ได้ ระบบจะปิดบังตัวตนของท่านเป็นความลับขั้นสูงสุด และส่งสาส์นฉบับนี้ตรงถึงสภากลาง (HR) โดยที่ผู้อื่นจะไม่มีสิทธิ์มองเห็นในกระดานสาธารณะโดยเด็ดขาด!
                                         </p>
                                     </div>
                                 </div>
@@ -2798,13 +3157,186 @@
                                 <h2 className="text-2xl font-bold text-[#5d3a1a] mb-6 flex items-center gap-2 border-b border-[#8b5a2b]/30 pb-2 font-cinzel"><i className="fa-solid fa-spell-book"></i> 3. พจนานุกรมแห่งสภา (Status Dictionary)</h2>
                                 <p className="text-sm text-[#8b5a2b] mb-4 font-bold">เนื่องจากมี 2 กระดาน ความหมายของสถานะจึงแบ่งตามบริบทของกระดานนั้นๆ ดังนี้:</p>
                                 <div className="space-y-4">
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-400 font-bold text-xs mb-2 shadow-sm">Blueprint</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สาส์นเพิ่งถูกส่งเข้ามา ยังไม่ได้รับการพิจารณาใดๆ (รอสภาเปิดอ่าน)</li><li><b>ในหน้าลานภารกิจ:</b> <i>(ไม่มีสถานะนี้ในลานภารกิจ)</i></li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-400 font-bold text-xs mb-2 shadow-sm">Founding</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเมืองรับเรื่องแล้ว กำลังปรึกษากับอาณาจักรเป้าหมายว่าทำได้จริงไหม (ยังไม่ได้คะแนน)</li><li><b>ในหน้าลานภารกิจ:</b> อาณาจักรเป้าหมายรับเรื่องแล้ว กำลังลงมือแก้ไขหน้างานจริง (กำลังก่อสร้าง)</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-400 font-bold text-xs mb-2 shadow-sm">Evidence</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> อาณาจักรเป้าหมายแก้ไขเสร็จและส่งรูปหลักฐานแล้ว กำลังรอสภาเมืองกลางเข้ามาตรวจรับ (ตัวแทนเป้าหมายกดอัปเดตหลักฐานใหม่ได้เรื่อยๆ ในขั้นตอนนี้)</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-500 font-bold text-xs mb-2 shadow-sm">Rising</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> สภาเห็นชอบว่าไอเดียนี้ดีเลิศ! (อนุมัติไอเดียสำเร็จ แจก +5 EXP ให้คนคิด และส่งเรื่องเป็นภารกิจต่อไป)</li><li><b>ในหน้าลานภารกิจ:</b> สภาตรวจหลักฐานผ่าน! (อนุมัติการลงมือทำ แจก +15 EXP ให้คนทำ) ถือว่าปิดภารกิจสมบูรณ์ 100%</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-bold text-xs mb-2 shadow-sm">Ruined</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> ไอเดียถูกปัดตกตั้งแต่แรก ไม่ได้รับการอนุมัติ</li><li><b>ในหน้าลานภารกิจ:</b> หลักฐานการแก้ไขยังไม่ผ่านเกณฑ์ (สภาจะคอมเมนต์จุดที่ต้องแก้ อาณาจักรเป้าหมายนำไปปรับปรุงและส่งรูปหลักฐานใหม่ได้ ระบบไม่หักคะแนน ถือเป็นวงจร PDCA)</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-500 font-bold text-xs mb-2 shadow-sm">Abandoned</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>ในหน้าประกาศิตฯ:</b> <i>(ไม่มีสถานะนี้ในหน้าประกาศิตฯ)</i></li><li><b>ในหน้าลานภารกิจ:</b> ภารกิจถูกปล่อยทิ้งร้างนานเกินกำหนด หากผู้รับผิดชอบกลับมาทำจนเสร็จในภายหลัง สภาจะลงโทษโดยลดรางวัลเหลือเพียง +5 EXP</li></ul></div>
-                                    <div className="p-4 bg-white/40 rounded border border-[#8b5a2b]/20"><span className="inline-block px-3 py-1 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-star mr-1"></i>Hall of Fame</span><ul className="list-disc list-inside text-sm text-[#3d2511] ml-2"><li><b>สถานะพิเศษ:</b> เป็นการนำสาส์นหรือภารกิจที่ <b>สำเร็จไปแล้ว (Rising/Super Rising)</b> ไปเก็บไว้ในหอเกียรติยศ เพื่อให้กระดานหน้าจอหลักสะอาดตา (ข้อมูลไม่หาย เลเวลไม่ลด และทุกคนยังโหลด CSV ไปดูประวัติผลงานได้ปกติ)</li></ul></div>
+                                    {/* 📌 Blueprint */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-900 border border-blue-400 font-bold text-sm sm:text-base shadow-sm">
+                                                📌 Blueprint
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-blue-900 bg-blue-100/90 px-2.5 py-0.5 rounded text-xs border border-blue-300 shadow-sm">
+                                                    📜 หน้าประกาศิตฯ (รอตรวจ)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-blue-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    สาส์นเพิ่งถูกส่งเข้ามาใหม่ หรือเจ้าของสาส์นเพิ่งกดแก้ไขข้อมูลมาใหม่ อยู่ระหว่างรอแอดมินสภาเมืองเปิดอ่านและตรวจสอบ
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-gray-700 bg-gray-200/90 px-2.5 py-0.5 rounded text-xs border border-gray-300 shadow-sm">
+                                                    ⚔️ หน้าลานภารกิจ
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-gray-300 text-xs sm:text-sm text-gray-500 italic leading-relaxed">
+                                                    (ไม่มีสถานะนี้ในลานภารกิจ — สาส์นจะต้องได้รับการอนุมัติจากสภาเมืองก่อน จึงจะถูกส่งมาเป็นเควสต์ในลานภารกิจ)
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 🏗️ Founding */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-400 font-bold text-sm sm:text-base shadow-sm">
+                                                🏗️ Founding
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded text-xs border border-amber-300 shadow-sm">
+                                                    📜 หน้าประกาศิตฯ (กำลังพิจารณา / สอบถามข้อมูล)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-amber-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    สภาเมืองรับเรื่องแล้ว กำลังอยู่ระหว่างพิจารณาความเหมาะสม หรือ <b>สภาใช้สถานะนี้เพื่อพิมพ์พูดคุยสอบถามข้อมูล รูปภาพ หรือรายละเอียดเพิ่มเติมจากผู้เสนอสาส์น</b> (ยังไม่ได้คะแนน)
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded text-xs border border-amber-300 shadow-sm">
+                                                    ⚔️ หน้าลานภารกิจ (รอลงมือแก้ไข)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-amber-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    อาณาจักรเป้าหมายรับเรื่องแล้ว <b>กำลังลงมือแก้ไขหน้างานจริง</b> หรืออยู่ระหว่างรอปรับปรุงตามคำแนะนำ (กำลังก่อสร้าง/แก้ไข)
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 📤 Evidence */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-purple-100 text-purple-900 border border-purple-400 font-bold text-sm sm:text-base shadow-sm">
+                                                📤 Evidence
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-gray-700 bg-gray-200/90 px-2.5 py-0.5 rounded text-xs border border-gray-300 shadow-sm">
+                                                    📜 หน้าประกาศิตฯ
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-gray-300 text-xs sm:text-sm text-gray-500 italic leading-relaxed">
+                                                    (ไม่มีสถานะนี้ในหน้าประกาศิตฯ)
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-purple-900 bg-purple-100/90 px-2.5 py-0.5 rounded text-xs border border-purple-300 shadow-sm">
+                                                    ⚔️ หน้าลานภารกิจ (ส่งหลักฐานแล้ว / รอตรวจ)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-purple-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    อาณาจักรเป้าหมายแก้ไขเสร็จและส่งรูปหลักฐานพร้อมงบประมาณแล้ว กำลังรอสภากลางเข้ามาตรวจรับงาน <b>(ตัวแทนเป้าหมายกดอัปเดตหลักฐานใหม่ได้เรื่อยๆ ในขั้นตอนนี้)</b>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ⭐ Rising */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-green-100 text-green-900 border border-green-500 font-bold text-sm sm:text-base shadow-sm">
+                                                ⭐ Rising
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-emerald-900 bg-emerald-100/90 px-2.5 py-0.5 rounded text-xs border border-emerald-300 shadow-sm">
+                                                    📜 หน้าประกาศิตฯ (อนุมัติไอเดียสำเร็จ +5 EXP)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-emerald-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    สภาเห็นชอบและอนุมัติไอเดียสำเร็จ <b>แจก +5 EXP ให้ผู้เสนอ</b> (หรือ <b>+10 EXP</b> หากได้ 👑 Super Rising) และส่งเรื่องต่อเป็นภารกิจในลานส่งมอบภารกิจ
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-emerald-900 bg-emerald-100/90 px-2.5 py-0.5 rounded text-xs border border-emerald-300 shadow-sm">
+                                                    ⚔️ หน้าลานภารกิจ (ภารกิจสำเร็จสมบูรณ์ +15 EXP)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-emerald-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    สภาตรวจหลักฐานผ่านเกณฑ์ <b>แจก +15 EXP ให้ผู้ลงมือทำ</b> ถือว่าปิดภารกิจสมบูรณ์ 100%
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ❌ Ruined */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-red-100 text-red-900 border border-red-400 font-bold text-sm sm:text-base shadow-sm">
+                                                ❌ Ruined
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-red-900 bg-red-100/90 px-2.5 py-0.5 rounded text-xs border border-red-300 shadow-sm">
+                                                    📜 หน้าประกาศิตฯ (ปัดตกไอเดีย)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-red-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    <b>ไอเดียถูกปัดตก ไม่ได้รับการอนุมัติ</b> เนื่องจากไม่สอดคล้องกับหลักเกณฑ์หรืองบประมาณ (จบกระบวนการในเฟสเสนอไอเดีย)
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-red-900 bg-red-100/90 px-2.5 py-0.5 rounded text-xs border border-red-300 shadow-sm">
+                                                    ⚔️ หน้าลานภารกิจ (ยังไม่ผ่านเกณฑ์ / ส่งแก้ใหม่ได้)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-red-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    <b>หลักฐานการแก้ไขยังไม่ผ่านเกณฑ์</b> สภาจะคอมเมนต์จุดที่ต้องแก้เพิ่ม <b>อาณาจักรเป้าหมายสามารถนำไปปรับปรุงและส่งรูปหลักฐานใหม่ได้เรื่อยๆ</b> (ระบบไม่หักคะแนน ถือเป็นวงจร PDCA)
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 👻 Abandoned */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-gray-200 text-gray-900 border border-gray-400 font-bold text-sm sm:text-base shadow-sm">
+                                                👻 Abandoned
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-gray-700 bg-gray-200/90 px-2.5 py-0.5 rounded text-xs border border-gray-300 shadow-sm">
+                                                    📜 หน้าประกาศิตฯ
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-gray-300 text-xs sm:text-sm text-gray-500 italic leading-relaxed">
+                                                    (ไม่มีสถานะนี้ในหน้าประกาศิตฯ)
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-gray-800 bg-gray-300/90 px-2.5 py-0.5 rounded text-xs border border-gray-400 shadow-sm">
+                                                    ⚔️ หน้าลานภารกิจ (ทิ้งร้างเกินกำหนด)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-gray-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    ภารกิจถูกปล่อยทิ้งไว้นานเกินกำหนด หากผู้รับผิดชอบกลับมาทำจนเสร็จในภายหลัง <b>สภาจะลงโทษโดยลดรางวัลเหลือเพียง +5 EXP</b>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 🌟 Hall of Fame */}
+                                    <div className="p-4 sm:p-5 bg-white/60 rounded-xl border border-[#8b5a2b]/30 shadow-md space-y-3">
+                                        <div>
+                                            <span className="inline-block px-4 py-1.5 rounded-full bg-yellow-900 text-yellow-300 border border-yellow-500 font-bold text-sm sm:text-base shadow-sm">
+                                                <i className="fa-solid fa-star mr-1"></i>🌟 Hall of Fame
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3 text-sm text-[#3d2511] pt-1">
+                                            <div className="space-y-1">
+                                                <span className="inline-block font-bold text-amber-900 bg-amber-200/90 px-2.5 py-0.5 rounded text-xs border border-amber-400 shadow-sm">
+                                                    🏛️ หอเกียรติยศบันทึกผลงาน (สถานะพิเศษ)
+                                                </span>
+                                                <p className="pl-3 border-l-2 border-amber-400 text-xs sm:text-sm text-[#3d2511] leading-relaxed">
+                                                    เป็นการนำสาส์นหรือภารกิจที่ <b>สำเร็จไปแล้ว (Rising / Super Rising)</b> ไปเก็บไว้ในหอเกียรติยศ เพื่อให้กระดานหน้าจอหลักสะอาดตา (ข้อมูลไม่หาย เลเวลไม่ลด และทุกคนยังโหลด CSV ไปดูประวัติผลงานย้อนหลังได้ตามปกติ)
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </section>
                         </div>
@@ -3008,12 +3540,19 @@
                 }
             };
 
+            const [dashboardFilter, setDashboardFilter] = useState(null);
+            const [questFilter, setQuestFilter] = useState(null);
+
             const handleViewChange = (view, extraParam) => {
                 setIsKingdomModalOpen(false);
                 setCurrentView(view);
                 if (view === 'chronicles') {
-                    if (extraParam) setChronicleTab(extraParam); 
+                    if (typeof extraParam === 'string') setChronicleTab(extraParam); 
                     else setChronicleTab('lore'); 
+                } else if (view === 'dashboard') {
+                    setDashboardFilter(extraParam || null);
+                } else if (view === 'quests') {
+                    setQuestFilter(extraParam || null);
                 }
             };
 
@@ -3093,7 +3632,9 @@
                                 ideaApproved: item.idea_approved,
                                 isSecret: item.is_secret,
                                 isQualityEvent: item.is_quality_event,
-                                isSuperRising: item.is_super_rising
+                                isSuperRising: item.is_super_rising,
+                                created_at: item.created_at || null,
+                                updated_at: item.updated_at || null
                             }));
                             setProjects(mappedProjects);
 
@@ -3147,7 +3688,9 @@
             }, [projects]);
 
             const handleAddProject = async (newProject) => { 
-                setProjects(prev => [newProject, ...prev]); 
+                const nowIso = new Date().toISOString();
+                const projectWithDates = { ...newProject, created_at: nowIso, updated_at: nowIso, wasRecentlyUpdated: true };
+                setProjects(prev => [projectWithDates, ...prev]); 
 
                 if (supabase) {
                     const { error } = await supabase.from('projects').insert([{
@@ -3202,7 +3745,9 @@
                     return;
                 }
 
-                setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p)); 
+                const nowIso = new Date().toISOString();
+                const projectWithUpdated = { ...updatedProject, updated_at: nowIso, wasRecentlyUpdated: true };
+                setProjects(prev => prev.map(p => p.id === updatedProject.id ? projectWithUpdated : p)); 
 
                 if (supabase) {
                     const { error } = await supabase.from('projects').update({
@@ -3237,6 +3782,12 @@
 
             const showSidebar = currentView !== 'popboss' && !isKingdomModalOpen; 
 
+            const currentHour = new Date().getHours();
+            const isDayTime = currentHour >= 6 && currentHour < 18;
+            const videoSrc = isMobilePortrait 
+                ? (isDayTime ? "Assets/video/bg_portrait_day.mp4" : "Assets/video/bg_portrait_night.mp4")
+                : (isDayTime ? "Assets/video/bg_horizontal_day.mp4" : "Assets/video/bg_horizontal_night.mp4");
+
             return (
                 <div className="relative min-h-screen flex flex-col">
                     <audio ref={audioRef} id="bgMusic" src={musicTracks[currentTrackIndex].src} loop={isLoopingOne} onEnded={handleNextTrack}></audio>
@@ -3245,14 +3796,14 @@
                     <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
 
                     <video 
-                        key={isMobilePortrait ? 'portrait' : 'horizontal'}
+                        key={`${isMobilePortrait ? 'portrait' : 'horizontal'}_${isDayTime ? 'day' : 'night'}`}
                         autoPlay 
                         loop 
                         muted 
                         playsInline 
                         className={`fixed inset-0 w-full h-full object-cover -z-50 transition-opacity duration-1000 select-none pointer-events-none ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                     >
-                        <source src={isMobilePortrait ? "Assets/video/bg_portrait.mp4" : "Assets/video/bg_horizontal.mp4"} type="video/mp4" />
+                        <source src={videoSrc} type="video/mp4" />
                     </video>
 
                     {!isAuthorized ? (
@@ -3298,9 +3849,17 @@
                                                 onUpdateProject={handleUpdateProject} 
                                                 kingdomEXP={kingdomEXP} 
                                                 onStartEdit={handleStartEdit}
+                                                initialFilter={dashboardFilter}
                                             />
                                         )}
-                                        {currentView === 'quests' && <QuestBoard projects={projects} onUpdateProject={handleUpdateProject} kingdomEXP={kingdomEXP} />}
+                                        {currentView === 'quests' && (
+                                            <QuestBoard 
+                                                projects={projects} 
+                                                onUpdateProject={handleUpdateProject} 
+                                                kingdomEXP={kingdomEXP} 
+                                                initialFilter={questFilter}
+                                            />
+                                        )}
                                         {currentView === 'chronicles' && <Chronicles onViewChange={handleViewChange} initialTab={chronicleTab} />}
                                     </div>
                                 </main>
