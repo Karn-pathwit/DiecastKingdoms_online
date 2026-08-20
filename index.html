@@ -623,7 +623,7 @@
                             )}
 
                             <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.2.0</p>)}
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.3.1</p>)}
                             </div>
                         </div>
                     </div>
@@ -1083,8 +1083,10 @@
                 if (editingProject) {
                     let catVal = editingProject.category || '';
                     if (catVal.includes('Quality')) catVal = '💎 Quality (EVENT x2 EXP!)';
-                    else if (catVal.includes('Safety')) catVal = '🛡️ Safety - มนตราแห่งเกราะคุ้มภัย';
-                    else if (catVal.includes('Culture')) catVal = '📜 Culture - คัมภีร์แห่งปัญญา';
+                    else if (catVal.includes('Safety')) catVal = '🛡️ Safety - ความปลอดภัย';
+                    else if (catVal.includes('Culture')) catVal = '📜 Culture - วัฒนธรรมองค์กร';
+                    else if (catVal.includes('Secret')) catVal = '🔒 Secret - สาส์นลับแห่งเงา (เรื่องร้องเรียน)';
+                    else if (catVal.includes('Enrollment')) catVal = '🎖️ Enrollment - ลงทะเบียนนักผจญภัย (24-30 ส.ค.)';
                     
                     setFormData({
                         name: editingProject.name || '',
@@ -1115,13 +1117,6 @@
             };
 
             const defaultNames = { 'เบสเซนตร้า': 'อัญมณีนักปราชญ์', 'แคสเทอเรีย': 'สิงโตเพลิง', 'แบลงค์ไฮม์การ์ด': 'กวางหิมะ', 'แมคชีนโพลิส': 'ม้าบินจักรกล', 'ไฟนัลธรอน': 'นกยูงขาว' };
-
-            useEffect(() => {
-                if (!editingProject) {
-                    if (formData.origin === 'เบสเซนตร้า' && !formData.category.includes('Enrollment')) setFormData(prev => ({...prev, category: '🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)'}));
-                    else if (formData.category.includes('Secret')) setFormData(prev => ({...prev, category: ''}));
-                }
-            }, [formData.origin, formData.category, editingProject]);
 
 
             const handleFileChange = (e) => {
@@ -1213,7 +1208,6 @@
             };
 
             const isEnrollment = formData.category.includes('Enrollment');
-            const isAnonymous = formData.origin === 'เบสเซนตร้า' && !isEnrollment;
             const isSecret = formData.category.includes('Secret');
 
             const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -1224,16 +1218,21 @@
                 setFormData(prev => { 
                     const newData = { ...prev, [name]: value }; 
                     if (name === 'target') newData.process = ''; 
-                    if (name === 'category' && value.includes('Enrollment')) {
-                        if (newData.origin === 'เบสเซนตร้า') newData.origin = '';
-                        newData.target = 'เบสเซนตร้า';
-                        newData.process = 'อื่นๆ / Other (ข้อเสนอแนะทั่วไป)';
-                        newData.factory = 'โรจนะ';
-                        newData.pinpoint = '-';
-                        newData.title = 'รายงานตัวนักผจญภัย';
-                        newData.problem = '';
-                        newData.solution = '-';
-                        newData.benefit = 'สร้างความสามัคคีและรายงานตัวเข้าสู่อาณาจักร';
+                    if (name === 'category') {
+                        if (value.includes('Secret')) {
+                            newData.origin = 'เบสเซนตร้า';
+                            if (newData.target === 'เบสเซนตร้า') newData.target = '';
+                        } else if (value.includes('Enrollment')) {
+                            if (newData.origin === 'เบสเซนตร้า') newData.origin = '';
+                            newData.target = 'เบสเซนตร้า';
+                            newData.process = 'อื่นๆ / Other (ข้อเสนอแนะทั่วไป)';
+                            newData.factory = 'โรจนะ';
+                            newData.pinpoint = '-';
+                            newData.title = 'รายงานตัวนักผจญภัย';
+                            newData.problem = '';
+                            newData.solution = '-';
+                            newData.benefit = 'สร้างความสามัคคีและรายงานตัวเข้าสู่อาณาจักร';
+                        }
                     }
                     return newData; 
                 });
@@ -1241,7 +1240,7 @@
 
             const handleSubmit = (e) => {
                 e.preventDefault();
-                if (!isAnonymous && !formData.empId.trim()) { alert('กรุณากรอกรหัสพนักงานเพื่อใช้รับรางวัลและยืนยันตัวตนค่ะ'); return; }
+                if (!formData.empId.trim()) { alert('กรุณากรอกรหัสพนักงานเพื่อใช้ยืนยันตัวตนค่ะ'); return; }
                 const checkProblem = isEnrollment ? (formData.problem.trim() || 'รายงานตัวเข้าร่วมกองทัพนักผจญภัย') : formData.problem;
                 if (!formData.origin || !formData.target || !formData.category || !formData.process || !formData.factory || !formData.title || !checkProblem || !formData.benefit) { alert('กรุณากรอกข้อมูลให้ครบถ้วนก่อนส่งสาส์นค่ะ'); return; }
 
@@ -1260,8 +1259,8 @@
                     if (editingProject) {
                         const updatedProject = {
                             ...editingProject,
-                            emp: isAnonymous ? '???-????' : formData.empId,
-                            name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                            emp: formData.empId,
+                            name: finalName,
                             origin: formData.origin,
                             target: formData.target,
                             category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
@@ -1275,16 +1274,17 @@
                             imageText: imageList.length > 0 ? `📷 รูปแนบ: (${imageList.length} รูป)` : '📷 รูปจำลองสาส์นปัญหา',
                             imagePreview: imageList[0] || null,
                             images: imageList,
-                            status: 'Blueprint',
+                            status: isSecret ? 'Hidden' : 'Blueprint',
                             comment: 'สาส์นถูกแก้ไขข้อมูลมาใหม่ รอสภาเมืองเปิดตรวจซ้ำ',
                             ideaApproved: false,
+                            isSecret: isSecret,
                             isQualityEvent: formData.category.includes('Quality') && isQualityEventActive()
                         };
 
                         if (onUpdateProject) await onUpdateProject(updatedProject);
                         await new Promise(resolve => setTimeout(resolve, 800));
                         setShowConfirmModal(false);
-                        setNotification(`✅ อัปเดตสาส์น ${editingProject.id} สำเร็จ! เรื่องถูกส่งกลับเข้าสู่สภาเมืองเรียบร้อยแล้ว`);
+                        setNotification(isSecret ? '🦉 สาส์นลับแห่งเงาถูกอัปเดตและส่งเข้าสู่ป่าต้องมนตราแล้วค่ะ' : `✅ อัปเดตสาส์น ${editingProject.id} สำเร็จ! เรื่องถูกส่งกลับเข้าสู่สภาเมืองเรียบร้อยแล้ว`);
                         setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
                         if (onCancelEdit) onCancelEdit();
                         setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
@@ -1320,7 +1320,7 @@
                     setRunningSeq(latestSeq + 1); 
 
                     const newProject = {
-                        id: newId, emp: isAnonymous ? '???-????' : formData.empId, name: isAnonymous ? 'นักผจญภัยนิรนาม' : finalName,
+                        id: newId, emp: formData.empId, name: finalName,
                         origin: formData.origin, target: formData.target, category: formData.category.split(' - ')[0].replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim(),
                         factory: formData.factory, location: formData.process, pinpoint: formData.pinpoint || 'ไม่ระบุพิกัดชัดเจน',
                         title: formData.title, problem: finalProblem, solution: formData.solution || 'ไม่มีคำอธิบายเสนอแก้', benefit: formData.benefit,
@@ -1334,7 +1334,7 @@
                     await onAddProject(newProject);
                     await new Promise(resolve => setTimeout(resolve, 800));
                     setShowConfirmModal(false);
-                    setNotification(isSecret ? '🔒 สาส์นลับถูกส่งถึงหอจดหมายเหตุ HR โดยปลอดภัยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`);
+                    setNotification(isSecret ? '🦉 สาส์นลับแห่งเงาของท่านได้ถูกส่งไปกับนกฮูกเข้าสู่ป่าต้องมนตราแล้ว... รอสภาเมืองเปิดตรวจสอบ' : (isEnrollment ? '🎖️ สาส์นรายงานตัวของท่านส่งถึงสภาเมืองเรียบร้อยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`));
                     setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
                     setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
                 } catch (err) {
@@ -1389,7 +1389,17 @@
                         </div>
                     )}
                     
-                    {isAnonymous && <div className="bg-gray-800 text-gray-200 border border-gray-600 p-4 rounded-lg mb-6 shadow-inner text-sm font-bold animate-pulse"><i className="fa-solid fa-user-secret mr-2"></i> โหมดสาส์นลับ: ซ่อนข้อมูลประจำตัวคุณแล้ว ส่งตรงถึง HR</div>}
+                    {isSecret && (
+                        <div className="bg-purple-900/90 text-purple-100 border-2 border-purple-400 p-4 rounded-xl text-sm shadow-xl mb-6 animate-fade-in flex items-start gap-3">
+                            <div className="text-3xl animate-pulse">🦉</div>
+                            <div className="flex-1">
+                                <p className="font-bold text-base text-purple-200 mb-0.5">🔒 สาส์นลับแห่งเงา (โหมดเรื่องร้องเรียน / ไม่เปิดเผยต่อสาธารณะ)</p>
+                                <p className="text-xs text-purple-100/90 leading-relaxed">
+                                    สาส์นของท่านจะถูกส่งไปกับนกฮูกเข้าสู่ป่าต้องมนตราแห่งเบสเซนตร้าโดยตรง และถูกซ่อนจากกระดานสาธารณะทั้งหมด มีเพียงสภาเมืองส่วนกลางที่ใส่รหัสผ่านเท่านั้นที่จะสามารถเปิดอ่านและตรวจสอบเรื่องนี้ได้ค่ะ
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {isEnrollment && (
                         <div className="bg-emerald-100 border-2 border-emerald-500 p-4 rounded-xl text-emerald-950 text-sm shadow-md mb-6 animate-fade-in flex items-start gap-3">
@@ -1413,34 +1423,29 @@
                             </h2>
                             
                             {/* 1️⃣ ข้อมูลระบุตัวตน (รหัสพนักงาน + นามแฝง/ฉายาในเกม) */}
-                            {!isAnonymous && (
-                                <div className="bg-[#e5d3a6]/40 p-4 rounded-lg border border-[#8b5a2b]/30 mb-4">
-                                    <p className="text-xs text-[#8b5a2b] font-bold mb-2"><i className="fa-solid fa-user-shield"></i> ข้อมูลระบุตัวตน (Identity)</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div><input type="text" name="empId" value={formData.empId} onChange={handleChange} placeholder="รหัสพนักงาน (บังคับ)" className="input-style font-medium text-sm" required /><p className="text-[9px] mt-1 text-red-600 font-bold">*รหัสจะถูกบันทึกเพื่อใช้พิจารณาแจกรางวัล</p></div>
-                                        <div><input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="นามแฝง / ฉายาในเกม (ไม่บังคับ)" className="input-style font-medium text-sm" /><p className="text-[9px] mt-1 text-[#8b5a2b]">*หากเว้นว่าง ระบบจะตั้งฉายาตามอาณาจักรให้</p></div>
-                                    </div>
+                            <div className="bg-[#e5d3a6]/40 p-4 rounded-lg border border-[#8b5a2b]/30 mb-4">
+                                <p className="text-xs text-[#8b5a2b] font-bold mb-2"><i className="fa-solid fa-user-shield"></i> ข้อมูลระบุตัวตน (Identity)</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><input type="text" name="empId" value={formData.empId} onChange={handleChange} placeholder="รหัสพนักงาน (บังคับ)" className="input-style font-medium text-sm" required /><p className="text-[9px] mt-1 text-red-600 font-bold">*รหัสจะถูกบันทึกเพื่อใช้พิจารณาแจกรางวัล / ให้สภาตรวจสอบ</p></div>
+                                    <div><input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="นามแฝง / ฉายาในเกม (ไม่บังคับ)" className="input-style font-medium text-sm" /><p className="text-[9px] mt-1 text-[#8b5a2b]">*หากเว้นว่าง ระบบจะตั้งฉายาตามอาณาจักรให้</p></div>
                                 </div>
-                            )}
+                            </div>
 
                             {/* 2️⃣ เลือกพลังของสาส์น (Category) */}
                             <div className="w-full">
                                 <label className="block text-xs font-bold text-[#8b5a2b] mb-1">เลือกพลังของสาส์น / Select Category <span className="text-red-600">*</span></label>
-                                <select name="category" value={formData.category} onChange={handleChange} className={`w-full input-style font-bold ${isAnonymous ? 'bg-gray-800 text-white' : ''}`} required>
-                                    {isAnonymous ? <option value="🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)">🔒 Secret - สาส์นลับแห่งเงา (แจ้งเรื่องส่วนตัว/ร้องเรียน)</option> : (
-                                        <>
-                                            <option value="">-- เลือกพลังของสาส์น / Select Category --</option>
-                                            <option value="💎 Quality (EVENT x2 EXP!)">
-                                                {isQualityEventActive() ? "💎 Quality (กิจกรรม X2 วันนี้ถึง 31 ธันวาคม)" : "💎 Quality - มนตราแห่งคุณภาพ"}
-                                            </option>
-                                            <option value="🛡️ Safety - ความปลอดภัย">🛡️ Safety - ความปลอดภัย</option>
-                                            <option value="📜 Culture - วัฒนธรรมองค์กร">📜 Culture - วัฒนธรรมองค์กร</option>
-                                            {isEnrollmentActive() && (
-                                                <option value="🎖️ Enrollment - ลงทะเบียนนักผจญภัย (24-30 ส.ค.)" className="font-bold text-emerald-800 bg-emerald-100">
-                                                    🎖️ Enrollment (กิจกรรมลงทะเบียนนักผจญภัย วันนี้ถึง 30 สิงหาคม)
-                                                </option>
-                                            )}
-                                        </>
+                                <select name="category" value={formData.category} onChange={handleChange} className={`w-full input-style font-bold ${isSecret ? 'bg-purple-950 text-purple-100 border-purple-400' : ''}`} required>
+                                    <option value="">-- เลือกพลังของสาส์น / Select Category --</option>
+                                    <option value="💎 Quality (EVENT x2 EXP!)">
+                                        {isQualityEventActive() ? "💎 Quality (กิจกรรม X2 วันนี้ถึง 31 ธันวาคม)" : "💎 Quality - มนตราแห่งคุณภาพ"}
+                                    </option>
+                                    <option value="🛡️ Safety - ความปลอดภัย">🛡️ Safety (ความปลอดภัย)</option>
+                                    <option value="📜 Culture - วัฒนธรรมองค์กร">📜 Culture (วัฒนธรรมองค์กร)</option>
+                                    <option value="🔒 Secret - สาส์นลับแห่งเงา (เรื่องร้องเรียน)">🔒 Secret (เรื่องร้องเรียนแบบไม่เผยตัวตน)</option>
+                                    {isEnrollmentActive() && (
+                                        <option value="🎖️ Enrollment - ลงทะเบียนนักผจญภัย (24-30 ส.ค.)" className="font-bold text-emerald-800 bg-emerald-100">
+                                            🎖️ Enrollment (กิจกรรมลงทะเบียนนักผจญภัย วันนี้ถึง 30 สิงหาคม)
+                                        </option>
                                     )}
                                 </select>
                                 
@@ -1455,13 +1460,13 @@
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label className="block text-xs font-bold text-[#8b5a2b] mb-1">อาณาจักรต้นสังกัด / Origin <span className="text-red-600">*</span></label>
-                                    <select name="origin" value={formData.origin} onChange={handleChange} className="input-style font-semibold w-full" required disabled={!!editingProject}>
+                                    <select name="origin" value={formData.origin} onChange={handleChange} className="input-style font-semibold w-full" required disabled={!!editingProject || isSecret}>
                                         <option value="">เลือกอาณาจักรต้นสังกัด / Origin Kingdom</option>
+                                        <option value="เบสเซนตร้า">เบสเซนตร้า (อัญมณีนักปราชญ์) / Bascentra</option>
                                         <option value="แคสเทอเรีย">แคสเทอเรีย (สิงโตอัคคี) / Casteria</option>
                                         <option value="แบลงค์ไฮม์การ์ด">แบลงค์ไฮม์การ์ด (กวางน้ำแข็ง) / Blankheimgard</option>
                                         <option value="แมคชีนโพลิส">แมคชีนโพลิส (จักรกลวิจัย) / Machinepolis</option>
-                                        <option value="ไฟนัลธรอน">ไฟนัลธรอน (นกยูงแสง) / Finalthron</option>
-                                        {!isEnrollment && <option value="เบสเซนตร้า" className="text-red-700 font-bold">🔒 ส่งแบบสาส์นลับ (เบสเซนตร้า)</option>}
+                                        <option value="ไฟนัลธรอน">ไฟนัลธรอน (นกยูงขาว) / Finalthron</option>
                                     </select>
                                 </div>
                                 <div>
@@ -1490,10 +1495,10 @@
                                 </section>
                                 <section className="space-y-4">
                                     <h2 className="text-xl font-bold text-[#5d3a1a] border-b border-[#8b5a2b] pb-1">3. รายละเอียดแห่งสาส์น <span className="text-sm font-normal">(Content)</span></h2>
-                                    <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder={isSecret ? "หัวข้อเรื่องร้องเรียน" : "ชื่อโครงการ / Project Name"} className="input-style font-bold" required />
-                                    <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder="รายละเอียดปัญหาที่พบ / Problem Description" className="input-style h-24 font-sans" required></textarea>
-                                    <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder="วิธีแก้ไขที่ต้องการ (ถ้ามี) / Proposed Solution" className="input-style h-24 font-sans"></textarea>
-                                    <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder="ผลลัพธ์ที่คาดหวัง / Expected Benefits" className="input-style h-24 font-sans" required></textarea>
+                                    <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder={isSecret ? "หัวข้อเรื่องร้องเรียน / Complaint Title" : "ชื่อโครงการ / Project Name"} className="input-style font-bold" required />
+                                    <textarea name="problem" value={formData.problem} onChange={handleChange} placeholder={isSecret ? "รายละเอียดเรื่องร้องเรียนที่พบ / Complaint Details" : "รายละเอียดปัญหาที่พบ / Problem Description"} className="input-style h-24 font-sans" required></textarea>
+                                    <textarea name="solution" value={formData.solution} onChange={handleChange} placeholder={isSecret ? "สิ่งที่ต้องการให้แก้ไขหรือข้อเสนอแนะ / Proposed Solution" : "วิธีแก้ไขที่ต้องการ (ถ้ามี) / Proposed Solution"} className="input-style h-24 font-sans"></textarea>
+                                    <textarea name="benefit" value={formData.benefit} onChange={handleChange} placeholder={isSecret ? "ผลลัพธ์ที่คาดหวังหลังการแก้ไข / Expected Benefits" : "ผลลัพธ์ที่คาดหวัง / Expected Benefits"} className="input-style h-24 font-sans" required></textarea>
                                 </section>
                             </>
                         ) : null}
@@ -2068,6 +2073,7 @@
                                 <option value="Quality">💎 Quality</option>
                                 <option value="Safety">⚠️ Safety</option>
                                 <option value="Culture">🍃 Culture</option>
+                                {isAdminMode && <option value="Secret">🔒 Secret (สาส์นลับ)</option>}
                                 {isEnrollmentActive() && <option value="Enrollment">🎖️ Enrollment</option>}
                             </select>
                             <select name="status" value={filters.status} onChange={handleFilterChange} className={getStatusSelectClass(filters.status)}>
@@ -2312,11 +2318,11 @@
                                     <div className="mt-4 p-4 bg-red-50 border border-red-300 rounded-xl space-y-3">
                                         <p className="font-bold text-red-800 flex items-center gap-1.5 text-xs"><i className="fa-solid fa-gavel"></i> แผงควบคุมสภาเมือง (พิจารณาสาส์นต้นทาง)</p>
                                         <select value={adminCategory} onChange={(e) => setAdminCategory(e.target.value)} className="w-full p-2.5 border border-red-300 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none mb-1">
-                                            {isEnrollmentActive() && <option value="Enrollment">🎖️ หมวดหมู่: Enrollment (ลงทะเบียนนักผจญภัย)</option>}
                                             <option value="Quality">💎 หมวดหมู่: Quality (กิจกรรมพิเศษ x2 EXP!)</option>
                                             <option value="Safety">🛡️ หมวดหมู่: Safety</option>
                                             <option value="Culture">📜 หมวดหมู่: Culture</option>
                                             <option value="Secret">🔒 หมวดหมู่: Secret</option>
+                                            {isEnrollmentActive() && <option value="Enrollment">🎖️ หมวดหมู่: Enrollment (ลงทะเบียนนักผจญภัย)</option>}
                                         </select>
                                         <select value={adminStatus} onChange={(e) => setAdminStatus(e.target.value)} className="w-full p-2.5 border border-red-300 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none">
                                             <option value="">-- อัปเดตสถานะไอเดีย --</option>
@@ -3253,7 +3259,7 @@
                                                     💎 อัญมณี
                                                 </td>
                                                 <td className="p-3 font-medium">
-                                                    ส่วนกลาง, HR, แอดมิน, สวัสดิการ, สาส์นลับแห่งเงา, กิจกรรมพิเศษ
+                                                    ส่วนกลาง, แอดมิน, สวัสดิการ, สาส์นลับแห่งเงา, กิจกรรมพิเศษ
                                                 </td>
                                             </tr>
                                             <tr className="hover:bg-amber-100/60 transition">
@@ -3385,10 +3391,10 @@
                                             นอกจากคะแนน EXP แล้ว ระบบยังมีการบันทึกความภาคภูมิใจของแต่ละอาณาจักรไว้ในหน้า World Map ด้วย หากเมืองใดเข้าร่วมกิจกรรม มินิเกม หรือทำผลงานบรรลุเป้าหมายพิเศษที่สภากำหนด (เช่น <i>"ถ้วยรางวัลความสามัคคีแห่งแผ่นดิน"</i>) จะได้รับถ้วยรางวัลไปประดับไว้ในหน้าข้อมูลอาณาจักรให้แคว้นอื่นได้ประจักษ์!
                                         </p>
                                     </div>
-                                    <div className="p-4 bg-gray-800 rounded border border-gray-600">
-                                        <span className="inline-block px-3 py-1 rounded-full bg-gray-600 text-white border border-gray-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> สาส์นลับแห่งเงา (Secret Message)</span>
-                                        <p className="text-sm text-gray-300 leading-relaxed">
-                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ไม่ต้องการเปิดเผยชื่อ ท่านสามารถเลือกส่งสาส์นในนามแคว้น <b>"Bascentra (เบสเซนตร้า)"</b> ได้ ระบบจะปิดบังตัวตนของท่านเป็นความลับขั้นสูงสุด และส่งสาส์นฉบับนี้ตรงถึงสภากลาง โดยที่ผู้อื่นจะไม่มีสิทธิ์มองเห็นในกระดานสาธารณะโดยเด็ดขาด!
+                                    <div className="p-4 bg-purple-950/80 rounded-xl border-2 border-purple-500/60 shadow-md">
+                                        <span className="inline-block px-3 py-1 rounded-full bg-purple-800 text-purple-100 border border-purple-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> 🦉 สาส์นลับแห่งเงา (Secret Message)</span>
+                                        <p className="text-sm text-purple-200 leading-relaxed">
+                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ต้องการความปลอดภัย ท่านสามารถเลือกพลังของสาส์นเป็น <b>"🔒 Secret (เรื่องร้องเรียนแบบไม่เผยตัวตน)"</b> สาส์นของท่านจะถูกส่งไปกับนกฮูกเข้าสู่ป่าต้องมนตราแห่งเบสเซนตร้าโดยตรง และถูกซ่อนจากกระดานสาธารณะทั้งหมดอย่างปลอดภัย โดยมีเพียงสภาเมืองส่วนกลางที่ใส่รหัสผ่านเท่านั้นที่จะเปิดอ่านและดำเนินการตรวจสอบข้อเท็จจริงได้ค่ะ
                                         </p>
                                     </div>
                                 </div>
