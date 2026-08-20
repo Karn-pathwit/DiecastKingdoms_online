@@ -208,8 +208,9 @@
 
         function isEnrollmentActive() {
             const now = new Date();
+            const start = new Date('2026-08-24T00:00:00');
             const expiry = new Date('2026-08-30T23:59:59');
-            return now <= expiry;
+            return now >= start && now <= expiry;
         }
 
         function MapPin({ kingdomKey, kingdom, onClick }) {
@@ -448,10 +449,23 @@
                                     </p>
                                     <div className="mt-3 flex flex-wrap items-center gap-2">
                                         <span className="text-emerald-950 font-bold px-3 py-1 bg-emerald-300/60 rounded-full inline-block border border-emerald-500/50 text-xs md:text-sm">⏳ ระยะเวลากิจกรรม: 24 สิงหาคม - 30 สิงหาคม 2026 เท่านั้น</span>
-                                        <button onClick={() => onViewChange('suggestion', { category: '🎖️ Enrollment - ลงทะเบียนนักผจญภัย (24-30 ส.ค.)' })} className="px-4 py-1.5 rounded-lg bg-emerald-800 text-white font-bold text-xs md:text-sm hover:bg-emerald-700 transition shadow cursor-pointer border border-emerald-400">
-                                            ✍️ ไปยื่นรายงานตัวทันที
-                                        </button>
+                                        {isEnrollmentActive() ? (
+                                            <button onClick={() => onViewChange('suggestion', { category: '🎖️ Enrollment - ลงทะเบียนนักผจญภัย (24-30 ส.ค.)' })} className="px-4 py-1.5 rounded-lg bg-emerald-800 text-white font-bold text-xs md:text-sm hover:bg-emerald-700 transition shadow cursor-pointer border border-emerald-400">
+                                                ✍️ ไปยื่นรายงานตัวทันที
+                                            </button>
+                                        ) : (new Date() < new Date('2026-08-24T00:00:00')) ? (
+                                            <span className="px-3 py-1 rounded-lg bg-stone-800 text-amber-300 font-bold text-xs border border-amber-400/50 shadow-sm flex items-center gap-1.5">
+                                                <i className="fa-solid fa-lock text-amber-400"></i> เปิดรับรายงานตัว 24 ส.ค. (00:00 น.)
+                                            </span>
+                                        ) : (
+                                            <span className="px-3 py-1 rounded-lg bg-stone-700 text-stone-300 font-bold text-xs border border-stone-500 shadow-sm">
+                                                🏁 สิ้นสุดระยะเวลากิจกรรมแล้ว
+                                            </span>
+                                        )}
                                     </div>
+                                    <p className="text-[11px] text-emerald-800/90 italic mt-2">
+                                        *หมายเหตุ: สภาเมืองอาจมีการจัดเก็บสาส์นรายงานตัวเข้าสู่คลังความทรงจำเพื่อให้หน้าบอร์ดสะอาด ท่านสามารถกด <b>"เบิกบันทึกสภา (Export .csv)"</b> ที่หน้าประกาศิตแผ่นดิน เพื่อตรวจเช็ครายชื่อนักผจญภัยได้ตลอดเวลาค่ะ
+                                    </p>
                                 </div>
                             </div>
 
@@ -623,7 +637,7 @@
                             )}
 
                             <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.3.1</p>)}
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.3.2</p>)}
                             </div>
                         </div>
                     </div>
@@ -1211,6 +1225,7 @@
             const isSecret = formData.category.includes('Secret');
 
             const [showConfirmModal, setShowConfirmModal] = useState(false);
+            const [successModalData, setSuccessModalData] = useState(null);
             const [isSubmitting, setIsSubmitting] = useState(false);
 
             const handleChange = (e) => {
@@ -1282,12 +1297,14 @@
                         };
 
                         if (onUpdateProject) await onUpdateProject(updatedProject);
-                        await new Promise(resolve => setTimeout(resolve, 800));
+                        await new Promise(resolve => setTimeout(resolve, 600));
                         setShowConfirmModal(false);
-                        setNotification(isSecret ? '🦉 สาส์นลับแห่งเงาถูกอัปเดตและส่งเข้าสู่ป่าต้องมนตราแล้วค่ะ' : `✅ อัปเดตสาส์น ${editingProject.id} สำเร็จ! เรื่องถูกส่งกลับเข้าสู่สภาเมืองเรียบร้อยแล้ว`);
-                        setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
-                        if (onCancelEdit) onCancelEdit();
-                        setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                        setSuccessModalData({
+                            type: 'edit',
+                            title: 'อัปเดตสาส์นสำเร็จ!',
+                            desc: `สาส์นรหัส ${editingProject.id} ได้รับการอัปเดตข้อมูลและส่งกลับเข้าสู่สภาเมืองเรียบร้อยแล้วค่ะ`,
+                            targetView: 'dashboard'
+                        });
                         return;
                     }
 
@@ -1332,11 +1349,31 @@
                     };
 
                     await onAddProject(newProject);
-                    await new Promise(resolve => setTimeout(resolve, 800));
+                    await new Promise(resolve => setTimeout(resolve, 600));
                     setShowConfirmModal(false);
-                    setNotification(isSecret ? '🦉 สาส์นลับแห่งเงาของท่านได้ถูกส่งไปกับนกฮูกเข้าสู่ป่าต้องมนตราแล้ว... รอสภาเมืองเปิดตรวจสอบ' : (isEnrollment ? '🎖️ สาส์นรายงานตัวของท่านส่งถึงสภาเมืองเรียบร้อยแล้วค่ะ' : `✅ ส่งสาส์นสำเร็จ! ในนาม: ${finalName}`));
-                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
-                    setTimeout(() => { setNotification(''); onViewChange('dashboard'); }, 2500);
+                    
+                    if (isSecret) {
+                        setSuccessModalData({
+                            type: 'secret',
+                            title: 'สาส์นลับถูกส่งเข้าสู่ป่าต้องมนตราแล้ว!',
+                            desc: 'สาส์นของท่านถูกส่งไปกับนกฮูกถึงสภาเมืองเรียบร้อยแล้วค่ะ สาส์นนี้จะถูกซ่อนจากกระดานสาธารณะทั้งหมดอย่างปลอดภัย โดยสภาเมืองจะประสานงานติดต่อกลับหาท่านโดยตรงผ่านรหัสพนักงานค่ะ',
+                            targetView: 'worldmap'
+                        });
+                    } else if (isEnrollment) {
+                        setSuccessModalData({
+                            type: 'enrollment',
+                            title: 'รายงานตัวนักผจญภัยสำเร็จ!',
+                            desc: 'ยินดีต้อนรับสู่กองทัพนักผจญภัยแห่ง Diecast Kingdoms! สาส์นรายงานตัวของท่านถูกนำขึ้นสู่กระดานประกาศิตแผ่นดินเรียบร้อยแล้วค่ะ',
+                            targetView: 'dashboard'
+                        });
+                    } else {
+                        setSuccessModalData({
+                            type: 'normal',
+                            title: 'ส่งสาส์นพัฒนาสำเร็จ!',
+                            desc: `ส่งสาส์นในนาม "${finalName}" สำเร็จเรียบร้อยแล้วค่ะ ม้าเร็วกำลังนำสาส์นของท่านส่งเข้าสู่กระดานประกาศิตแผ่นดิน`,
+                            targetView: 'dashboard'
+                        });
+                    }
                 } catch (err) {
                     alert('เกิดข้อผิดพลาดในการส่งสาส์น กรุณาลองใหม่อีกครั้งค่ะ');
                 } finally {
@@ -1564,8 +1601,24 @@
                             </div>
                         </section>
 
-                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-lg font-cinzel transition cursor-pointer ${isSecret ? 'bg-gray-800' : isEnrollment ? 'bg-gradient-to-r from-emerald-800 to-teal-700 hover:from-emerald-700 hover:to-teal-600' : 'bg-[#8b5a2b]'}`}>
-                            {editingProject ? <><i className="fa-solid fa-floppy-disk mr-2"></i> 💾 อัปเดตข้อมูลสาส์น</> : isSecret ? <><i className="fa-solid fa-lock mr-2"></i> ปิดผนึกและส่งสาส์นลับ</> : isEnrollment ? <><i className="fa-solid fa-award mr-2"></i> 🎖️ ยืนยันรายงานตัวนักผจญภัย</> : 'ส่งสาส์นสู่สภา / Submit to the Council'}
+                        <button type="submit" className={`w-full text-white font-bold py-4 rounded-xl shadow-xl text-base sm:text-lg font-cinzel transition cursor-pointer ${
+                            editingProject 
+                                ? 'bg-amber-800 hover:bg-amber-700' 
+                                : isSecret 
+                                    ? 'bg-purple-950 hover:bg-purple-900 border-2 border-purple-400 text-purple-100 shadow-[0_0_15px_rgba(168,85,247,0.4)]' 
+                                    : isEnrollment 
+                                        ? 'bg-gradient-to-r from-emerald-800 to-teal-700 hover:from-emerald-700 hover:to-teal-600 border border-emerald-400' 
+                                        : 'bg-[#8b5a2b] hover:bg-[#6e4620]'
+                        }`}>
+                            {editingProject ? (
+                                <><i className="fa-solid fa-floppy-disk mr-2"></i> 💾 อัปเดตข้อมูลสาส์น</>
+                            ) : isSecret ? (
+                                <><span className="text-xl sm:text-2xl mr-2">🦉</span> ปิดผนึกและส่งไปกับนกฮูกสู่ป่าต้องมนตรา</>
+                            ) : isEnrollment ? (
+                                <><span className="text-xl sm:text-2xl mr-2">🎒</span> ก้าวสู่แผ่นดิน! ยืนยันรายงานตัวนักผจญภัย</>
+                            ) : (
+                                <><span className="text-xl sm:text-2xl mr-2">🐎</span> ส่งม้าเร็วนำสาส์นสู่สภาเมือง</>
+                            )}
                         </button>
                     </form>
 
@@ -1576,81 +1629,67 @@
                                 <button onClick={() => setShowConfirmModal(false)} className="absolute top-4 right-4 text-[#8b5a2b] hover:text-red-700 text-2xl font-bold cursor-pointer transition">&times;</button>
 
                                 <div className="text-center mb-5 border-b-2 border-[#8b5a2b]/30 pb-4">
-                                    <div className="text-3xl mb-1 animate-bounce">📜</div>
+                                    <div className="text-3xl mb-1 animate-bounce">
+                                        {isSecret ? '🦉' : isEnrollment ? '🎒' : '📜'}
+                                    </div>
                                     <h2 className="text-xl md:text-2xl font-bold text-[#5d3a1a] font-cinzel">
-                                        {editingProject ? `ตัวอย่างสาส์นแก้ไข (Decree Update Preview)` : 'ตัวอย่างสาส์นพัฒนาแด่อาณาจักร (Decree Preview)'}
+                                        {editingProject 
+                                            ? `ตัวอย่างสาส์นแก้ไข (Decree Update Preview)` 
+                                            : isSecret 
+                                                ? `ตัวอย่างสาส์นลับแห่งเงา (Secret Decree Preview)` 
+                                                : isEnrollment 
+                                                    ? `ตัวอย่างสาส์นรายงานตัวนักผจญภัย (Adventurer Enrollment Preview)` 
+                                                    : `ตัวอย่างสาส์นพัฒนาแด่อาณาจักร (Decree Preview)`}
                                     </h2>
                                     <p className="text-xs text-[#8b5a2b] font-bold mt-1">
-                                        (โปรดตรวจสอบความถูกต้องของข้อมูลสาส์นก่อนยืนยันส่งเข้าสู่สภาเมือง)
+                                        {isSecret 
+                                            ? `(สาส์นฉบับนี้จะถูกส่งตรงถึงสภาเมือง และไม่แสดงในกระดานสาธารณะ)` 
+                                            : isEnrollment 
+                                                ? `(โปรดตรวจสอบข้อมูลการรายงานตัวก่อนยืนยันส่งเข้าสู่อาณาจักร)` 
+                                                : `(โปรดตรวจสอบความถูกต้องของข้อมูลสาส์นก่อนยืนยันส่งเข้าสู่สภาเมือง)`}
                                     </p>
                                 </div>
 
-                                <div className="space-y-4 text-xs md:text-sm">
-                                    {/* 1. Identity & Kingdom route */}
-                                    <div className="bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30 space-y-2">
-                                        <div className="flex flex-wrap justify-between items-center gap-2">
-                                            <div>
-                                                <span className="font-bold text-[#5d3a1a]">👤 ผู้เสนอ: </span>
-                                                <span className="font-bold text-[#1e3a8a]">{isAnonymous ? 'นักผจญภัยนิรนาม (สาส์นลับ)' : (formData.name.trim() || 'ผู้เดินทางไร้นาม')}</span>
+                                {isEnrollment ? (
+                                    /* 🎒 รูปแบบ Preview เฉพาะสำหรับกิจกรรม Enrollment */
+                                    <div className="space-y-4 text-xs md:text-sm">
+                                        {/* 1. Identity & Origin */}
+                                        <div className="bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30 space-y-2.5">
+                                            <div className="flex flex-wrap justify-between items-center gap-2">
+                                                <div>
+                                                    <span className="font-bold text-[#5d3a1a]">👤 ผู้ออกผจญภัย: </span>
+                                                    <span className="font-bold text-[#1e3a8a] text-sm">{formData.name.trim() || defaultNames[formData.origin] || 'ผู้เดินทางไร้นาม'}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="font-bold text-[#5d3a1a]">🪪 รหัสพนักงาน: </span>
+                                                    <span className="font-mono font-bold text-[#1e3a8a]">{formData.empId}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span className="font-bold text-[#5d3a1a]">🪪 รหัสพนักงาน: </span>
-                                                <span className="font-mono font-bold text-[#1e3a8a]">{isAnonymous ? '???-????' : maskEmpId(formData.empId)}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-2 pt-1">
-                                            <span className="font-bold text-[#5d3a1a]">🗺️ เส้นทางสาส์น: </span>
-                                            <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.origin)}`}>
-                                                {formData.origin || 'ไม่ระบุ'}
-                                            </span>
-                                            <i className="fa-solid fa-arrow-right text-[#8b5a2b] text-xs"></i>
-                                            <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.target)}`}>
-                                                {formData.target || 'ไม่ระบุ'}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* 2. Location & Category */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30">
-                                        <div><span className="font-bold text-[#5d3a1a]">🏭 โรงงาน: </span><span className="font-medium text-[#1e3a8a]">{formData.factory || '-'}</span></div>
-                                        <div><span className="font-bold text-[#5d3a1a]">⚙️ กระบวนการ: </span><span className="font-medium text-[#1e3a8a]">{formData.process || '-'}</span></div>
-                                        <div><span className="font-bold text-[#5d3a1a]">📍 พิกัดปัญหา: </span><span className="font-medium text-[#1e3a8a]">{formData.pinpoint || 'ไม่ระบุ'}</span></div>
-                                        <div><span className="font-bold text-[#5d3a1a]">💎 หมวดหมู่พลัง: </span><span className="font-medium text-[#1e3a8a]">{formData.category || '-'}</span></div>
-                                    </div>
-
-                                    {/* 3. Title, Problem, Solution, Benefit */}
-                                    <div className="space-y-3 bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
-                                        <div>
-                                            <div className="font-bold text-[#5d3a1a] mb-1">📌 หัวข้อสาส์น (Title):</div>
-                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-bold text-[#1e3a8a] text-sm">
-                                                {formData.title || '-'}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-[#5d3a1a] mb-1">⚠️ รายละเอียดปัญหาหน้างาน (Problem Description):</div>
-                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
-                                                {formData.problem || '-'}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-[#5d3a1a] mb-1">💡 แนวทางแก้ไขเสนอแนะ (Proposed Solution):</div>
-                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
-                                                {formData.solution || 'ไม่มีคำอธิบายเสนอแก้'}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-[#5d3a1a] mb-1">🏆 ประโยชน์ที่คาดว่าจะได้รับ (Expected Benefit):</div>
-                                            <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
-                                                {formData.benefit || '-'}
+                                            <div className="flex items-center gap-2 pt-1 border-t border-[#8b5a2b]/20">
+                                                <span className="font-bold text-[#5d3a1a]">🏰 อาณาจักรต้นสังกัด: </span>
+                                                <span className={`px-3 py-1 rounded-full text-xs ${getKingdomBadgeStyle(formData.origin)}`}>
+                                                    {formData.origin || 'ไม่ระบุ'}
+                                                </span>
                                             </div>
                                         </div>
 
-                                        {/* 4. Images grid (1-5) */}
+                                        {/* 2. Message / Wish */}
+                                        <div className="bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
+                                            <div className="font-bold text-[#5d3a1a] mb-1.5 flex items-center gap-1.5">
+                                                <i className="fa-solid fa-comment-dots text-emerald-700"></i>
+                                                <span>💬 ความในใจ / สิ่งที่อยากบอกสภาเมือง:</span>
+                                            </div>
+                                            <div className="bg-white/90 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                {formData.problem.trim() || 'รายงานตัวเข้าร่วมกองทัพนักผจญภัย'}
+                                            </div>
+                                        </div>
+
+                                        {/* 3. Photo attachments */}
                                         {((formData.images && formData.images.length > 0) || formData.imagePreview) && (
-                                            <div>
-                                                <div className="font-bold text-[#5d3a1a] mb-1.5 flex items-center gap-1.5">
-                                                    <i className="fa-solid fa-camera text-red-700"></i>
-                                                    <span>ภาพแนบประกอบสาส์น ({(formData.images || [formData.imagePreview]).length} รูป):</span>
+                                            <div className="bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
+                                                <div className="font-bold text-[#5d3a1a] mb-2 flex items-center gap-1.5">
+                                                    <i className="fa-solid fa-camera text-emerald-700"></i>
+                                                    <span>📸 ภาพถ่ายนักผจญภัย ({(formData.images || [formData.imagePreview]).length} รูป):</span>
                                                 </div>
                                                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                                                     {(formData.images && formData.images.length > 0 ? formData.images : [formData.imagePreview]).map((imgUrl, idx) => (
@@ -1661,8 +1700,99 @@
                                                 </div>
                                             </div>
                                         )}
+
+                                        {/* 💡 หมายเหตุเรื่องการซ่อนสาส์นและการเบิกบันทึก CSV */}
+                                        <div className="bg-emerald-950/15 border border-emerald-600/40 p-3.5 rounded-xl text-xs text-emerald-950 leading-relaxed space-y-1">
+                                            <p className="font-bold flex items-center gap-1.5 text-emerald-900">
+                                                <i className="fa-solid fa-circle-info text-emerald-700"></i>
+                                                <span>หมายเหตุจากสภาเมือง:</span>
+                                            </p>
+                                            <p className="text-[11px] sm:text-xs text-[#5d3a1a]">
+                                                หากในวันข้างหน้าท่านเข้ามาแล้วพบว่าสาส์นรายงานตัวของท่านไม่แสดงบนกระดาน ไม่ต้องตกใจนะคะ! สภาเมืองไม่ได้เผามันทิ้ง แต่เก็บเข้าสู่คลังความทรงจำเพื่อให้กระดานสะอาดตา โดยท่านสามารถกด <b>"เบิกบันทึกสภา (Export .csv)"</b> ที่หน้าประกาศิตแผ่นดิน เพื่อตรวจเช็ครายชื่อนักผจญภัยทั้งหมดได้ตลอดเวลาค่ะ
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    /* 📜 รูปแบบ Preview เต็มสำหรับสาส์นลับและสาส์นพัฒนาทั่วไป */
+                                    <div className="space-y-4 text-xs md:text-sm">
+                                        {/* 1. Identity & Kingdom route */}
+                                        <div className="bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30 space-y-2">
+                                            <div className="flex flex-wrap justify-between items-center gap-2">
+                                                <div>
+                                                    <span className="font-bold text-[#5d3a1a]">👤 ผู้เสนอ: </span>
+                                                    <span className="font-bold text-[#1e3a8a]">{formData.name.trim() || defaultNames[formData.origin] || 'ผู้เดินทางไร้นาม'}{isSecret ? ' (🔒 สาส์นลับ)' : ''}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="font-bold text-[#5d3a1a]">🪪 รหัสพนักงาน: </span>
+                                                    <span className="font-mono font-bold text-[#1e3a8a]">{formData.empId}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 pt-1">
+                                                <span className="font-bold text-[#5d3a1a]">🗺️ เส้นทางสาส์น: </span>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.origin)}`}>
+                                                    {formData.origin || 'ไม่ระบุ'}
+                                                </span>
+                                                <i className="fa-solid fa-arrow-right text-[#8b5a2b] text-xs"></i>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs ${getKingdomBadgeStyle(formData.target)}`}>
+                                                    {formData.target || 'ไม่ระบุ'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* 2. Location & Category */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#fff8e7] p-3.5 rounded-xl border border-[#8b5a2b]/30">
+                                            <div><span className="font-bold text-[#5d3a1a]">🏭 โรงงาน: </span><span className="font-medium text-[#1e3a8a]">{formData.factory || '-'}</span></div>
+                                            <div><span className="font-bold text-[#5d3a1a]">⚙️ กระบวนการ: </span><span className="font-medium text-[#1e3a8a]">{formData.process || '-'}</span></div>
+                                            <div><span className="font-bold text-[#5d3a1a]">📍 พิกัดปัญหา: </span><span className="font-medium text-[#1e3a8a]">{formData.pinpoint || 'ไม่ระบุ'}</span></div>
+                                            <div><span className="font-bold text-[#5d3a1a]">💎 หมวดหมู่พลัง: </span><span className="font-medium text-[#1e3a8a]">{formData.category || '-'}</span></div>
+                                        </div>
+
+                                        {/* 3. Title, Problem, Solution, Benefit */}
+                                        <div className="space-y-3 bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
+                                            <div>
+                                                <div className="font-bold text-[#5d3a1a] mb-1">📌 หัวข้อสาส์น (Title):</div>
+                                                <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-bold text-[#1e3a8a] text-sm">
+                                                    {formData.title || '-'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-[#5d3a1a] mb-1">⚠️ รายละเอียดปัญหาหน้างาน (Problem Description):</div>
+                                                <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                    {formData.problem || '-'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-[#5d3a1a] mb-1">💡 แนวทางแก้ไขเสนอแนะ (Proposed Solution):</div>
+                                                <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                    {formData.solution || 'ไม่มีคำอธิบายเสนอแก้'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-[#5d3a1a] mb-1">🏆 ประโยชน์ที่คาดว่าจะได้รับ (Expected Benefit):</div>
+                                                <div className="bg-white/80 p-3 rounded-lg border border-[#8b5a2b]/20 font-medium text-[#1e3a8a] text-xs leading-relaxed whitespace-pre-wrap">
+                                                    {formData.benefit || '-'}
+                                                </div>
+                                            </div>
+
+                                            {/* 4. Images grid (1-5) */}
+                                            {((formData.images && formData.images.length > 0) || formData.imagePreview) && (
+                                                <div>
+                                                    <div className="font-bold text-[#5d3a1a] mb-1.5 flex items-center gap-1.5">
+                                                        <i className="fa-solid fa-camera text-red-700"></i>
+                                                        <span>ภาพแนบประกอบสาส์น ({(formData.images || [formData.imagePreview]).length} รูป):</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                                        {(formData.images && formData.images.length > 0 ? formData.images : [formData.imagePreview]).map((imgUrl, idx) => (
+                                                            <div key={idx} className="h-20 border border-[#8b5a2b]/50 rounded-lg overflow-hidden bg-black/20 shadow-inner">
+                                                                <img src={imgUrl} alt={`Preview ${idx+1}`} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Action buttons */}
                                 <div className="flex gap-3 mt-6 pt-4 border-t border-[#8b5a2b]/30">
@@ -1678,15 +1808,55 @@
                                         type="button" 
                                         onClick={handleFinalSubmit} 
                                         disabled={isSubmitting} 
-                                        className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg border border-yellow-300 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                        className={`flex-1 py-3 px-3 rounded-xl text-white font-bold text-xs md:text-sm transition cursor-pointer shadow-lg disabled:opacity-50 flex items-center justify-center gap-1.5 ${
+                                            isSecret 
+                                                ? 'bg-purple-900 hover:bg-purple-800 border border-purple-400' 
+                                                : isEnrollment 
+                                                    ? 'bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 border border-emerald-300' 
+                                                    : 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 border border-yellow-300'
+                                        }`}
                                     >
                                         {isSubmitting ? (
-                                            <><span className="inline-block animate-pulse text-base">🐎💨</span> ⏳ กำลังส่งสาส์น...</>
+                                            <><span className="inline-block animate-pulse text-base">{isSecret ? '🦉' : isEnrollment ? '🎒' : '🐎💨'}</span> ⏳ กำลังส่งข้อมูล...</>
+                                        ) : isSecret ? (
+                                            <><span className="text-base">🦉</span> ยืนยันส่งสาส์นลับ</>
+                                        ) : isEnrollment ? (
+                                            <><span className="text-base">🎒</span> ยืนยันรายงานตัว</>
                                         ) : (
                                             <><i className="fa-solid fa-paper-plane"></i> 🐎💨 ยืนยันการส่งสาส์น</>
                                         )}
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ✨ Themed Success Modal (หน้าต่างแจ้งเตือนส่งสาส์นสำเร็จตามธีม) */}
+                    {successModalData && (
+                        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
+                            <div className="parchment max-w-md w-full p-6 md:p-8 rounded-2xl text-center border-4 border-[#8b5a2b] shadow-2xl space-y-4">
+                                <div className="text-5xl animate-bounce">
+                                    {successModalData.type === 'secret' ? '🦉' : successModalData.type === 'enrollment' ? '🎖️' : '📜'}
+                                </div>
+                                <h2 className="text-xl md:text-2xl font-bold text-[#5d3a1a] font-cinzel">
+                                    {successModalData.title}
+                                </h2>
+                                <p className="text-xs md:text-sm text-[#8b5a2b] leading-relaxed font-sans font-medium">
+                                    {successModalData.desc}
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const targetView = successModalData.targetView;
+                                        setSuccessModalData(null);
+                                        setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                                        if (onCancelEdit) onCancelEdit();
+                                        onViewChange(targetView);
+                                    }}
+                                    className="w-full py-3 bg-[#5d3a1a] hover:bg-[#8b5a2b] text-white font-bold rounded-xl shadow-lg border border-yellow-400 transition cursor-pointer text-sm font-cinzel"
+                                >
+                                    {successModalData.type === 'secret' ? '✨ รับทราบ (กลับสู่แผนที่โลก)' : '✨ ตกลง (ไปยังกระดานประกาศิต)'}
+                                </button>
                             </div>
                         </div>
                     )}
@@ -3394,7 +3564,7 @@
                                     <div className="p-4 bg-purple-950/80 rounded-xl border-2 border-purple-500/60 shadow-md">
                                         <span className="inline-block px-3 py-1 rounded-full bg-purple-800 text-purple-100 border border-purple-400 font-bold text-xs mb-2 shadow-sm"><i className="fa-solid fa-user-secret mr-1"></i> 🦉 สาส์นลับแห่งเงา (Secret Message)</span>
                                         <p className="text-sm text-purple-200 leading-relaxed">
-                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ต้องการความปลอดภัย ท่านสามารถเลือกพลังของสาส์นเป็น <b>"🔒 Secret (เรื่องร้องเรียนแบบไม่เผยตัวตน)"</b> สาส์นของท่านจะถูกส่งไปกับนกฮูกเข้าสู่ป่าต้องมนตราแห่งเบสเซนตร้าโดยตรง และถูกซ่อนจากกระดานสาธารณะทั้งหมดอย่างปลอดภัย โดยมีเพียงสภาเมืองส่วนกลางที่ใส่รหัสผ่านเท่านั้นที่จะเปิดอ่านและดำเนินการตรวจสอบข้อเท็จจริงได้ค่ะ
+                                            หากท่านมีปัญหาคับข้องใจ หรือเรื่องร้องเรียนส่วนตัวที่ต้องการความปลอดภัย ท่านสามารถเลือกพลังของสาส์นเป็น <b>"🔒 Secret (เรื่องร้องเรียนแบบไม่เผยตัวตน)"</b> สาส์นของท่านจะถูกส่งไปกับนกฮูกเข้าสู่ป่าต้องมนตราแห่งเบสเซนตร้าโดยตรง และถูกซ่อนจากกระดานสาธารณะทั้งหมดอย่างปลอดภัย โดยมีเพียงสภาเมืองส่วนกลางที่ใส่รหัสผ่านเท่านั้นที่จะเปิดอ่านและดำเนินการตรวจสอบข้อเท็จจริงได้
                                         </p>
                                     </div>
                                 </div>
