@@ -477,7 +477,7 @@
                     <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => onViewChange('worldmap')} className="absolute top-4 right-5 text-4xl font-bold text-[#8b5a2b] hover:text-red-600 transition cursor-pointer">&times;</button>
                         <div className="text-center border-b-2 border-[#8b5a2b]/30 pb-4 mb-6 mt-4">
-                            <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> ประกาศิตข่าวสาร</h1>
+                            <h1 className="text-3xl md:text-4xl font-bold text-[#5d3a1a] font-cinzel"><i className="fa-solid fa-scroll"></i> กระดานข่าวสาร</h1>
                             <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">อัปเดตกิจกรรมและประกาศพิเศษจากสภาเมือง</p>
                         </div>
                         <div className="space-y-6">
@@ -548,223 +548,6 @@
                         </div>
                     </div>
                 </div>
-            );
-        }
-
-        // ==========================================
-        // COMPONENT: Sidebar
-        // ==========================================
-        function Sidebar({ 
-            currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
-            musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
-            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack,
-            projects = [], isModalOpen = false
-        }) {
-            const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
-
-            const blueprintCount = projects.filter(p => p.status === 'Blueprint').length;
-            const evidenceCount = projects.filter(p => p.status === 'Evidence').length;
-
-            const menuItems = [
-                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot' },
-                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
-                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
-                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
-                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
-                { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
-            ];
-
-            const mobileNavItems = [
-                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
-                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
-                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot', isCenter: true },
-                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
-                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
-            ];
-
-            return (
-                <>
-                    {/* ================= DESKTOP SIDEBAR (md:flex) ================= */}
-                    <div className={`hidden md:flex fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
-                        
-                        <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
-                            <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
-                                {!isCollapsed && (
-                                    <div className="flex flex-col">
-                                        <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
-                                        <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
-                                    </div>
-                                )}
-                                {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
-                                <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
-                                    <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
-                                </button>
-                            </div>
-                            
-                            <nav className="p-3 space-y-2 mt-2 shrink-0">
-                                <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
-                                    <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
-                                    {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
-                                </button>
-                                {menuItems.map((item) => {
-                                    const isActive = currentView === item.id;
-                                    const hasBadge = typeof item.badge === 'number' && item.badge > 0;
-                                    return (
-                                        <button key={item.id} onClick={() => onViewChange(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition duration-200 cursor-pointer ${isActive ? 'bg-[#8b5a2b] text-[#f7e6c4] font-bold shadow-lg border border-[#ebdcb9]/20' : 'hover:bg-[#8b5a2b]/15 text-[#ebdcb9]/80 hover:text-[#ebdcb9]'}`}>
-                                            <div className="flex items-center justify-center w-8 text-center text-lg relative h-8">
-                                                {hasBadge ? (
-                                                    <>
-                                                        <i className={`${item.icon} absolute animate-toggle-icon`}></i>
-                                                        <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
-                                                            {item.badge}
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <i className={item.icon}></i>
-                                                )}
-                                            </div>
-                                            {!isCollapsed && (
-                                                <div className="flex items-center justify-between flex-1 truncate">
-                                                    <span className="text-sm font-semibold truncate text-left">{item.label}</span>
-                                                    {hasBadge && (
-                                                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
-                                                            {item.badge} เรื่องใหม่
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </nav>
-                        </div>
-
-                        <div className="mt-auto shrink-0 flex flex-col">
-                            {!isCollapsed ? (
-                                <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
-                                    <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
-                                        {musicTracks.map((t, idx) => (
-                                            <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
-                                                {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
-                                                {t.title}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div onClick={() => setIsPlaylistOpen(!isPlaylistOpen)} className="p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition select-none">
-                                        <div className="flex items-center gap-2 overflow-hidden">
-                                            <i className="fa-solid fa-compact-disc text-yellow-500 animate-spin" style={{ animationDuration: '4s' }}></i>
-                                            <div className="music-marquee-container flex-1">
-                                                <span className="music-marquee-text text-xs text-yellow-200 font-medium">
-                                                    {musicTracks[currentTrackIndex].title}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
-                                    </div>
-                                    <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
-                                        <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
-                                            <i className="fa-solid fa-repeat"></i>
-                                        </button>
-                                        <div className="flex items-center gap-3">
-                                            <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
-                                            <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
-                                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
-                                            </button>
-                                            <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="mx-3 mb-4 flex justify-center">
-                                    <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
-                                        <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.3.3</p>)}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
-                    <div className={`md:hidden ${isModalOpen ? 'modal-open-hide-sidebar' : ''}`}>
-                        {/* ↖️ Top Left Quick Buttons (📢 News, ⚡ PopBoss, 🎵 Music) */}
-                        <div className="fixed top-3 left-3 z-50 flex flex-col gap-2">
-                            <button
-                                onClick={() => onViewChange('news')}
-                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
-                                    currentView === 'news'
-                                        ? 'bg-blue-900/80 text-blue-200 border-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.6)] scale-105'
-                                        : 'bg-blue-950/60 text-blue-300 border-blue-500/40 hover:bg-blue-900/80'
-                                }`}
-                                title="ประกาศข่าวสาร"
-                            >
-                                <i className="fa-solid fa-bullhorn text-base"></i>
-                            </button>
-                            <button
-                                onClick={() => onViewChange('popboss')}
-                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
-                                    currentView === 'popboss'
-                                        ? 'bg-yellow-900/80 text-yellow-300 border-yellow-400 shadow-[0_0_12px_rgba(250,204,21,0.6)] scale-105'
-                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
-                                }`}
-                                title={isPopBossActive() ? "⚡ เหตุการณ์พิเศษ POPBOSS" : "🔒 สรุปผล PopBoss Season 1 (จบฤดูกาล)"}
-                            >
-                                <i className={`fa-solid ${isPopBossActive() ? 'fa-bolt text-lg animate-pulse' : 'fa-trophy text-base text-yellow-400'}`}></i>
-                            </button>
-                            <button
-                                onClick={() => setIsPlaying(!isPlaying)}
-                                className={`w-11 h-11 rounded-full glass-panel border flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer ${
-                                    isPlaying
-                                        ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-black border-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.7)] scale-105 font-bold'
-                                        : 'bg-black/60 text-yellow-400 border-yellow-500/40 hover:bg-yellow-900/40'
-                                }`}
-                                title={isPlaying ? "ปิดเพลงประกอบ" : "เปิดเพลงประกอบ"}
-                            >
-                                <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse text-base' : 'fa-play text-sm ml-0.5'}`}></i>
-                            </button>
-                        </div>
-
-                        {/* ⚓ Bottom Navigation Dock (5 Circular Buttons) */}
-                        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 glass-panel glow-border px-3.5 py-2 rounded-full flex items-center gap-3 shadow-[0_0_25px_rgba(0,0,0,0.85)] border border-[#ebdcb9]/40 backdrop-blur-xl bg-black/70">
-                            {mobileNavItems.map((item) => {
-                                const isActive = currentView === item.id;
-                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
-                                const isCenter = item.isCenter;
-
-                                return (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => onViewChange(item.id)}
-                                        className={`relative rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                                            isCenter
-                                                ? 'w-12 h-12 text-xl border-2'
-                                                : 'w-10 h-10 text-base border'
-                                        } ${
-                                            isActive
-                                                ? 'bg-gradient-to-b from-[#8b5a2b] to-[#5d3a1a] text-[#f7e6c4] border-[#ebdcb9] shadow-[0_0_15px_rgba(247,230,196,0.6)] scale-110'
-                                                : 'bg-black/50 text-[#ebdcb9]/70 border-white/10 hover:bg-[#8b5a2b]/30 hover:text-[#ebdcb9]'
-                                        }`}
-                                        title={item.label}
-                                    >
-                                        {hasBadge ? (
-                                            <>
-                                                <i className={`${item.icon} absolute animate-toggle-icon`}></i>
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center border border-yellow-300 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-toggle-badge">
-                                                    {item.badge}
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <i className={item.icon}></i>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </>
             );
         }
 
@@ -1169,6 +952,339 @@
                         </div>
                     )}
                 </div>
+            );
+        }
+
+        // ==========================================
+        // COMPONENT: Sidebar
+        // ==========================================
+        function Sidebar({ 
+            currentView, onViewChange, isCollapsed, onToggleCollapse, visible,
+            musicTracks, currentTrackIndex, setCurrentTrackIndex, isPlaying, setIsPlaying, 
+            isLoopingOne, setIsLoopingOne, handleNextTrack, handlePrevTrack,
+            projects = [], isModalOpen = false
+        }) {
+            const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+            const [isLineModalOpen, setIsLineModalOpen] = useState(false);
+            const [isFanOpen, setIsFanOpen] = useState(false);
+            const lineOpenChatUrl = "https://line.me/ti/g2/Ijdxg_ClWO5fclJK3O92w7xrbs0GuMUYsyDMhg?utm_source=invitation&utm_medium=link_copy&utm_campaign=default";
+
+            const blueprintCount = projects.filter(p => p.status === 'Blueprint').length;
+            const evidenceCount = projects.filter(p => p.status === 'Evidence').length;
+
+            const menuItems = [
+                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot' },
+                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
+                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
+                { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
+            ];
+
+            const mobileNavItems = [
+                { id: 'suggestion', label: 'ยื่นสาส์นพัฒนา', icon: 'fa-solid fa-pen-to-square' },
+                { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
+                { id: 'worldmap', label: 'แผนที่แผ่นดิน', icon: 'fa-solid fa-map-location-dot', isCenter: true },
+                { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
+                { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
+            ];
+
+            return (
+                <>
+                    {/* ================= DESKTOP SIDEBAR (md:flex) ================= */}
+                    <div className={`hidden md:flex fixed top-4 bottom-4 glass-panel glow-border rounded-2xl flex-col justify-between transition-all duration-500 ease-in-out z-40 text-[#ebdcb9] ${isCollapsed ? 'w-20' : 'w-72'} ${visible ? 'left-4 translate-x-0 opacity-100' : 'left-4 -translate-x-80 opacity-0 pointer-events-none'}`}>
+                        
+                        <div className="overflow-y-auto overflow-x-hidden flex flex-col pb-4 h-full">
+                            <div className="p-4 border-b border-[#8b5a2b]/30 flex items-center justify-between shrink-0">
+                                {!isCollapsed && (
+                                    <div className="flex flex-col">
+                                        <span className="font-cinzel text-lg font-bold tracking-wide text-[#f7e6c4]">DIECAST KINGDOMS</span>
+                                        <span className="text-[10px] tracking-widest text-[#8b5a2b] font-sarabun font-bold mt-0.5">ลำนำแห่ง 5 อาณาจักร</span>
+                                    </div>
+                                )}
+                                {isCollapsed && (<div className="mx-auto text-[#f7e6c4]"><i className="fa-solid fa-crown text-xl"></i></div>)}
+                                <button onClick={onToggleCollapse} className="p-1 rounded bg-[#8b5a2b]/20 hover:bg-[#8b5a2b]/40 text-[#ebdcb9] hover:text-white transition cursor-pointer">
+                                    <i className={`fa-solid ${isCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+                                </button>
+                            </div>
+                            
+                            <nav className="p-3 space-y-2 mt-2 shrink-0">
+                                <button onClick={() => onViewChange('news')} className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-900/60 text-blue-200 hover:bg-blue-800/80 transition border border-blue-500/50 font-bold mb-4 cursor-pointer shadow">
+                                    <div className="flex items-center justify-center w-8 text-center text-lg"><i className="fa-solid fa-bullhorn"></i></div>
+                                    {!isCollapsed && <span className="text-sm truncate text-left">ประกาศข่าวสาร</span>}
+                                </button>
+                                {menuItems.map((item) => {
+                                    const isActive = currentView === item.id;
+                                    const hasBadge = typeof item.badge === 'number' && item.badge > 0;
+
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => onViewChange(item.id)}
+                                            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-300 cursor-pointer ${
+                                                isActive
+                                                    ? 'bg-gradient-to-r from-[#8b5a2b] to-[#5d3a1a] text-[#f7e6c4] font-bold shadow-[0_0_15px_rgba(247,230,196,0.4)] border border-[#ebdcb9]/40'
+                                                    : 'hover:bg-[#8b5a2b]/20 text-[#ebdcb9]/80 hover:text-[#f7e6c4]'
+                                            }`}
+                                        >
+                                            <div className="relative flex items-center justify-center w-8 text-center text-lg shrink-0">
+                                                {hasBadge ? (
+                                                    <>
+                                                        <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                        <div className="absolute w-7 h-7 rounded-full bg-red-600 text-white text-xs font-extrabold flex items-center justify-center border-2 border-yellow-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-toggle-badge" title={`มีเรื่องรออยู่ ${item.badge} เรื่อง`}>
+                                                            {item.badge}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <i className={item.icon}></i>
+                                                )}
+                                            </div>
+                                            {!isCollapsed && (
+                                                <div className="flex items-center justify-between flex-1 truncate">
+                                                    <span className="text-sm font-semibold truncate text-left">{item.label}</span>
+                                                    {hasBadge && (
+                                                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-300 shadow ml-1">
+                                                            {item.badge} เรื่องใหม่
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+
+                                {/* 🟢 Desktop LINE OpenChat Button (เหนือบาร์เพลง) */}
+                                <button 
+                                    onClick={() => setIsLineModalOpen(true)}
+                                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-900/90 to-teal-900/90 hover:from-emerald-800 hover:to-teal-800 text-emerald-200 transition border border-emerald-400/60 font-bold mt-2 cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.35)] group"
+                                    title="เปิดหน้าต่าง QR Code LINE OpenChat"
+                                >
+                                    <div className="flex items-center justify-center w-8 text-center text-xl text-[#06c755] group-hover:scale-110 transition-transform">
+                                        <i className="fa-brands fa-line"></i>
+                                    </div>
+                                    {!isCollapsed && (
+                                        <div className="flex flex-col text-left truncate">
+                                            <span className="text-xs font-bold text-emerald-300">LINE OpenChat</span>
+                                            <span className="text-[10px] text-emerald-100/70">กิลด์พูดคุย & แจ้งบั๊ก</span>
+                                        </div>
+                                    )}
+                                </button>
+                            </nav>
+                        </div>
+
+                        <div className="mt-auto shrink-0 flex flex-col">
+                            {!isCollapsed ? (
+                                <div className="mx-3 mb-4 bg-gradient-to-b from-black/60 to-black/80 border border-[#8b5a2b]/50 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
+                                    <div className={`transition-all duration-300 ease-in-out ${isPlaylistOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} overflow-y-auto bg-black/50`}>
+                                        {musicTracks.map((t, idx) => (
+                                            <button key={t.id} onClick={() => setCurrentTrackIndex(idx)} className={`w-full text-left px-3 py-2 text-xs border-b border-white/5 transition hover:bg-white/10 ${idx === currentTrackIndex ? 'text-yellow-400 bg-yellow-900/30 font-bold' : 'text-gray-300'}`}>
+                                                {idx === currentTrackIndex && <i className="fa-solid fa-volume-high mr-2 animate-pulse"></i>}
+                                                {t.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div onClick={() => setIsPlaylistOpen(!isPlaylistOpen)} className="p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition select-none">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <i className="fa-solid fa-compact-disc text-yellow-500 animate-spin" style={{ animationDuration: '4s' }}></i>
+                                            <div className="music-marquee-container flex-1">
+                                                <span className="music-marquee-text text-xs text-yellow-200 font-medium">
+                                                    {musicTracks[currentTrackIndex].title}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <i className={`fa-solid fa-chevron-${isPlaylistOpen ? 'down' : 'up'} text-yellow-600`}></i>
+                                    </div>
+                                    <div className="px-3 py-2.5 flex justify-between items-center bg-black/60">
+                                        <button onClick={() => setIsLoopingOne(!isLoopingOne)} className={`text-xs w-6 h-6 rounded flex items-center justify-center transition ${isLoopingOne ? 'bg-yellow-500 text-black shadow-[0_0_8px_yellow]' : 'text-gray-400 hover:text-white'}`} title={isLoopingOne ? "เล่นวนเพลงเดียว" : "เล่นตามลำดับ"}>
+                                            <i className="fa-solid fa-repeat"></i>
+                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={handlePrevTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-backward-step"></i></button>
+                                            <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-500 text-black flex items-center justify-center hover:scale-110 transition shadow-lg cursor-pointer">
+                                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play ml-0.5'}`}></i>
+                                            </button>
+                                            <button onClick={handleNextTrack} className="text-gray-400 hover:text-yellow-400 transition"><i className="fa-solid fa-forward-step"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mx-3 mb-4 flex justify-center">
+                                    <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition cursor-pointer ${isPlaying ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-yellow-400 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'bg-black/50 border-gray-600 text-gray-400'}`}>
+                                        <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-pause'}`}></i>
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.4.3</p>)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ================= MOBILE NAVIGATION UI (md:hidden) ================= */}
+                    <div className={`md:hidden ${isModalOpen ? 'modal-open-hide-sidebar' : ''}`}>
+                        {/* ⚓ Bottom Navigation Dock (5 Circular Buttons Centered) */}
+                        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass-panel glow-border px-3.5 py-2 rounded-full flex items-center gap-3 shadow-[0_0_25px_rgba(0,0,0,0.85)] border border-[#ebdcb9]/40 backdrop-blur-xl bg-black/70">
+                            {mobileNavItems.map((item) => {
+                                const isActive = currentView === item.id;
+                                const hasBadge = typeof item.badge === 'number' && item.badge > 0;
+                                const isCenter = item.isCenter;
+
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => onViewChange(item.id)}
+                                        className={`relative rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                                            isCenter
+                                                ? 'w-12 h-12 text-xl border-2'
+                                                : 'w-10 h-10 text-base border'
+                                        } ${
+                                            isActive
+                                                ? 'bg-gradient-to-b from-[#8b5a2b] to-[#5d3a1a] text-[#f7e6c4] border-[#ebdcb9] shadow-[0_0_15px_rgba(247,230,196,0.6)] scale-110'
+                                                : 'bg-black/50 text-[#ebdcb9]/70 border-white/10 hover:bg-[#8b5a2b]/30 hover:text-[#ebdcb9]'
+                                        }`}
+                                        title={item.label}
+                                    >
+                                        {hasBadge ? (
+                                              <>
+                                                  <i className={`${item.icon} absolute animate-toggle-icon`}></i>
+                                                  <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center border border-yellow-300 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-toggle-badge">
+                                                      {item.badge}
+                                                  </div>
+                                              </>
+                                        ) : (
+                                            <i className={item.icon}></i>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* 🪭 ================= RADIAL ARC FAN FAB (มุมล่างขวา ไม่ทับบาร์ล่าง 100%) ================= */}
+                        <div className="fixed bottom-3.5 right-4 z-50 flex items-center justify-center">
+                            {/* 1. 📢 ประกาศข่าวสาร (บนสุด / Level 4) */}
+                            <button
+                                onClick={() => { onViewChange('news'); setIsFanOpen(false); }}
+                                className={`fan-item absolute w-11 h-11 rounded-full glass-panel border border-blue-400/80 text-blue-300 shadow-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all duration-300 ${
+                                    isFanOpen 
+                                        ? 'opacity-100 pointer-events-auto transform translate-x-0 -translate-y-[215px] shadow-[0_0_15px_rgba(59,130,246,0.85)] scale-100' 
+                                        : 'opacity-0 pointer-events-none transform translate-x-0 translate-y-0 scale-50'
+                                }`}
+                                title="ประกาศข่าวสาร"
+                            >
+                                <i className="fa-solid fa-bullhorn text-sm"></i>
+                            </button>
+
+                            {/* 2. ⚡ เหตุการณ์พิเศษ PopBoss (รองบน / Level 3) */}
+                            <button
+                                onClick={() => { onViewChange('popboss'); setIsFanOpen(false); }}
+                                className={`fan-item absolute w-11 h-11 rounded-full glass-panel border border-yellow-400/80 text-yellow-300 shadow-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all duration-300 ${
+                                    isFanOpen 
+                                        ? 'opacity-100 pointer-events-auto transform -translate-x-[25px] -translate-y-[165px] shadow-[0_0_15px_rgba(250,204,21,0.85)] scale-100' 
+                                        : 'opacity-0 pointer-events-none transform translate-x-0 translate-y-0 scale-50'
+                                }`}
+                                title={isPopBossActive() ? "⚡ เหตุการณ์พิเศษ POPBOSS" : "🔒 สรุปผล PopBoss Season 1"}
+                            >
+                                <i className={`fa-solid ${isPopBossActive() ? 'fa-bolt text-base animate-pulse' : 'fa-trophy text-sm text-yellow-400'}`}></i>
+                            </button>
+
+                            {/* 3. 💬 LINE OpenChat (รองล่าง / Level 2) */}
+                            <button
+                                onClick={() => { setIsLineModalOpen(true); setIsFanOpen(false); }}
+                                className={`fan-item absolute w-11 h-11 rounded-full bg-gradient-to-r from-[#06c755] to-[#048e3c] border-2 border-white/90 text-white shadow-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all duration-300 ${
+                                    isFanOpen 
+                                        ? 'opacity-100 pointer-events-auto transform -translate-x-[55px] -translate-y-[115px] shadow-[0_0_20px_rgba(6,199,85,0.95)] scale-100' 
+                                        : 'opacity-0 pointer-events-none transform translate-x-0 translate-y-0 scale-50'
+                                }`}
+                                title="LINE OpenChat กิลด์นักสร้างสรรค์"
+                            >
+                                <i className="fa-brands fa-line text-xl"></i>
+                            </button>
+
+                            {/* 4. 🎵 เพลง BGM (ล่างสุด / Level 1) */}
+                            <button
+                                onClick={() => setIsPlaying(!isPlaying)}
+                                className={`fan-item absolute w-11 h-11 rounded-full glass-panel border border-amber-400/80 text-amber-300 shadow-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all duration-300 ${
+                                    isFanOpen 
+                                        ? 'opacity-100 pointer-events-auto transform -translate-x-[75px] -translate-y-[62px] shadow-[0_0_15px_rgba(245,158,11,0.85)] scale-100' 
+                                        : 'opacity-0 pointer-events-none transform translate-x-0 translate-y-0 scale-50'
+                                }`}
+                                title={isPlaying ? "ปิดเพลงประกอบ" : "เปิดเพลงประกอบ"}
+                            >
+                                <i className={`fa-solid ${isPlaying ? 'fa-music animate-pulse' : 'fa-play ml-0.5'} text-sm`}></i>
+                            </button>
+
+                            {/* 🌟 MAIN TRIGGER BUTTON (ปุ่มคทามนตรา) */}
+                            <button
+                                onClick={() => setIsFanOpen(!isFanOpen)}
+                                className={`w-12 h-12 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.9)] border-2 transition-all duration-300 flex items-center justify-center text-lg cursor-pointer active:scale-90 ${
+                                    isFanOpen
+                                        ? 'bg-gradient-to-r from-red-600 to-amber-600 text-white border-yellow-300 rotate-90 shadow-[0_0_15px_rgba(239,68,68,0.8)]'
+                                        : 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-stone-900 border-yellow-200 shadow-[0_0_15px_rgba(250,204,21,0.85)]'
+                                }`}
+                                title={isFanOpen ? "ปิดเมนู" : "เปิดเมนูด่วน"}
+                            >
+                                {isFanOpen ? (
+                                    <i className="fa-solid fa-xmark"></i>
+                                ) : (
+                                    <i className="fa-solid fa-wand-magic-sparkles"></i>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ================= 🟢 MODAL: LINE QR CODE POPUP (Desktop & Mobile) ================= */}
+                    {isLineModalOpen && (
+                        <div 
+                            onClick={() => setIsLineModalOpen(false)}
+                            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+                        >
+                            <div 
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-gradient-to-br from-[#064e3b] via-[#065f46] to-[#022c22] border-2 border-emerald-400/80 p-6 md:p-8 rounded-3xl max-w-sm w-full shadow-2xl text-white relative text-center space-y-4"
+                            >
+                                <button 
+                                    onClick={() => setIsLineModalOpen(false)}
+                                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-gray-300 hover:text-white flex items-center justify-center transition cursor-pointer"
+                                >
+                                    <i className="fa-solid fa-xmark"></i>
+                                </button>
+
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-800/90 border border-emerald-300/50 text-emerald-200 text-xs font-bold">
+                                    <i className="fa-brands fa-line text-sm text-[#06c755]"></i>
+                                    <span>LINE OPENCHAT</span>
+                                </div>
+
+                                <h3 className="text-xl font-bold font-cinzel text-emerald-100">
+                                    ห้องชุมนุมกิลด์นักสร้างสรรค์
+                                </h3>
+
+                                <div className="w-48 h-48 bg-white p-3 rounded-2xl shadow-2xl border-4 border-emerald-300 mx-auto flex items-center justify-center">
+                                    <img 
+                                        src="Assets/Images/LINE_OpenChat_QR.png" 
+                                        onError={(e) => { e.target.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(lineOpenChatUrl); }}
+                                        alt="LINE OpenChat QR Code" 
+                                        className="w-full h-full object-contain rounded-lg"
+                                    />
+                                </div>
+
+                                <p className="text-xs text-emerald-100/80 leading-relaxed font-sans">
+                                    ยกกล้องมือถือขึ้นมาสแกน QR Code เพื่อเข้าร่วมกลุ่มพูดคุยได้ทันที!
+                                </p>
+
+                                <a 
+                                    href={lineOpenChatUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#06c755] to-[#05a847] hover:from-[#05b34c] text-white font-bold text-sm shadow-lg border border-emerald-200 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                                >
+                                    <i className="fa-brands fa-line text-lg"></i>
+                                    <span>คลิกลิงก์เข้าสู่กลุ่ม LINE OpenChat</span>
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </>
             );
         }
 
@@ -3555,7 +3671,7 @@
                                             </tr>
                                             <tr className="hover:bg-amber-100/60 transition">
                                                 <td className="p-3 font-bold border-r border-[#8b5a2b]/20 whitespace-nowrap text-sky-900">
-                                                    ❄️ Blankheimgard <span className="text-xs font-normal font-sans">(แบลงค์ไฮม์การ์ด)</span>
+                                                    ❄️ BlankHeimgard <span className="text-xs font-normal font-sans">(แบลงค์ไฮม์การ์ด)</span>
                                                 </td>
                                                 <td className="p-3 text-center border-r border-[#8b5a2b]/20 whitespace-nowrap font-bold text-sky-700">
                                                     🦌 กวางขาวหิมะ
@@ -3590,7 +3706,6 @@
                                     </table>
                                 </div>
 
-                                {/* คู่มือการกรอกสาส์นและวิถีแห่งเสรีภาพ */}
                                 <div className="bg-gradient-to-r from-[#e5d3a6] to-[#f4e4bc] p-5 rounded-lg border-l-8 border-purple-700 shadow space-y-3">
                                     <h3 className="font-bold text-[#5d3a1a] text-lg border-b border-[#8b5a2b]/30 pb-2">
                                         <i className="fa-solid fa-feather-pointed text-purple-800 mr-2"></i> คู่มือการกรอกสาส์น และวิถีแห่งเสรีภาพ (Freedom of Choice)
@@ -3918,6 +4033,55 @@
                                         </div>
                                     </div>
                                 </section>
+
+                                {/* 🟢 การ์ดชุมนุมกิลด์ LINE OpenChat */}
+                                <div className="md:col-span-2 mt-4">
+                                    <div className="bg-gradient-to-br from-[#064e3b]/95 via-[#065f46] to-[#022c22] p-5 md:p-7 rounded-2xl border-2 border-emerald-400/80 text-white shadow-2xl relative overflow-hidden">
+                                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                                            {/* QR Code */}
+                                            <div className="shrink-0 flex flex-col items-center">
+                                                <div className="w-36 h-36 md:w-44 md:h-44 bg-white p-2.5 rounded-2xl shadow-xl border-4 border-emerald-300 flex flex-col items-center justify-center">
+                                                    <img 
+                                                        src="Assets/Images/LINE_OpenChat_QR.png" 
+                                                        onError={(e) => { e.target.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent("https://line.me/ti/g2/Ijdxg_ClWO5fclJK3O92w7xrbs0GuMUYsyDMhg?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"); }}
+                                                        alt="LINE OpenChat QR Code" 
+                                                        className="w-full h-full object-contain rounded-lg"
+                                                    />
+                                                </div>
+                                                <span className="text-[11px] text-emerald-200 font-bold mt-2 flex items-center gap-1">
+                                                    <i className="fa-solid fa-qrcode text-emerald-400"></i> สแกนด้วยกล้องมือถือ
+                                                </span>
+                                            </div>
+
+                                            {/* Text */}
+                                            <div className="flex-1 text-center md:text-left space-y-3">
+                                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-800/90 border border-emerald-300/50 text-emerald-200 text-xs font-bold shadow-sm">
+                                                    <i className="fa-brands fa-line text-sm text-[#06c755]"></i>
+                                                    <span>COMMUNITY & FEEDBACK GUILD</span>
+                                                </div>
+                                                <h3 className="text-xl md:text-3xl font-bold font-cinzel text-emerald-100">
+                                                    ห้องชุมนุมกิลด์นักสร้างสรรค์ (LINE OpenChat)
+                                                </h3>
+                                                <p className="text-xs md:text-sm text-emerald-100/90 leading-relaxed font-sans">
+                                                    พบเจอบั๊กหน้าจอ? สาส์นไม่แสดงผล? หรือมีไอเดียอยากเสนอแนะฟังก์ชันใหม่ให้สภาเมืองพัฒนา? 
+                                                    ขอเชิญชวนสหายนักผจญภัยทุกแคว้นเข้าร่วม <b>LINE OpenChat สภาเมืองกลาง</b> เพื่อแลกเปลี่ยนมุมมอง พูดคุยอย่างเป็นกันเอง และร่วมสร้างแผ่นดินไปด้วยกัน!
+                                                </p>
+                                                <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                                    <a 
+                                                        href="https://line.me/ti/g2/Ijdxg_ClWO5fclJK3O92w7xrbs0GuMUYsyDMhg?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#06c755] to-[#05a847] hover:from-[#05b34c] hover:to-[#048e3c] text-white font-bold text-xs md:text-sm shadow-[0_4px_15px_rgba(6,199,85,0.4)] border border-emerald-200 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                                                    >
+                                                        <i className="fa-brands fa-line text-lg"></i>
+                                                        <span>กดเพื่อเข้าร่วม LINE OpenChat ทันที</span>
+                                                        <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
