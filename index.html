@@ -236,6 +236,12 @@
             return now <= expiry;
         }
 
+        function isUnityCelebrationActive() {
+            const now = new Date();
+            const expiry = new Date('2026-09-07T23:59:59');
+            return now <= expiry;
+        }
+
         function MapPin({ kingdomKey, kingdom, onClick, onTrophyCelebration }) {
             const [imgError, setImgError] = useState(false);
             const glowFilterMap = {
@@ -246,7 +252,7 @@
                 'Finalthron': 'drop-shadow(0 0 12px rgba(250,204,21,0.95)) drop-shadow(0 0 25px rgba(217,119,6,0.85)) drop-shadow(0 0 40px rgba(180,83,9,0.7))'
             };
             const activeFilter = glowFilterMap[kingdomKey] || 'drop-shadow(0 0 20px rgba(255,255,255,0.8))';
-            const hasTrophies = isTrophyCelebrationActive() && kingdom.trophies && kingdom.trophies.length > 0;
+            const hasTrophies = isUnityCelebrationActive() && kingdomKey === 'Machinepolis' && kingdom.trophies && kingdom.trophies.length > 0;
 
             return (
                 <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
@@ -262,7 +268,7 @@
                                     className="absolute -top-7 sm:-top-8 md:-top-10 z-30 flex items-center gap-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-yellow-950 font-extrabold text-[9px] sm:text-[10px] md:text-xs px-2.5 py-0.5 rounded-full border-2 border-yellow-200 shadow-[0_0_20px_rgba(250,204,21,0.95)] animate-bounce whitespace-nowrap pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
                                     title="คลิกเพื่ออ่านสารสดุดีเกียรติยศ!"
                                 >
-                                    <span>🏆 10 Rising แรก!</span>
+                                    <span>🏆 แชมป์ความสามัคคี!</span>
                                 </div>
                                 <div className="absolute inset-0 pointer-events-none overflow-visible">
                                     <span className="gold-sparkle -left-2 top-0" style={{ animationDelay: '0s' }}></span>
@@ -481,37 +487,96 @@
                             <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">อัปเดตกิจกรรมและประกาศพิเศษจากสภาเมือง</p>
                         </div>
                         <div className="space-y-6">
-                            {/* ข่าวที่ 1: กิจกรรมลงทะเบียนนักผจญภัย */}
-                            <div className="bg-gradient-to-r from-emerald-100 via-teal-100 to-emerald-200 p-6 rounded-xl border-2 border-emerald-500 shadow-md flex flex-col md:flex-row items-center gap-6">
-                                <div className="text-6xl md:text-7xl animate-bounce">🎖️</div>
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-emerald-950 text-xl md:text-2xl mb-2 flex items-center gap-2">
-                                        <span>ฉลองเปิดเซิร์ฟเวอร์: "ลงทะเบียนนักผจญภัย ชิงถ้วยรางวัลถ้วยแรกของแผ่นดิน"</span>
-                                    </h3>
-                                    <p className="text-sm md:text-base text-emerald-900 leading-relaxed space-y-1">
-                                        ยินดีต้อนรับนักผจญภัยหน้าใหม่ทุกท่านเข้าสู่อาณาจักร Diecast Kingdoms!<br/>
-                                        เพื่อเป็นการฉลองเปิดแผ่นดินใหม่และซักซ้อมการส่งสาส์น ขอเชิญชวนพนักงานทุกคนมาร่วม <b>"ลงทะเบียนรายงานตัว"</b> พร้อมแชร์ภาพถ่ายแรกของคุณ โดยจะเป็นภาพอะไรก็ได้ ภาพทั่วไป ภาพแมว หรือภาพตลกๆ เพื่อรับการต้อนรับจากสภาเมืองกลาง!<br/>
-                                        🏆 <b className="text-emerald-950">รางวัลใหญ่:</b> อาณาจักรใดที่มีพลเมืองเข้าร่วมรายงานตัวมากที่สุดเมื่อสิ้นสุดกิจกรรม จะได้รับ <b className="text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded border border-amber-400">"ถ้วยรางวัลความสามัคคีแห่งแผ่นดิน (Unity Trophy)"</b> ไปประดับไว้ในหน้า World Map ของเมืองท่านทันที!
-                                    </p>
-                                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                                        <span className="text-emerald-950 font-bold px-3 py-1 bg-emerald-300/60 rounded-full inline-block border border-emerald-500/50 text-xs md:text-sm">⏳ ระยะเวลากิจกรรม: 24 สิงหาคม - 30 สิงหาคม 2026 เท่านั้น</span>
-                                        {isEnrollmentActive() ? (
-                                            <button onClick={() => onViewChange('suggestion', { category: '🎖️ Enrollment - ลงทะเบียนนักผจญภัย (24-30 ส.ค.)' })} className="px-4 py-1.5 rounded-lg bg-emerald-800 text-white font-bold text-xs md:text-sm hover:bg-emerald-700 transition shadow cursor-pointer border border-emerald-400">
-                                                ✍️ ไปยื่นรายงานตัวทันที
-                                            </button>
-                                        ) : (new Date() < new Date('2026-08-24T00:00:00')) ? (
-                                            <span className="px-3 py-1 rounded-lg bg-stone-800 text-amber-300 font-bold text-xs border border-amber-400/50 shadow-sm flex items-center gap-1.5">
-                                                <i className="fa-solid fa-lock text-amber-400"></i> เปิดรับรายงานตัว 24 ส.ค. (00:00 น.)
-                                            </span>
-                                        ) : (
-                                            <span className="px-3 py-1 rounded-lg bg-stone-700 text-stone-300 font-bold text-xs border border-stone-500 shadow-sm">
-                                                🏁 สิ้นสุดระยะเวลากิจกรรมแล้ว
-                                            </span>
-                                        )}
+                            {/* ข่าวที่ 1: ประกาศผลกิจกรรมลงทะเบียนนักผจญภัย (Unity Champion Leaderboard) */}
+                            <div className="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 p-6 rounded-xl border-2 border-yellow-400 shadow-xl flex flex-col md:flex-row items-center gap-6 text-white relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-2 text-yellow-400 opacity-20 text-8xl transform rotate-12"><i className="fa-solid fa-trophy"></i></div>
+                                <div className="text-6xl md:text-7xl animate-bounce">🏆</div>
+                                <div className="flex-1 relative z-10 w-full">
+                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                        <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-yellow-950 font-extrabold text-xs px-2.5 py-0.5 rounded-full shadow border border-yellow-200 uppercase tracking-wide">
+                                            ประกาศผลอย่างเป็นทางการ
+                                        </span>
+                                        <span className="text-yellow-300 text-xs font-bold bg-black/40 px-2 py-0.5 rounded border border-yellow-400/30">
+                                            1 - 7 กันยายน 2026
+                                        </span>
                                     </div>
-                                    <p className="text-[11px] text-emerald-800/90 italic mt-2">
-                                        *หมายเหตุ: สภาเมืองอาจมีการจัดเก็บสาส์นรายงานตัวเข้าสู่คลังความทรงจำเพื่อให้หน้าบอร์ดสะอาด ท่านสามารถกด <b>"เบิกบันทึกสภา (Export .csv)"</b> ที่หน้าประกาศิตแผ่นดิน เพื่อตรวจเช็ครายชื่อนักผจญภัยได้ตลอดเวลาค่ะ
+                                    <h3 className="font-bold text-yellow-300 text-xl md:text-2xl mb-1">
+                                        สรุปผลคะแนนกิจกรรม "ลงทะเบียนนักผจญภัย ชิงถ้วยความสามัคคี"
+                                    </h3>
+                                    <p className="text-xs md:text-sm text-gray-200 leading-relaxed mb-3">
+                                        สภาเมืองขอขอบคุณนักผจญภัยทุกท่านที่ร่วมใจกันส่งสาส์นรายงานตัวและแชร์ภาพถ่ายแรกเข้ามาอย่างคึกคักตลอด 7 วันที่ผ่านมา! ขอสดุดีผลสรุปการรวมพลังความสามัคคีของแต่ละอาณาจักรอย่างเป็นทางการ:
                                     </p>
+
+                                    {/* กล่องสรุปคะแนนแต่ละอาณาจักร */}
+                                    <div className="space-y-2.5 mb-4">
+                                        {/* 🥇 อันดับ 1: แมคชีนโพลิส (Full Width Champion Card) */}
+                                        <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 p-3 sm:p-4 rounded-xl border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.35)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 relative overflow-hidden">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-2xl sm:text-3xl animate-bounce">🥇</span>
+                                                <div>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="font-bold text-sm sm:text-base text-yellow-300">อันดับ 1: แมคชีนโพลิส (Machinepolis)</p>
+                                                        <span className="text-[10px] text-yellow-950 font-extrabold bg-gradient-to-r from-amber-300 to-yellow-400 px-2 py-0.5 rounded-full border border-yellow-200 shadow-sm">👑 UNITY CHAMPION</span>
+                                                    </div>
+                                                    <p className="text-[11px] text-emerald-200/90 font-medium">รวมพลังสามัคคีรายงานตัวสูงสุด คว้าถ้วยเกียรติยศแห่งแผ่นดิน!</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right self-end sm:self-center">
+                                                <span className="text-xl sm:text-2xl font-black text-yellow-300 font-cinzel tracking-wider">53 <span className="text-xs sm:text-sm font-sans font-bold text-yellow-200/80">สาส์น</span></span>
+                                            </div>
+                                        </div>
+
+                                        {/* อันดับ 2, 3, 4 เรียง 3 คอลัมน์ */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            {/* อันดับ 2: แบลงค์ไฮม์การ์ด */}
+                                            <div className="bg-sky-950/80 p-2.5 rounded-lg border border-sky-400/60 flex items-center justify-between shadow">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg">🥈</span>
+                                                    <div>
+                                                        <p className="font-bold text-xs text-sky-200">อันดับ 2: แบลงค์ไฮม์การ์ด</p>
+                                                        <p className="text-[10px] text-sky-400">Blankheimgard</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm sm:text-base font-extrabold text-sky-300 font-cinzel">40 <span className="text-[10px] font-sans font-normal text-sky-200/70">สาส์น</span></span>
+                                            </div>
+
+                                            {/* อันดับ 3: ไฟนัลธรอน */}
+                                            <div className="bg-amber-950/80 p-2.5 rounded-lg border border-amber-400/60 flex items-center justify-between shadow">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg">🥉</span>
+                                                    <div>
+                                                        <p className="font-bold text-xs text-amber-200">อันดับ 3: ไฟนัลธรอน</p>
+                                                        <p className="text-[10px] text-amber-400">Finalthron</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm sm:text-base font-extrabold text-amber-300 font-cinzel">27 <span className="text-[10px] font-sans font-normal text-amber-200/70">สาส์น</span></span>
+                                            </div>
+
+                                            {/* อันดับ 4: แคสเทอเรีย (🥺 หน้าเศร้า) */}
+                                            <div className="bg-red-950/80 p-2.5 rounded-lg border border-red-400/60 flex items-center justify-between shadow">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg">🥺</span>
+                                                    <div>
+                                                        <p className="font-bold text-xs text-red-200">อันดับ 4: แคสเทอเรีย</p>
+                                                        <p className="text-[10px] text-red-400">Casteria</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm sm:text-base font-extrabold text-red-300 font-cinzel">15 <span className="text-[10px] font-sans font-normal text-red-200/70">สาส์น</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <button 
+                                            onClick={() => onViewChange('worldmap', { celebrationKingdom: 'Machinepolis' })} 
+                                            className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-yellow-950 font-extrabold text-xs md:text-sm shadow-lg transition cursor-pointer border border-yellow-200 flex items-center gap-1.5"
+                                        >
+                                            <i className="fa-solid fa-trophy"></i> ไปชมถ้วยรางวัลของ Machinepolis ที่แผนที่โลก
+                                        </button>
+                                        <span className="text-xs text-gray-300 italic">
+                                            *สาส์นรายงานตัวทั้งหมด (135 สาส์น) ถูกบันทึกเข้าสู่คลังประวัติศาสตร์เรียบร้อยแล้ว
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -733,11 +798,17 @@
         // ==========================================
         // COMPONENT: WorldMap 
         // ==========================================
-        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle }) {
+        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle, initialCelebration }) {
             const [selectedKingdom, setSelectedKingdom] = useState(null);
-            const [celebrationKingdom, setCelebrationKingdom] = useState(null);
+            const [celebrationKingdom, setCelebrationKingdom] = useState(initialCelebration || null);
             const [zoomedImg, setZoomedImg] = useState(null); 
             const [expandedTab, setExpandedTab] = useState(null);
+
+            useEffect(() => {
+                if (initialCelebration) {
+                    setCelebrationKingdom(initialCelebration);
+                }
+            }, [initialCelebration]);
 
             useEffect(() => { 
                 if (!selectedKingdom) setExpandedTab(null); 
@@ -784,7 +855,13 @@
                     duties: 'Machining, QC Machining, Water Jet, Washing',
                     iconImg: 'Assets/Images/Kingdoms/Machinepolis_8bit.png', bgImage: 'Assets/Images/Kingdoms/Machinepolis_bg.png',
                     barColor: 'bg-gradient-to-r from-purple-500 to-indigo-500',
-                    trophies: [], history: [], position: { top: '90%', left: '26%' },
+                    trophies: [
+                        { 
+                            src: 'Assets/Images/Trophies/Trophy_machinepolis_unity.jpg', 
+                            name: 'ถ้วยเกียรติยศ: แชมป์ความสามัคคีแห่งแผ่นดิน (Unity Trophy)' 
+                        }
+                    ], 
+                    history: [], position: { top: '90%', left: '26%' },
                     customSize: 'w-[120px] md:w-[180px]' 
                 },
                 'Finalthron': {
@@ -824,21 +901,43 @@
                                 
                                 <div className="text-6xl animate-bounce">🏆</div>
                                 
-                                <div className="space-y-1">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-amber-800 bg-amber-200/80 px-3 py-1 rounded-full border border-amber-400 inline-block">
-                                        ✨ 10 RISING แรกแห่งประวัติศาสตร์แผ่นดิน ✨
-                                    </span>
-                                    <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel pt-2">
-                                        สดุดี "แบลงค์ไฮม์การ์ด"
-                                    </h2>
-                                    <p className="text-xs text-sky-800 font-bold">BLANKHEIMGARD - ปราการน้ำแข็งผู้ไม่ยอมแพ้</p>
-                                </div>
+                                {celebrationKingdom === 'Machinepolis' ? (
+                                    <>
+                                        <div className="space-y-1">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-800 bg-amber-200/80 px-3 py-1 rounded-full border border-amber-400 inline-block">
+                                                ✨ แชมป์ความสามัคคีแห่งแผ่นดิน (UNITY CHAMPION) ✨
+                                            </span>
+                                            <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel pt-2">
+                                                สดุดี "แมคชีนโพลิส"
+                                            </h2>
+                                            <p className="text-xs text-purple-900 font-bold">MACHINEPOLIS - มหานครจักรกลผู้ทรงพลังแห่งความสามัคคี</p>
+                                        </div>
 
-                                <p className="text-xs md:text-sm text-[#5d3a1a] leading-relaxed font-sans font-medium bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-left">
-                                    สภาเมืองขอแสดงความยินดีและขอบคุณชาวเมืองแบลงค์ไฮม์การ์ดทุกท่าน ที่ร่วมแรงร่วมใจกันผลักดันเสนอสาส์นพัฒนาจนสำเร็จครบ <b>10 Rising แรกของแผ่นดิน</b> สภาคาดหวังถึงการลงมือแก้ไขปัญหาต่างๆ เพื่อนำความแข็งแกร่งมาสู่อาณาจักรของท่านต่อไป!
-                                    <br/><br/>
-                                    🏆 โดยเหตุนี้แบลงค์ไฮม์การ์ดผู้ไม่ยอมแพ้ ได้บรรลุภารกิจ 10 สาส์นพัฒนาที่มีความหมาย จึงได้รับ <b>"ถ้วยเกียรติยศ 10 Rising แรก"</b> ประดิษฐานไว้ในหอเกียรติยศของอาณาจักรแบลงค์ไฮม์การ์ด!
-                                </p>
+                                        <p className="text-xs md:text-sm text-[#5d3a1a] leading-relaxed font-sans font-medium bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-left">
+                                            สภาเมืองขอแสดงความยินดีและสดุดีชาวเมืองแมคชีนโพลิสทุกท่าน ที่รวมพลังความสามัคคีร่วมส่งสาส์นรายงานตัวและแชร์ภาพถ่ายแรกสูงที่สุดในกิจกรรมฉลองเปิดเซิร์ฟเวอร์ (ลงทะเบียนนักผจญภัย)!
+                                            <br/><br/>
+                                            🏆 ด้วยพลังแห่งความเป็นหนึ่งเดียว แมคชีนโพลิสจึงได้รับ <b>"ถ้วยรางวัลความสามัคคีแห่งแผ่นดิน (Unity Trophy)"</b> ประดิษฐานไว้ในหอเกียรติยศของอาณาจักรแมคชีนโพลิส เพื่อเป็นเกียรติประวัติสืบไป!
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="space-y-1">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-800 bg-amber-200/80 px-3 py-1 rounded-full border border-amber-400 inline-block">
+                                                ✨ 10 RISING แรกแห่งประวัติศาสตร์แผ่นดิน ✨
+                                            </span>
+                                            <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel pt-2">
+                                                สดุดี "แบลงค์ไฮม์การ์ด"
+                                            </h2>
+                                            <p className="text-xs text-sky-800 font-bold">BLANKHEIMGARD - ปราการน้ำแข็งผู้ไม่ยอมแพ้</p>
+                                        </div>
+
+                                        <p className="text-xs md:text-sm text-[#5d3a1a] leading-relaxed font-sans font-medium bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-left">
+                                            สภาเมืองขอแสดงความยินดีและขอบคุณชาวเมืองแบลงค์ไฮม์การ์ดทุกท่าน ที่ร่วมแรงร่วมใจกันผลักดันเสนอสาส์นพัฒนาจนสำเร็จครบ <b>10 Rising แรกของแผ่นดิน</b> สภาคาดหวังถึงการลงมือแก้ไขปัญหาต่างๆ เพื่อนำความแข็งแกร่งมาสู่อาณาจักรของท่านต่อไป!
+                                            <br/><br/>
+                                            🏆 โดยเหตุนี้แบลงค์ไฮม์การ์ดผู้ไม่ยอมแพ้ ได้บรรลุภารกิจ 10 สาส์นพัฒนาที่มีความหมาย จึงได้รับ <b>"ถ้วยเกียรติยศ 10 Rising แรก"</b> ประดิษฐานไว้ในหอเกียรติยศของอาณาจักรแบลงค์ไฮม์การ์ด!
+                                        </p>
+                                    </>
+                                )}
 
                                 <div className="flex flex-col sm:flex-row gap-2 pt-2">
                                     <button
@@ -1116,7 +1215,7 @@
                             )}
 
                             <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.4.3</p>)}
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.5.3</p>)}
                             </div>
                         </div>
                     </div>
@@ -4235,11 +4334,18 @@
             const [dashboardFilter, setDashboardFilter] = useState(null);
             const [questFilter, setQuestFilter] = useState(null);
             const [initialCategory, setInitialCategory] = useState('');
+            const [worldmapCelebration, setWorldmapCelebration] = useState(null);
 
             const handleViewChange = (view, extraParam) => {
                 setIsKingdomModalOpen(false);
                 setCurrentView(view);
-                if (view === 'chronicles') {
+                if (view === 'worldmap') {
+                    if (extraParam && extraParam.celebrationKingdom) {
+                        setWorldmapCelebration(extraParam.celebrationKingdom);
+                    } else {
+                        setWorldmapCelebration(null);
+                    }
+                } else if (view === 'chronicles') {
                     if (typeof extraParam === 'string') setChronicleTab(extraParam); 
                     else setChronicleTab('lore'); 
                 } else if (view === 'dashboard') {
@@ -4525,7 +4631,15 @@
                                 />
                             )}
 
-                            {currentView === 'worldmap' && <WorldMap kingdomEXP={kingdomEXP} projects={projects} onViewChange={handleViewChange} onModalToggle={(open) => setIsKingdomModalOpen(open)} />}
+                            {currentView === 'worldmap' && (
+                                <WorldMap 
+                                    kingdomEXP={kingdomEXP} 
+                                    projects={projects} 
+                                    onViewChange={handleViewChange} 
+                                    onModalToggle={(open) => setIsKingdomModalOpen(open)} 
+                                    initialCelebration={worldmapCelebration}
+                                />
+                            )}
 
                             {currentView !== 'worldmap' && currentView !== 'popboss' && (
                                 <main className={`transition-all duration-500 flex-grow px-3 py-4 pt-16 pb-24 md:p-8 md:pt-8 md:pb-8 ${showSidebar ? (isSidebarCollapsed ? 'md:ml-24 ml-0' : 'md:ml-[18rem] ml-0') : 'ml-0'}`}>
