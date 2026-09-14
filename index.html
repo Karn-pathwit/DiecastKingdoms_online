@@ -384,41 +384,66 @@
         // COMPONENT: LoginGate
         // ==========================================
         function LoginGate({ onLoginSuccess }) {
-            const [displayPassword, setDisplayPassword] = useState('');
             const [realPassword, setRealPassword] = useState('');
             const [error, setError] = useState(false);
+            const [isTypingPasswordVisible, setIsTypingPasswordVisible] = useState(false);
+            const [isManuallyPasswordVisible, setIsManuallyPasswordVisible] = useState(false);
+            const passwordHideTimerRef = useRef(null);
 
-            const handlePasswordChange = (e) => {
-                const val = e.target.value;
-                setError(false);
-                
-                if (val.length - displayPassword.length > 1) {
-                    setRealPassword(val);
-                    setDisplayPassword('●'.repeat(val.length - 1) + val.slice(-1));
-                } 
-                else if (val.length < displayPassword.length) { 
-                    setRealPassword(realPassword.slice(0, val.length)); 
-                    setDisplayPassword(val); 
-                } 
-                else { 
-                    const addedChar = val.slice(-1); 
-                    setRealPassword(realPassword + addedChar); 
-                    setDisplayPassword('●'.repeat(val.length - 1) + addedChar); 
+            const clearPasswordHideTimer = () => {
+                if (passwordHideTimerRef.current) {
+                    clearTimeout(passwordHideTimerRef.current);
+                    passwordHideTimerRef.current = null;
                 }
             };
 
+            const handlePasswordChange = (e) => {
+                setError(false);
+                setRealPassword(e.target.value);
+                setIsTypingPasswordVisible(true);
+                clearPasswordHideTimer();
+                passwordHideTimerRef.current = setTimeout(() => {
+                    setIsTypingPasswordVisible(false);
+                    passwordHideTimerRef.current = null;
+                }, 3000);
+            };
+
             useEffect(() => {
-                const timeout = setTimeout(() => { if(displayPassword.length > 0) setDisplayPassword('●'.repeat(displayPassword.length)); }, 800);
-                return () => clearTimeout(timeout);
-            }, [displayPassword]);
+                return clearPasswordHideTimer;
+            }, []);
+
+            const isPasswordVisible = isTypingPasswordVisible || isManuallyPasswordVisible;
+
+            const handleTogglePasswordVisibility = () => {
+                if (isPasswordVisible) {
+                    setIsTypingPasswordVisible(false);
+                    setIsManuallyPasswordVisible(false);
+                    clearPasswordHideTimer();
+                } else {
+                    setIsManuallyPasswordVisible(true);
+                }
+            };
+
+            const normalizeCityPass = (password) => password
+                .normalize('NFC')
+                .toLowerCase()
+                .replace(/[\s\u200B-\u200D\uFEFF]+/g, '')
+                .replace(/เ{2,}/g, 'แ')
+                .replace(/เ+แ/g, 'แ')
+                .replace(/ดาย/g, 'ได')
+                .replace(/แคสต์/g, 'แคส');
 
             const handleSubmit = (e) => {
                 e.preventDefault();
-                const trimmedPass = realPassword.trim();
-                if (trimmedPass === 'DCweare1' || trimmedPass === 'ฏฉไำฟพำๅ') {
+                const normalizedPass = normalizeCityPass(realPassword);
+                const isEnglishPass = normalizedPass === 'dcweare1' || normalizedPass === 'dcwr1';
+                const isThaiPass = normalizedPass === 'เรารักมินิแบไดแคส';
+                const isLegacyThaiKeyboardPass = normalizedPass === 'ฏฉไำฟพำๅ';
+
+                if (isEnglishPass || isThaiPass || isLegacyThaiKeyboardPass) {
                     onLoginSuccess();
                 } else { 
-                    setError(true); setRealPassword(''); setDisplayPassword(''); 
+                    setError(true); setRealPassword(''); setIsTypingPasswordVisible(false); setIsManuallyPasswordVisible(false); clearPasswordHideTimer();
                 }
             };
 
@@ -430,7 +455,17 @@
                         <p className="text-[#8b5a2b] text-sm mb-6 font-bold">โปรดแสดงรหัสผ่านลับขององค์กรเพื่อเข้าสู่อาณาจักร</p>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <input type="text" value={displayPassword} onChange={handlePasswordChange} placeholder="กรอกรหัสผ่านลับ..." className={`input-style text-center text-lg tracking-widest ${error ? 'border-red-600 bg-red-100 placeholder-red-400' : ''}`} required autoComplete="off" />
+                                <div className="relative">
+                                    <input type="text" value={realPassword} onChange={handlePasswordChange} placeholder="กรอกรหัสผ่านลับ..." className={`input-style px-12 text-center text-lg tracking-widest ${error ? 'border-red-600 bg-red-100 placeholder-red-400' : ''}`} style={{ color: isPasswordVisible ? undefined : 'transparent', caretColor: isPasswordVisible ? undefined : 'transparent' }} inputMode="text" required autoComplete="off" />
+                                    {!isPasswordVisible && realPassword.length > 0 && (
+                                        <span className="absolute inset-y-0 left-12 right-12 flex items-center justify-center text-[#5d3a1a] text-lg tracking-widest pointer-events-none" aria-hidden="true">
+                                            {'●'.repeat(Array.from(realPassword).length)}
+                                        </span>
+                                    )}
+                                    <button type="button" onClick={handleTogglePasswordVisibility} className="absolute inset-y-0 right-0 px-4 text-[#8b5a2b] hover:text-[#5d3a1a] transition cursor-pointer" aria-label={isPasswordVisible ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'} title={isPasswordVisible ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}>
+                                        <i className={`fa-solid ${isPasswordVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                    </button>
+                                </div>
                                 {error && <p className="text-red-700 text-xs font-bold mt-2 animate-bounce">❌ รหัสผ่านไม่ถูกต้อง! ผู้บุกรุกจงถอยไป!</p>}
                             </div>
                             <button type="submit" className="w-full bg-[#5d3a1a] text-white py-3 rounded-lg hover:bg-[#8b5a2b] transition duration-200 font-bold shadow-lg cursor-pointer">เปิดประตูเมือง (Enter)</button>
