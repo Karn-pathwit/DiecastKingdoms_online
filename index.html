@@ -139,22 +139,6 @@
             .pin-finalthron { top: 78% !important; left: 74% !important; }
         }
 
-        /* ================= GOLD DUST & TROPHY SPARKLE CSS ================= */
-        @keyframes gold-dust-fall {
-            0% { transform: translateY(-12px) scale(0.6); opacity: 0; }
-            50% { opacity: 1; transform: translateY(6px) scale(1.3); }
-            100% { transform: translateY(24px) scale(0.3); opacity: 0; }
-        }
-        .gold-sparkle {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: radial-gradient(circle, #ffffff, #ffd700, #ff8c00);
-            border-radius: 50%;
-            pointer-events: none;
-            box-shadow: 0 0 6px #ffd700, 0 0 12px #ffa500;
-            animation: gold-dust-fall 2.2s ease-in-out infinite;
-        }
     </style>
 </head>
 <body class="font-sarabun overflow-x-hidden antialiased">
@@ -172,6 +156,74 @@
         const supabase = (window.supabase && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') 
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
             : null;
+        const PROJECT_MEDIA_BUCKET = 'project-media';
+        const MAX_VIDEO_SIZE_BYTES = 20 * 1024 * 1024;
+        const MAX_VIDEO_DURATION_SECONDS = 30;
+
+        const makeStorageId = () => (window.crypto && window.crypto.randomUUID)
+            ? window.crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        async function uploadImageDataUrl(dataUrl, projectId, stage, index) {
+            if (!supabase || !dataUrl || !dataUrl.startsWith('data:')) return dataUrl;
+            const imageBlob = await fetch(dataUrl).then(response => response.blob());
+            const objectPath = `${projectId}/${stage}/image-${index + 1}-${makeStorageId()}.jpg`;
+            const { error } = await supabase.storage.from(PROJECT_MEDIA_BUCKET).upload(objectPath, imageBlob, {
+                contentType: 'image/jpeg',
+                cacheControl: '31536000',
+                upsert: false
+            });
+            if (error) throw error;
+            const { data } = supabase.storage.from(PROJECT_MEDIA_BUCKET).getPublicUrl(objectPath);
+            return data.publicUrl;
+        }
+
+        async function persistImageList(images, projectId, stage) {
+            const safeImages = Array.isArray(images) ? images.filter(Boolean).slice(0, 5) : [];
+            return Promise.all(safeImages.map((imageUrl, index) => uploadImageDataUrl(imageUrl, projectId, stage, index)));
+        }
+
+        async function uploadVideoFile(file, projectId, stage) {
+            if (!supabase || !file) return null;
+            const objectPath = `${projectId}/${stage}/video-${makeStorageId()}.mp4`;
+            const { error } = await supabase.storage.from(PROJECT_MEDIA_BUCKET).upload(objectPath, file, {
+                contentType: 'video/mp4',
+                cacheControl: '31536000',
+                upsert: false
+            });
+            if (error) throw error;
+            const { data } = supabase.storage.from(PROJECT_MEDIA_BUCKET).getPublicUrl(objectPath);
+            return data.publicUrl;
+        }
+
+        function readVideoDuration(file) {
+            return new Promise((resolve, reject) => {
+                const previewUrl = URL.createObjectURL(file);
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadedmetadata = () => {
+                    const duration = video.duration;
+                    URL.revokeObjectURL(previewUrl);
+                    resolve(duration);
+                };
+                video.onerror = () => {
+                    URL.revokeObjectURL(previewUrl);
+                    reject(new Error('ไม่สามารถอ่านข้อมูลวิดีโอได้'));
+                };
+                video.src = previewUrl;
+            });
+        }
+
+        function normalizeMediaArray(value, fallbackUrl = null) {
+            if (Array.isArray(value)) return value.filter(Boolean);
+            if (typeof value === 'string' && value.trim()) {
+                try {
+                    const parsed = JSON.parse(value);
+                    if (Array.isArray(parsed)) return parsed.filter(Boolean);
+                } catch (_) {}
+            }
+            return fallbackUrl ? [fallbackUrl] : [];
+        }
 
         function getFormattedDate() {
             const bkkDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
@@ -191,6 +243,14 @@
                 requiredExp = Math.floor(requiredExp * 1.2); 
             }
             return { level, currentExp, requiredExp };
+        }
+
+        function calculateKingdomLevel(kingdomName, totalExp) {
+            const calculated = calculateLevel(totalExp);
+            if (kingdomName === 'แบลงค์ไฮม์การ์ด' && calculated.level < 5) {
+                return { level: 5, currentExp: 0, requiredExp: 123 };
+            }
+            return calculated;
         }
 
         function getKingdomBadgeStyle(kName) {
@@ -230,19 +290,13 @@
             return now >= start && now <= expiry;
         }
 
-        function isTrophyCelebrationActive() {
+        function isBlankheimLevel5CelebrationActive() {
             const now = new Date();
-            const expiry = new Date('2026-08-31T23:59:59');
+            const expiry = new Date('2026-09-29T23:59:59+07:00');
             return now <= expiry;
         }
 
-        function isUnityCelebrationActive() {
-            const now = new Date();
-            const expiry = new Date('2026-09-07T23:59:59');
-            return now <= expiry;
-        }
-
-        function MapPin({ kingdomKey, kingdom, onClick, onTrophyCelebration }) {
+        function MapPin({ kingdomKey, kingdom, onClick }) {
             const [imgError, setImgError] = useState(false);
             const glowFilterMap = {
                 'Bascentra': 'drop-shadow(0 0 12px rgba(168,85,247,0.95)) drop-shadow(0 0 25px rgba(147,51,234,0.85)) drop-shadow(0 0 40px rgba(126,34,206,0.7))',
@@ -252,32 +306,20 @@
                 'Finalthron': 'drop-shadow(0 0 12px rgba(250,204,21,0.95)) drop-shadow(0 0 25px rgba(217,119,6,0.85)) drop-shadow(0 0 40px rgba(180,83,9,0.7))'
             };
             const activeFilter = glowFilterMap[kingdomKey] || 'drop-shadow(0 0 20px rgba(255,255,255,0.8))';
-            const hasTrophies = isUnityCelebrationActive() && kingdomKey === 'Machinepolis' && kingdom.trophies && kingdom.trophies.length > 0;
+            const showLevel5Badge = isBlankheimLevel5CelebrationActive() && kingdomKey === 'Blankheimgard';
 
             return (
                 <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
                     <div className="absolute transform -translate-x-1/2 -translate-y-1/2">
-                        {hasTrophies && (
-                            <>
-                                <div 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (onTrophyCelebration) onTrophyCelebration(kingdomKey, kingdom);
-                                        else onClick();
-                                    }}
-                                    className="absolute -top-7 sm:-top-8 md:-top-10 z-30 flex items-center gap-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-yellow-950 font-extrabold text-[9px] sm:text-[10px] md:text-xs px-2.5 py-0.5 rounded-full border-2 border-yellow-200 shadow-[0_0_20px_rgba(250,204,21,0.95)] animate-bounce whitespace-nowrap pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
-                                    title="คลิกเพื่ออ่านสารสดุดีเกียรติยศ!"
-                                >
-                                    <span>🏆 แชมป์ความสามัคคี!</span>
-                                </div>
-                                <div className="absolute inset-0 pointer-events-none overflow-visible">
-                                    <span className="gold-sparkle -left-2 top-0" style={{ animationDelay: '0s' }}></span>
-                                    <span className="gold-sparkle left-6 -top-2" style={{ animationDelay: '0.6s' }}></span>
-                                    <span className="gold-sparkle right-2 top-2" style={{ animationDelay: '1.2s' }}></span>
-                                    <span className="gold-sparkle -right-1 top-8" style={{ animationDelay: '1.8s' }}></span>
-                                    <span className="gold-sparkle left-4 top-10" style={{ animationDelay: '0.9s' }}></span>
-                                </div>
-                            </>
+                        {showLevel5Badge && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onClick(); }}
+                                className="absolute -top-8 sm:-top-9 md:-top-11 left-1/2 -translate-x-1/2 z-30 bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-600 text-sky-950 font-extrabold text-[9px] sm:text-[10px] md:text-xs px-3 py-1 rounded-full border-2 border-cyan-100 shadow-[0_0_22px_rgba(56,189,248,0.95)] animate-bounce whitespace-nowrap pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
+                                title="เปิดชมวิวัฒนาการ Level 5 และอาณาจักรในวันวาน"
+                            >
+                                ❄️ LEVEL 5 EVOLUTION
+                            </button>
                         )}
                         <div onClick={onClick} className="flex flex-col items-center group cursor-pointer animate-float">
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-1 border border-white/30 whitespace-nowrap shadow-lg pointer-events-none">
@@ -436,7 +478,7 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 const normalizedPass = normalizeCityPass(realPassword);
-                const isEnglishPass = normalizedPass === 'dcweare1' || normalizedPass === 'dcwr1';
+                const isEnglishPass = normalizedPass === 'dcweare1' || normalizedPass === 'dcwr1' || normalizedPass === 'dcvr1';
                 const isThaiPass = normalizedPass === 'เรารักมินิแบไดแคส';
                 const isLegacyThaiKeyboardPass = normalizedPass === 'ฏฉไำฟพำๅ';
 
@@ -522,100 +564,7 @@
                             <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">อัปเดตกิจกรรมและประกาศพิเศษจากสภาเมือง</p>
                         </div>
                         <div className="space-y-6">
-                            {/* ข่าวที่ 1: ประกาศผลกิจกรรมลงทะเบียนนักผจญภัย (Unity Champion Leaderboard) */}
-                            <div className="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 p-6 rounded-xl border-2 border-yellow-400 shadow-xl flex flex-col md:flex-row items-center gap-6 text-white relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-2 text-yellow-400 opacity-20 text-8xl transform rotate-12"><i className="fa-solid fa-trophy"></i></div>
-                                <div className="text-6xl md:text-7xl animate-bounce">🏆</div>
-                                <div className="flex-1 relative z-10 w-full">
-                                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                                        <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-yellow-950 font-extrabold text-xs px-2.5 py-0.5 rounded-full shadow border border-yellow-200 uppercase tracking-wide">
-                                            ประกาศผลอย่างเป็นทางการ
-                                        </span>
-                                        <span className="text-yellow-300 text-xs font-bold bg-black/40 px-2 py-0.5 rounded border border-yellow-400/30">
-                                            1 - 7 กันยายน 2026
-                                        </span>
-                                    </div>
-                                    <h3 className="font-bold text-yellow-300 text-xl md:text-2xl mb-1">
-                                        สรุปผลคะแนนกิจกรรม "ลงทะเบียนนักผจญภัย ชิงถ้วยความสามัคคี"
-                                    </h3>
-                                    <p className="text-xs md:text-sm text-gray-200 leading-relaxed mb-3">
-                                        สภาเมืองขอขอบคุณนักผจญภัยทุกท่านที่ร่วมใจกันส่งสาส์นรายงานตัวและแชร์ภาพถ่ายแรกเข้ามาอย่างคึกคักตลอด 7 วันที่ผ่านมา! ขอสดุดีผลสรุปการรวมพลังความสามัคคีของแต่ละอาณาจักรอย่างเป็นทางการ:
-                                    </p>
-
-                                    {/* กล่องสรุปคะแนนแต่ละอาณาจักร */}
-                                    <div className="space-y-2.5 mb-4">
-                                        {/* 🥇 อันดับ 1: แมคชีนโพลิส (Full Width Champion Card) */}
-                                        <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 p-3 sm:p-4 rounded-xl border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.35)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 relative overflow-hidden">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-2xl sm:text-3xl animate-bounce">🥇</span>
-                                                <div>
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <p className="font-bold text-sm sm:text-base text-yellow-300">อันดับ 1: แมคชีนโพลิส (Machinepolis)</p>
-                                                        <span className="text-[10px] text-yellow-950 font-extrabold bg-gradient-to-r from-amber-300 to-yellow-400 px-2 py-0.5 rounded-full border border-yellow-200 shadow-sm">👑 UNITY CHAMPION</span>
-                                                    </div>
-                                                    <p className="text-[11px] text-emerald-200/90 font-medium">รวมพลังสามัคคีรายงานตัวสูงสุด คว้าถ้วยเกียรติยศแห่งแผ่นดิน!</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right self-end sm:self-center">
-                                                <span className="text-xl sm:text-2xl font-black text-yellow-300 font-cinzel tracking-wider">53 <span className="text-xs sm:text-sm font-sans font-bold text-yellow-200/80">สาส์น</span></span>
-                                            </div>
-                                        </div>
-
-                                        {/* อันดับ 2, 3, 4 เรียง 3 คอลัมน์ */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                            {/* อันดับ 2: แบลงค์ไฮม์การ์ด */}
-                                            <div className="bg-sky-950/80 p-2.5 rounded-lg border border-sky-400/60 flex items-center justify-between shadow">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-lg">🥈</span>
-                                                    <div>
-                                                        <p className="font-bold text-xs text-sky-200">อันดับ 2: แบลงค์ไฮม์การ์ด</p>
-                                                        <p className="text-[10px] text-sky-400">Blankheimgard</p>
-                                                    </div>
-                                                </div>
-                                                <span className="text-sm sm:text-base font-extrabold text-sky-300 font-cinzel">40 <span className="text-[10px] font-sans font-normal text-sky-200/70">สาส์น</span></span>
-                                            </div>
-
-                                            {/* อันดับ 3: ไฟนัลธรอน */}
-                                            <div className="bg-amber-950/80 p-2.5 rounded-lg border border-amber-400/60 flex items-center justify-between shadow">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-lg">🥉</span>
-                                                    <div>
-                                                        <p className="font-bold text-xs text-amber-200">อันดับ 3: ไฟนัลธรอน</p>
-                                                        <p className="text-[10px] text-amber-400">Finalthron</p>
-                                                    </div>
-                                                </div>
-                                                <span className="text-sm sm:text-base font-extrabold text-amber-300 font-cinzel">27 <span className="text-[10px] font-sans font-normal text-amber-200/70">สาส์น</span></span>
-                                            </div>
-
-                                            {/* อันดับ 4: แคสเทอเรีย (🥺 หน้าเศร้า) */}
-                                            <div className="bg-red-950/80 p-2.5 rounded-lg border border-red-400/60 flex items-center justify-between shadow">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-lg">🥺</span>
-                                                    <div>
-                                                        <p className="font-bold text-xs text-red-200">อันดับ 4: แคสเทอเรีย</p>
-                                                        <p className="text-[10px] text-red-400">Casteria</p>
-                                                    </div>
-                                                </div>
-                                                <span className="text-sm sm:text-base font-extrabold text-red-300 font-cinzel">15 <span className="text-[10px] font-sans font-normal text-red-200/70">สาส์น</span></span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap items-center gap-3">
-                                        <button 
-                                            onClick={() => onViewChange('worldmap', { celebrationKingdom: 'Machinepolis' })} 
-                                            className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-yellow-950 font-extrabold text-xs md:text-sm shadow-lg transition cursor-pointer border border-yellow-200 flex items-center gap-1.5"
-                                        >
-                                            <i className="fa-solid fa-trophy"></i> ไปชมถ้วยรางวัลของ Machinepolis ที่แผนที่โลก
-                                        </button>
-                                        <span className="text-xs text-gray-300 italic">
-                                            *สาส์นรายงานตัวทั้งหมด (135 สาส์น) ถูกบันทึกเข้าสู่คลังประวัติศาสตร์เรียบร้อยแล้ว
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* ข่าวที่ 2: Quality x2 */}
+                            {/* ข่าวปัจจุบัน: Quality x2 */}
                             <div className="bg-gradient-to-r from-amber-100 to-yellow-300 p-6 rounded-xl border-2 border-yellow-500 shadow-md flex flex-col md:flex-row items-center gap-6">
                                 <div className="text-6xl md:text-7xl animate-pulse">💎</div>
                                 <div>
@@ -833,22 +782,15 @@
         // ==========================================
         // COMPONENT: WorldMap 
         // ==========================================
-        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle, initialCelebration }) {
+        function WorldMap({ kingdomEXP, projects, onViewChange, onModalToggle }) {
             const [selectedKingdom, setSelectedKingdom] = useState(null);
-            const [celebrationKingdom, setCelebrationKingdom] = useState(initialCelebration || null);
             const [zoomedImg, setZoomedImg] = useState(null); 
             const [expandedTab, setExpandedTab] = useState(null);
 
-            useEffect(() => {
-                if (initialCelebration) {
-                    setCelebrationKingdom(initialCelebration);
-                }
-            }, [initialCelebration]);
-
             useEffect(() => { 
                 if (!selectedKingdom) setExpandedTab(null); 
-                if (onModalToggle) onModalToggle(!!selectedKingdom || !!celebrationKingdom);
-            }, [selectedKingdom, celebrationKingdom]);
+                if (onModalToggle) onModalToggle(!!selectedKingdom);
+            }, [selectedKingdom]);
 
             const kingdomsData = {
                 'Bascentra': {
@@ -864,7 +806,7 @@
                     nameEng: 'BLANKHEIMGARD', nameThai: 'แบลงค์ไฮม์การ์ด', kingdomId: 'Blankheimgard',
                     desc: 'ปราการน้ำแข็งและพายุหิมะอันหนาวเหน็บ วิถีชีวิตแบบสโลว์ไลฟ์ รักธรรมชาติและสู้ชีวิต',
                     duties: 'Deburr, Shot Blast, Pretreatment, E-coating, Inspect 2',
-                    iconImg: 'Assets/Images/Kingdoms/Blankheimgard_8bit.png', bgImage: 'Assets/Images/Kingdoms/Blankheimgard_bg.png',
+                    iconImg: 'Assets/Images/Kingdoms/Blankheimgard_8bit.png', bgImage: 'Assets/Images/Kingdoms/Blankheimgard_bg_lv5.jpg?v=20260922',
                     barColor: 'bg-gradient-to-r from-sky-400 to-blue-600',
                     trophies: [
                         { 
@@ -872,7 +814,12 @@
                             name: 'ถ้วยเกียรติยศ: ผู้บรรลุภารกิจสาส์นพัฒนา 10 Rising' 
                         }
                     ], 
-                    history: [], position: { top: '48%', left: '26%' },
+                    history: [
+                        {
+                            src: 'Assets/Images/Kingdoms/History/Blankheimgard_history_lv4.jpg',
+                            name: 'แบลงค์ไฮม์การ์ดในวันวาน — ยุคก่อนวิวัฒนาการสู่ Level 5'
+                        }
+                    ], position: { top: '48%', left: '26%' },
                     customSize: 'w-[120px] md:w-[180px]' 
                 },
                 'Casteria': {
@@ -912,7 +859,7 @@
 
             const activeData = selectedKingdom ? kingdomsData[selectedKingdom] : null;
             let levelData = { level: 1, currentExp: 0, requiredExp: 60 };
-            if (activeData) levelData = calculateLevel(kingdomEXP[activeData.nameThai] || 0);
+            if (activeData) levelData = calculateKingdomLevel(activeData.nameThai, kingdomEXP[activeData.nameThai] || 0);
 
             return (
                 <div className="fixed inset-0 w-full h-full pointer-events-none z-10 pb-20 md:pb-0">
@@ -923,81 +870,9 @@
                                 kingdomKey={key} 
                                 kingdom={kingdomsData[key]} 
                                 onClick={() => setSelectedKingdom(key)} 
-                                onTrophyCelebration={(kKey) => setCelebrationKingdom(kKey)}
                             />
                         );
                     })}
-                    
-                    {celebrationKingdom && (
-                        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[70] animate-fade-in pointer-events-auto" onClick={() => setCelebrationKingdom(null)}>
-                            <div className="parchment max-w-lg w-full p-6 md:p-8 rounded-2xl text-center border-4 border-yellow-500 shadow-[0_0_50px_rgba(250,204,21,0.6)] space-y-4 relative overflow-hidden bg-gradient-to-b from-[#fbf4db] to-[#f4e4bc]" onClick={(e) => e.stopPropagation()}>
-                                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500"></div>
-                                <button onClick={() => setCelebrationKingdom(null)} className="absolute top-3 right-4 text-[#8b5a2b] hover:text-red-600 text-3xl font-bold transition cursor-pointer">&times;</button>
-                                
-                                <div className="text-6xl animate-bounce">🏆</div>
-                                
-                                {celebrationKingdom === 'Machinepolis' ? (
-                                    <>
-                                        <div className="space-y-1">
-                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-800 bg-amber-200/80 px-3 py-1 rounded-full border border-amber-400 inline-block">
-                                                ✨ แชมป์ความสามัคคีแห่งแผ่นดิน (UNITY CHAMPION) ✨
-                                            </span>
-                                            <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel pt-2">
-                                                สดุดี "แมคชีนโพลิส"
-                                            </h2>
-                                            <p className="text-xs text-purple-900 font-bold">MACHINEPOLIS - มหานครจักรกลผู้ทรงพลังแห่งความสามัคคี</p>
-                                        </div>
-
-                                        <p className="text-xs md:text-sm text-[#5d3a1a] leading-relaxed font-sans font-medium bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-left">
-                                            สภาเมืองขอแสดงความยินดีและสดุดีชาวเมืองแมคชีนโพลิสทุกท่าน ที่รวมพลังความสามัคคีร่วมส่งสาส์นรายงานตัวและแชร์ภาพถ่ายแรกสูงที่สุดในกิจกรรมฉลองเปิดเซิร์ฟเวอร์ (ลงทะเบียนนักผจญภัย)!
-                                            <br/><br/>
-                                            🏆 ด้วยพลังแห่งความเป็นหนึ่งเดียว แมคชีนโพลิสจึงได้รับ <b>"ถ้วยรางวัลความสามัคคีแห่งแผ่นดิน (Unity Trophy)"</b> ประดิษฐานไว้ในหอเกียรติยศของอาณาจักรแมคชีนโพลิส เพื่อเป็นเกียรติประวัติสืบไป!
-                                        </p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="space-y-1">
-                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-800 bg-amber-200/80 px-3 py-1 rounded-full border border-amber-400 inline-block">
-                                                ✨ 10 RISING แรกแห่งประวัติศาสตร์แผ่นดิน ✨
-                                            </span>
-                                            <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel pt-2">
-                                                สดุดี "แบลงค์ไฮม์การ์ด"
-                                            </h2>
-                                            <p className="text-xs text-sky-800 font-bold">BLANKHEIMGARD - ปราการน้ำแข็งผู้ไม่ยอมแพ้</p>
-                                        </div>
-
-                                        <p className="text-xs md:text-sm text-[#5d3a1a] leading-relaxed font-sans font-medium bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-left">
-                                            สภาเมืองขอแสดงความยินดีและขอบคุณชาวเมืองแบลงค์ไฮม์การ์ดทุกท่าน ที่ร่วมแรงร่วมใจกันผลักดันเสนอสาส์นพัฒนาจนสำเร็จครบ <b>10 Rising แรกของแผ่นดิน</b> สภาคาดหวังถึงการลงมือแก้ไขปัญหาต่างๆ เพื่อนำความแข็งแกร่งมาสู่อาณาจักรของท่านต่อไป!
-                                            <br/><br/>
-                                            🏆 โดยเหตุนี้แบลงค์ไฮม์การ์ดผู้ไม่ยอมแพ้ ได้บรรลุภารกิจ 10 สาส์นพัฒนาที่มีความหมาย จึงได้รับ <b>"ถ้วยเกียรติยศ 10 Rising แรก"</b> ประดิษฐานไว้ในหอเกียรติยศของอาณาจักรแบลงค์ไฮม์การ์ด!
-                                        </p>
-                                    </>
-                                )}
-
-                                <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                                    <button
-                                        onClick={() => {
-                                            const target = celebrationKingdom;
-                                            const trophyImg = kingdomsData[target]?.trophies?.[0]?.src || 'Assets/Images/Trophies/Trophy_blankheim_10rising.jpg';
-                                            setCelebrationKingdom(null);
-                                            setSelectedKingdom(target);
-                                            setExpandedTab('trophy');
-                                            setZoomedImg(trophyImg);
-                                        }}
-                                        className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold rounded-xl shadow-lg border border-yellow-300 transition cursor-pointer text-xs md:text-sm flex items-center justify-center gap-2"
-                                    >
-                                        <i className="fa-solid fa-trophy"></i> ✨ เข้าชมถ้วยรางวัลในหอเกียรติยศ
-                                    </button>
-                                    <button
-                                        onClick={() => setCelebrationKingdom(null)}
-                                        className="py-3 px-4 bg-stone-700 hover:bg-stone-800 text-white font-bold rounded-xl border border-stone-500 transition cursor-pointer text-xs md:text-sm"
-                                    >
-                                        ปิดหน้าต่าง
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                     
                     {selectedKingdom && (
                         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] animate-fade-in p-4 md:p-8 pointer-events-auto" onClick={() => setSelectedKingdom(null)}>
@@ -1250,7 +1125,7 @@
                             )}
 
                             <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.5.3</p>)}
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.6.0</p>)}
                             </div>
                         </div>
                     </div>
@@ -1429,7 +1304,8 @@
             const [formData, setFormData] = useState({
                 name: '', empId: '', origin: '', target: '', category: '',
                 process: '', factory: '', pinpoint: '', title: '', problem: '',
-                solution: '', benefit: '', image: null, imagePreview: null, images: []
+                solution: '', benefit: '', image: null, imagePreview: null, images: [],
+                videoFile: null, videoPreview: null, videoUrl: null
             });
             const [notification, setNotification] = useState('');
 
@@ -1477,10 +1353,21 @@
                         benefit: editingProject.benefit || '',
                         image: null,
                         imagePreview: editingProject.imagePreview || null,
-                        images: editingProject.images || (editingProject.imagePreview ? [editingProject.imagePreview] : [])
+                        images: editingProject.images || (editingProject.imagePreview ? [editingProject.imagePreview] : []),
+                        videoFile: null,
+                        videoPreview: editingProject.videoUrl || null,
+                        videoUrl: editingProject.videoUrl || null
                     });
                 }
             }, [editingProject]);
+
+            useEffect(() => {
+                return () => {
+                    if (formData.videoPreview && formData.videoPreview.startsWith('blob:')) {
+                        URL.revokeObjectURL(formData.videoPreview);
+                    }
+                };
+            }, [formData.videoPreview]);
 
             const processMap = {
                 'แคสเทอเรีย': ['Incoming (อินคัมมิ่ง)', 'Casting (แคสติ้ง)'],
@@ -1581,6 +1468,44 @@
                 });
             };
 
+            const handleVideoChange = async (e) => {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = '';
+                if (!file) return;
+                if (formData.category.includes('Secret')) {
+                    alert('เพื่อความปลอดภัย สาส์นลับยังไม่รองรับการแนบวิดีโอค่ะ');
+                    return;
+                }
+                if (file.type !== 'video/mp4' && !file.name.toLowerCase().endsWith('.mp4')) {
+                    alert('รองรับวิดีโอ MP4 เท่านั้นค่ะ');
+                    return;
+                }
+                if (file.size > MAX_VIDEO_SIZE_BYTES) {
+                    alert('วิดีโอต้องมีขนาดไม่เกิน 20 MB ค่ะ');
+                    return;
+                }
+                try {
+                    const duration = await readVideoDuration(file);
+                    if (!Number.isFinite(duration) || duration > MAX_VIDEO_DURATION_SECONDS + 0.25) {
+                        alert('วิดีโอต้องมีความยาวไม่เกิน 30 วินาทีค่ะ');
+                        return;
+                    }
+                    const previewUrl = URL.createObjectURL(file);
+                    setFormData(prev => ({
+                        ...prev,
+                        videoFile: file,
+                        videoPreview: previewUrl,
+                        videoUrl: null
+                    }));
+                } catch (error) {
+                    alert('ไม่สามารถอ่านวิดีโอนี้ได้ กรุณาเลือกไฟล์ MP4 อื่นค่ะ');
+                }
+            };
+
+            const handleRemoveVideo = () => {
+                setFormData(prev => ({ ...prev, videoFile: null, videoPreview: null, videoUrl: null }));
+            };
+
             const isEnrollment = formData.category.includes('Enrollment');
             const isSecret = formData.category.includes('Secret');
 
@@ -1597,6 +1522,9 @@
                         if (value.includes('Secret')) {
                             newData.origin = 'เบสเซนตร้า';
                             if (newData.target === 'เบสเซนตร้า') newData.target = '';
+                            newData.videoFile = null;
+                            newData.videoPreview = null;
+                            newData.videoUrl = null;
                         } else if (value.includes('Enrollment')) {
                             if (newData.origin === 'เบสเซนตร้า') newData.origin = '';
                             newData.target = 'เบสเซนตร้า';
@@ -1649,6 +1577,8 @@
                             imageText: imageList.length > 0 ? `📷 รูปแนบ: (${imageList.length} รูป)` : '📷 รูปจำลองสาส์นปัญหา',
                             imagePreview: imageList[0] || null,
                             images: imageList,
+                            videoUrl: formData.videoUrl || null,
+                            _videoFile: formData.videoFile || null,
                             status: isSecret ? 'Hidden' : 'Blueprint',
                             comment: 'สาส์นถูกแก้ไขข้อมูลมาใหม่ รอสภาเมืองเปิดตรวจซ้ำ',
                             ideaApproved: false,
@@ -1704,6 +1634,8 @@
                         imageText: imageList.length > 0 ? `📷 รูปแนบ: (${imageList.length} รูป)` : '📷 รูปจำลองสาส์นปัญหา', 
                         imagePreview: imageList[0] || null,
                         images: imageList,
+                        videoUrl: formData.videoUrl || null,
+                        _videoFile: formData.videoFile || null,
                         status: isSecret ? 'Hidden' : 'Blueprint', comment: '', targetComment: '', imageAfterPreview: null,
                         wasAbandoned: false, ideaApproved: false, isSecret: isSecret, isQualityEvent: formData.category.includes('Quality') && isQualityEventActive(), isSuperRising: false 
                     };
@@ -1775,7 +1707,7 @@
                             <button 
                                 type="button" 
                                 onClick={() => {
-                                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                                    setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [], videoFile: null, videoPreview: null, videoUrl: null });
                                     if (onCancelEdit) onCancelEdit();
                                     if (onViewChange) onViewChange('dashboard');
                                 }}
@@ -1956,6 +1888,41 @@
                                                 </button>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-[#e5d3a6]/50 p-4 rounded-lg border border-[#8b5a2b]/30">
+                                <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+                                    <label className="block text-sm font-bold text-[#8b5a2b]">
+                                        🎬 แนบวิดีโอประกอบ (MP4 สูงสุด 1 คลิป / 30 วินาที / 20 MB)
+                                    </label>
+                                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${formData.videoPreview ? 'bg-emerald-100 text-emerald-800 border-emerald-400' : 'bg-stone-100 text-stone-600 border-stone-300'}`}>
+                                        {formData.videoPreview ? 'มีวิดีโอ 1 คลิป' : 'ยังไม่มีวิดีโอ'}
+                                    </span>
+                                </div>
+
+                                {isSecret ? (
+                                    <p className="text-xs text-purple-800 bg-purple-100 border border-purple-300 rounded-lg p-3 font-bold">
+                                        🔒 เพื่อความปลอดภัย สาส์นลับยังไม่เปิดให้แนบวิดีโอค่ะ
+                                    </p>
+                                ) : !formData.videoPreview ? (
+                                    <input
+                                        type="file"
+                                        accept="video/mp4,.mp4"
+                                        onChange={handleVideoChange}
+                                        className="w-full text-sm text-[#5d3a1a] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-sky-100 file:text-sky-800 hover:file:bg-sky-200 file:cursor-pointer"
+                                    />
+                                ) : (
+                                    <div className="relative mt-2 bg-black rounded-xl overflow-hidden border-2 border-sky-500 shadow-lg">
+                                        <video src={formData.videoPreview} controls playsInline preload="metadata" className="w-full max-h-64 bg-black"></video>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveVideo}
+                                            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow cursor-pointer"
+                                        >
+                                            <i className="fa-solid fa-trash-can mr-1"></i> ลบวิดีโอ
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -2154,6 +2121,16 @@
                                     </div>
                                 )}
 
+                                {formData.videoPreview && !isSecret && (
+                                    <div className="mt-4 bg-[#fff8e7] p-4 rounded-xl border border-[#8b5a2b]/30">
+                                        <div className="font-bold text-[#5d3a1a] mb-2 flex items-center gap-1.5 text-xs md:text-sm">
+                                            <i className="fa-solid fa-video text-sky-700"></i>
+                                            <span>วิดีโอประกอบสาส์น:</span>
+                                        </div>
+                                        <video src={formData.videoPreview} controls playsInline preload="metadata" className="w-full max-h-72 rounded-lg bg-black border border-sky-400"></video>
+                                    </div>
+                                )}
+
                                 {/* Action buttons */}
                                 <div className="flex gap-3 mt-6 pt-4 border-t border-[#8b5a2b]/30">
                                     <button 
@@ -2209,7 +2186,7 @@
                                     onClick={() => {
                                         const targetView = successModalData.targetView;
                                         setSuccessModalData(null);
-                                        setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [] });
+                                        setFormData({ name: '', empId: '', origin: '', target: '', category: '', process: '', factory: '', pinpoint: '', title: '', problem: '', solution: '', benefit: '', image: null, imagePreview: null, images: [], videoFile: null, videoPreview: null, videoUrl: null });
                                         if (onCancelEdit) onCancelEdit();
                                         onViewChange(targetView);
                                     }}
@@ -2535,7 +2512,7 @@
                         {isExpBoardOpen && (
                             <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
                                 {kingdoms.map(k => {
-                                    const levelData = calculateLevel(kingdomEXP[k.name] || 0);
+                                    const levelData = calculateKingdomLevel(k.name, kingdomEXP[k.name] || 0);
                                     const percent = (levelData.currentExp / levelData.requiredExp) * 100;
                                     return (
                                         <div key={k.id}>
@@ -2766,6 +2743,12 @@
                                             <div className="bg-gray-200 h-24 mt-1.5 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 font-bold"><span>{selectedProject.imageText}</span></div>
                                         )}
                                     </div>
+                                    {selectedProject.videoUrl && (
+                                        <div>
+                                            <p className="font-bold text-sky-800 mb-1.5"><i className="fa-solid fa-video mr-1"></i> วิดีโอประกอบสาส์น:</p>
+                                            <video src={selectedProject.videoUrl} controls playsInline preload="metadata" className="w-full max-h-80 rounded-lg bg-black border border-sky-400 shadow"></video>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mt-6 p-4 comment-box rounded-xl shadow-inner">
@@ -2921,6 +2904,9 @@
             const [targetImageFile, setTargetImageFile] = useState(null);
             const [targetImagePreview, setTargetImagePreview] = useState(null);
             const [targetImages, setTargetImages] = useState([]);
+            const [targetVideoFile, setTargetVideoFile] = useState(null);
+            const [targetVideoPreview, setTargetVideoPreview] = useState(null);
+            const [targetVideoUrl, setTargetVideoUrl] = useState(null);
             const [centralStatus, setCentralStatus] = useState('');
             const [centralComment, setCentralComment] = useState('');
 
@@ -2947,6 +2933,14 @@
                     }));
                 }
             }, [initialFilter]);
+
+            useEffect(() => {
+                return () => {
+                    if (targetVideoPreview && targetVideoPreview.startsWith('blob:')) {
+                        URL.revokeObjectURL(targetVideoPreview);
+                    }
+                };
+            }, [targetVideoPreview]);
 
             const handleRoleLogin = (type) => {
                 if (type === 'target') {
@@ -3059,6 +3053,39 @@
                 setTargetImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
             };
 
+            const handleEvidenceVideoChange = async (e) => {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = '';
+                if (!file) return;
+                if (file.type !== 'video/mp4' && !file.name.toLowerCase().endsWith('.mp4')) {
+                    alert('รองรับวิดีโอ MP4 เท่านั้นค่ะ');
+                    return;
+                }
+                if (file.size > MAX_VIDEO_SIZE_BYTES) {
+                    alert('วิดีโอต้องมีขนาดไม่เกิน 20 MB ค่ะ');
+                    return;
+                }
+                try {
+                    const duration = await readVideoDuration(file);
+                    if (!Number.isFinite(duration) || duration > MAX_VIDEO_DURATION_SECONDS + 0.25) {
+                        alert('วิดีโอต้องมีความยาวไม่เกิน 30 วินาทีค่ะ');
+                        return;
+                    }
+                    const previewUrl = URL.createObjectURL(file);
+                    setTargetVideoFile(file);
+                    setTargetVideoPreview(previewUrl);
+                    setTargetVideoUrl(null);
+                } catch (error) {
+                    alert('ไม่สามารถอ่านวิดีโอนี้ได้ กรุณาเลือกไฟล์ MP4 อื่นค่ะ');
+                }
+            };
+
+            const handleRemoveEvidenceVideo = () => {
+                setTargetVideoFile(null);
+                setTargetVideoPreview(null);
+                setTargetVideoUrl(null);
+            };
+
             const openQuestModal = (quest) => { 
                 setSelectedQuest(quest); 
                 setTargetCommentText(quest ? (quest.targetComment || '') : ''); 
@@ -3075,6 +3102,9 @@
                     initialImgs = [quest.imageAfterPreview];
                 }
                 setTargetImages(Array.isArray(initialImgs) ? initialImgs : []);
+                setTargetVideoFile(null);
+                setTargetVideoUrl(quest ? (quest.videoAfterUrl || null) : null);
+                setTargetVideoPreview(quest ? (quest.videoAfterUrl || null) : null);
                 setCentralStatus(''); 
                 setCentralComment(''); 
             };
@@ -3087,6 +3117,9 @@
                 setTargetImageFile(null); 
                 setTargetImagePreview(null); 
                 setTargetImages([]);
+                setTargetVideoFile(null);
+                setTargetVideoPreview(null);
+                setTargetVideoUrl(null);
             };
 
             const [showQuestConfirm, setShowQuestConfirm] = useState(false);
@@ -3112,6 +3145,8 @@
                         imageAfterText: imageList.length > 0 ? `📸 ภาพหลักฐาน: (${imageList.length} รูป)` : '📸 ภาพหลักฐานการแก้ไข (After)', 
                         imageAfterPreview: imageList[0] || null,
                         imagesAfter: imageList,
+                        videoAfterUrl: targetVideoUrl,
+                        _videoAfterFile: targetVideoFile,
                         adminComment: 'รอสภาเมืองกลางตรวจสอบหลักฐาน...' 
                     };
                     await onUpdateProject(updatedQuest);
@@ -3304,7 +3339,7 @@
                             <div className="space-y-4 mt-4 pt-4 border-t border-[#8b5a2b]/30 animate-fade-in">
                                 {kingdoms.map(k => {
                                     const expVal = (kingdomEXP && kingdomEXP[k.name]) ? kingdomEXP[k.name] : 0;
-                                    const levelData = calculateLevel(expVal);
+                                    const levelData = calculateKingdomLevel(k.name, expVal);
                                     const percent = levelData.requiredExp > 0 ? (levelData.currentExp / levelData.requiredExp) * 100 : 0;
                                     return (
                                         <div key={k.id}>
@@ -3491,15 +3526,26 @@
                                                 <p className="font-bold flex items-center justify-between">วิธีแก้ไข (ที่เสนอมา):</p>
                                                 <p className="text-[#1e3a8a] font-bold italic ml-2 mt-1 bg-white/80 p-2 rounded-lg border border-[#1e3a8a]/20 shadow-sm">{selectedQuest.solution}</p>
                                             </div>
-                                            {selectedQuest.imagePreview ? (
+                                            {(selectedQuest.images && selectedQuest.images.length > 0) ? (
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1.5">
+                                                    {selectedQuest.images.map((imgUrl, idx) => (
+                                                        <div key={idx} className="bg-black/10 rounded-lg border border-gray-400 overflow-hidden h-28 flex justify-center shadow cursor-pointer group relative" onClick={() => setZoomedImg(imgUrl)}>
+                                                            <img src={imgUrl} alt={`Before ${idx+1}`} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                                                <i className="fa-solid fa-magnifying-glass-plus mr-1"></i> คลิกขยาย
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : selectedQuest.imagePreview ? (
                                                 <div className="bg-gray-200 mt-1.5 rounded-lg border border-gray-400 overflow-hidden flex justify-center shadow-inner cursor-pointer group relative" onClick={() => setZoomedImg(selectedQuest.imagePreview)}>
                                                     <img src={selectedQuest.imagePreview} alt="Before Preview" className="max-h-48 object-contain transition-transform duration-200 group-hover:scale-105" />
-                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity duration-200">
-                                                        <i className="fa-solid fa-magnifying-glass-plus mr-1 text-sm"></i> คลิกเพื่อขยายรูปภาพ
-                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="bg-gray-200 h-32 rounded-lg border border-gray-400 flex items-center justify-center text-gray-500 text-xs font-bold shadow-inner"><span>{selectedQuest.imageText}</span></div>
+                                            )}
+                                            {selectedQuest.videoUrl && (
+                                                <video src={selectedQuest.videoUrl} controls playsInline preload="metadata" className="w-full max-h-56 mt-3 rounded-lg bg-black border border-sky-400 shadow"></video>
                                             )}
                                         </div>
 
@@ -3541,6 +3587,12 @@
                                                 </div>
                                             ) : (
                                                 <div className="bg-white h-24 rounded-lg border border-[#8b5a2b] flex items-center justify-center text-green-700 font-bold shadow-inner text-xs"><span>{selectedQuest.imageAfterText || '📸 ภาพหลักฐานการแก้ไข (After)'}</span></div>
+                                            )}
+                                            {selectedQuest.videoAfterUrl && (
+                                                <div className="mt-3">
+                                                    <strong className="font-bold text-green-900 block mb-1">🎬 วิดีโอหลักฐานหลังปรับปรุง:</strong>
+                                                    <video src={selectedQuest.videoAfterUrl} controls playsInline preload="metadata" className="w-full max-h-56 rounded-lg bg-black border border-green-500 shadow"></video>
+                                                </div>
                                             )}
                                             <div className="mt-2 bg-[#fff8e7] p-2.5 rounded-lg border border-gray-300 text-xs text-gray-600">
                                                 <strong className="text-amber-800">👑 สภาเมืองกลางคอมเมนต์:</strong>
@@ -3588,6 +3640,25 @@
                                                                 <button type="button" onClick={() => handleRemoveEvidence(idx)} className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shadow cursor-pointer">&times;</button>
                                                             </div>
                                                         ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="bg-white/90 p-3 rounded-lg border border-sky-300">
+                                                <div className="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+                                                    <span className="text-xs font-bold text-sky-900">🎬 5. แนบวิดีโอหลักฐาน (MP4 สูงสุด 30 วินาที / 20 MB):</span>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${targetVideoPreview ? 'text-emerald-800 bg-emerald-100 border-emerald-400' : 'text-gray-600 bg-gray-100 border-gray-300'}`}>
+                                                        {targetVideoPreview ? 'มีวิดีโอ 1 คลิป' : 'ยังไม่มีวิดีโอ'}
+                                                    </span>
+                                                </div>
+                                                {!targetVideoPreview ? (
+                                                    <input type="file" accept="video/mp4,.mp4" onChange={handleEvidenceVideoChange} className="text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-cyan-100 file:text-cyan-800 hover:file:bg-cyan-200 file:cursor-pointer" />
+                                                ) : (
+                                                    <div className="relative mt-2 bg-black rounded-lg overflow-hidden border border-sky-500 shadow">
+                                                        <video src={targetVideoPreview} controls playsInline preload="metadata" className="w-full max-h-64 bg-black"></video>
+                                                        <button type="button" onClick={handleRemoveEvidenceVideo} className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow cursor-pointer">
+                                                            <i className="fa-solid fa-trash-can mr-1"></i> ลบวิดีโอ
+                                                        </button>
                                                     </div>
                                                 )}
                                             </div>
@@ -4369,18 +4440,11 @@
             const [dashboardFilter, setDashboardFilter] = useState(null);
             const [questFilter, setQuestFilter] = useState(null);
             const [initialCategory, setInitialCategory] = useState('');
-            const [worldmapCelebration, setWorldmapCelebration] = useState(null);
 
             const handleViewChange = (view, extraParam) => {
                 setIsKingdomModalOpen(false);
                 setCurrentView(view);
-                if (view === 'worldmap') {
-                    if (extraParam && extraParam.celebrationKingdom) {
-                        setWorldmapCelebration(extraParam.celebrationKingdom);
-                    } else {
-                        setWorldmapCelebration(null);
-                    }
-                } else if (view === 'chronicles') {
+                if (view === 'chronicles') {
                     if (typeof extraParam === 'string') setChronicleTab(extraParam); 
                     else setChronicleTab('lore'); 
                 } else if (view === 'dashboard') {
@@ -4462,12 +4526,16 @@
                                 solution: item.solution,
                                 benefit: item.benefit,
                                 imagePreview: item.image_preview,
+                                images: normalizeMediaArray(item.images, item.image_preview),
+                                videoUrl: item.video_url || null,
                                 status: item.status,
                                 comment: item.comment,
                                 targetComment: item.target_comment,
                                 expense: item.expense || '',
                                 actualResult: item.actual_result || item.actualResult || '',
                                 imageAfterPreview: item.image_after_preview,
+                                imagesAfter: normalizeMediaArray(item.images_after, item.image_after_preview),
+                                videoAfterUrl: item.video_after_url || null,
                                 wasAbandoned: item.was_abandoned,
                                 ideaApproved: item.idea_approved,
                                 isSecret: item.is_secret,
@@ -4529,10 +4597,12 @@
 
             const handleAddProject = async (newProject) => { 
                 const nowIso = new Date().toISOString();
-                const projectWithDates = { ...newProject, created_at: nowIso, updated_at: nowIso, wasRecentlyUpdated: true };
-                setProjects(prev => [projectWithDates, ...prev]); 
+                let persistedImages = normalizeMediaArray(newProject.images, newProject.imagePreview);
+                let videoUrl = newProject.videoUrl || null;
 
                 if (supabase) {
+                    persistedImages = await persistImageList(persistedImages, newProject.id, 'before');
+                    if (newProject._videoFile) videoUrl = await uploadVideoFile(newProject._videoFile, newProject.id, 'before');
                     const { error } = await supabase.from('projects').insert([{
                         id: newProject.id,
                         emp: newProject.emp,
@@ -4547,21 +4617,40 @@
                         problem: newProject.problem,
                         solution: newProject.solution,
                         benefit: newProject.benefit,
-                        image_preview: newProject.imagePreview,
+                        image_preview: persistedImages[0] || null,
+                        images: persistedImages,
+                        video_url: videoUrl,
                         status: newProject.status,
                         comment: newProject.comment,
                         target_comment: newProject.targetComment,
                         expense: newProject.expense,
                         actual_result: newProject.actualResult,
                         image_after_preview: newProject.imageAfterPreview,
+                        images_after: [],
+                        video_after_url: null,
                         was_abandoned: newProject.wasAbandoned,
                         idea_approved: newProject.ideaApproved,
                         is_secret: newProject.isSecret,
                         is_quality_event: newProject.isQualityEvent,
                         is_super_rising: newProject.isSuperRising
                     }]);
-                    if (error) console.error("Supabase insert error:", error);
+                    if (error) {
+                        console.error("Supabase insert error:", error);
+                        throw error;
+                    }
                 }
+
+                const { _videoFile, ...safeProject } = newProject;
+                const projectWithDates = {
+                    ...safeProject,
+                    images: persistedImages,
+                    imagePreview: persistedImages[0] || null,
+                    videoUrl,
+                    created_at: nowIso,
+                    updated_at: nowIso,
+                    wasRecentlyUpdated: true
+                };
+                setProjects(prev => [projectWithDates, ...prev]);
             };
 
             const [editingProject, setEditingProject] = useState(null);
@@ -4586,10 +4675,16 @@
                 }
 
                 const nowIso = new Date().toISOString();
-                const projectWithUpdated = { ...updatedProject, updated_at: nowIso, wasRecentlyUpdated: true };
-                setProjects(prev => prev.map(p => p.id === updatedProject.id ? projectWithUpdated : p)); 
+                let persistedImages = normalizeMediaArray(updatedProject.images, updatedProject.imagePreview);
+                let persistedImagesAfter = normalizeMediaArray(updatedProject.imagesAfter, updatedProject.imageAfterPreview);
+                let videoUrl = updatedProject.videoUrl || null;
+                let videoAfterUrl = updatedProject.videoAfterUrl || null;
 
                 if (supabase) {
+                    persistedImages = await persistImageList(persistedImages, updatedProject.id, 'before');
+                    persistedImagesAfter = await persistImageList(persistedImagesAfter, updatedProject.id, 'after');
+                    if (updatedProject._videoFile) videoUrl = await uploadVideoFile(updatedProject._videoFile, updatedProject.id, 'before');
+                    if (updatedProject._videoAfterFile) videoAfterUrl = await uploadVideoFile(updatedProject._videoAfterFile, updatedProject.id, 'after');
                     const { error } = await supabase.from('projects').update({
                         emp: updatedProject.emp,
                         name: updatedProject.name,
@@ -4603,13 +4698,17 @@
                         problem: updatedProject.problem,
                         solution: updatedProject.solution,
                         benefit: updatedProject.benefit,
-                        image_preview: updatedProject.imagePreview,
+                        image_preview: persistedImages[0] || null,
+                        images: persistedImages,
+                        video_url: videoUrl,
                         status: updatedProject.status,
                         comment: updatedProject.comment,
                         target_comment: updatedProject.targetComment,
                         expense: updatedProject.expense,
                         actual_result: updatedProject.actualResult,
-                        image_after_preview: updatedProject.imageAfterPreview,
+                        image_after_preview: persistedImagesAfter[0] || null,
+                        images_after: persistedImagesAfter,
+                        video_after_url: videoAfterUrl,
                         was_abandoned: updatedProject.wasAbandoned,
                         idea_approved: updatedProject.ideaApproved,
                         is_secret: updatedProject.isSecret,
@@ -4617,8 +4716,25 @@
                         is_super_rising: updatedProject.isSuperRising,
                         updated_at: nowIso
                     }).eq('id', updatedProject.id);
-                    if (error) console.error("Supabase update error:", error);
+                    if (error) {
+                        console.error("Supabase update error:", error);
+                        throw error;
+                    }
                 }
+
+                const { _videoFile, _videoAfterFile, ...safeProject } = updatedProject;
+                const projectWithUpdated = {
+                    ...safeProject,
+                    images: persistedImages,
+                    imagePreview: persistedImages[0] || null,
+                    imagesAfter: persistedImagesAfter,
+                    imageAfterPreview: persistedImagesAfter[0] || null,
+                    videoUrl,
+                    videoAfterUrl,
+                    updated_at: nowIso,
+                    wasRecentlyUpdated: true
+                };
+                setProjects(prev => prev.map(p => p.id === updatedProject.id ? projectWithUpdated : p));
             };
 
             const showSidebar = currentView !== 'popboss' && !isKingdomModalOpen; 
@@ -4626,8 +4742,8 @@
             const currentHour = new Date().getHours();
             const isDayTime = currentHour >= 6 && currentHour < 18;
             const videoSrc = isMobilePortrait 
-                ? (isDayTime ? "Assets/video/bg_portrait_day.mp4" : "Assets/video/bg_portrait_night.mp4")
-                : (isDayTime ? "Assets/video/bg_horizontal_day.mp4" : "Assets/video/bg_horizontal_night.mp4");
+                ? (isDayTime ? "Assets/video/bg_portrait_day.mp4?v=20260922" : "Assets/video/bg_portrait_night.mp4")
+                : (isDayTime ? "Assets/video/bg_horizontal_day.mp4?v=20260922" : "Assets/video/bg_horizontal_night.mp4");
 
             return (
                 <div className="relative min-h-screen flex flex-col">
@@ -4672,7 +4788,6 @@
                                     projects={projects} 
                                     onViewChange={handleViewChange} 
                                     onModalToggle={(open) => setIsKingdomModalOpen(open)} 
-                                    initialCelebration={worldmapCelebration}
                                 />
                             )}
 
