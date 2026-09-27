@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diecast Kingdoms - ระบบพัฒนาอาณาจักร</title>
+    <title>Diecast Kingdoms V2.0.0 - Halloween 2027</title>
 
     <!-- PWA & Mobile App Settings (Full Screen App Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -271,10 +271,73 @@
             return str.slice(0, str.length - 3) + 'xxx';
         }
 
-        function isPopBossActive() {
-            const now = new Date();
-            const expiry = new Date('2026-10-01T00:00:00'); // 30 กันยายน 2026
-            return now < expiry;
+        function isHalloweenActive(at = new Date()) {
+            const start = new Date('2026-09-27T00:00:00+07:00');
+            const end = new Date('2026-10-31T00:00:00+07:00');
+            return at >= start && at < end;
+        }
+
+        function isPopBossActive() { return isHalloweenActive(); }
+
+        function isPopBossAnnouncementActive(at = new Date()) {
+            return at >= new Date('2026-09-27T00:00:00+07:00') && at < new Date('2026-10-04T00:00:00+07:00');
+        }
+
+        function maskLastFourScoreDigits(value) {
+            const digits = String(value ?? '').replace(/\D/g, '');
+            if (!digits) return 'xxxx';
+            let hidden = 0;
+            return Number(digits).toLocaleString('en-US').split('').reverse().map(char => {
+                if (/\d/.test(char) && hidden < 4) { hidden += 1; return 'x'; }
+                return char;
+            }).reverse().join('');
+        }
+
+        function formatThaiDateTime(value) {
+            if (!value) return 'ยังไม่มีข้อมูลเวลา';
+            const parsed = new Date(value);
+            if (Number.isNaN(parsed.getTime())) return 'ยังไม่มีข้อมูลเวลา';
+            return new Intl.DateTimeFormat('th-TH', {
+                dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok'
+            }).format(parsed);
+        }
+
+        function describeProjectEvent(event) {
+            const labels = {
+                Blueprint: 'Blueprint', Founding: 'Founding', Evidence: 'Evidence',
+                Rising: 'Rising', Ruined: 'Ruined', Abandoned: 'Abandoned',
+                Hidden: 'ถูกซ่อน', 'Hall of fame': 'Hall of Fame'
+            };
+            if (event.event_type === 'suggestion_submitted') return 'ผู้เสนอส่งสาส์นเข้าระบบ';
+            if (event.event_type === 'evidence_submitted') return 'ส่งหลักฐานครั้งแรก';
+            if (event.event_type === 'evidence_updated') return 'ส่งหลักฐานเพิ่มเติม';
+            if (event.event_type === 'comment_updated') return 'มีการเพิ่มหรือแก้ไขคอมเมนต์';
+            if (event.event_type === 'status_changed') return `เปลี่ยนสถานะจาก ${labels[event.from_status] || event.from_status || '—'} เป็น ${labels[event.to_status] || event.to_status || '—'}`;
+            return 'มีความเคลื่อนไหวในสาส์น';
+        }
+
+        function getEvidenceEventTimes(project) {
+            const evidenceEvents = (project?.statusHistory || []).filter(event =>
+                event.event_type === 'evidence_submitted' || event.event_type === 'evidence_updated'
+            );
+            return {
+                first: evidenceEvents[0]?.event_at || null,
+                latest: evidenceEvents[evidenceEvents.length - 1]?.event_at || null
+            };
+        }
+
+        function formatEvidenceTimestamp(project, value) {
+            if (value) return formatThaiDateTime(value);
+            const hasEvidence = project?.status === 'Evidence' || project?.status === 'Rising' || project?.status === 'Hall of fame'
+                || project?.imageAfterPreview || project?.videoAfterUrl || project?.actualResult
+                || (project?.imagesAfter && project.imagesAfter.length > 0);
+            return hasEvidence ? 'ไม่พบเวลา (บันทึกก่อน V2.0.0)' : 'ยังไม่ส่งหลักฐาน';
+        }
+
+        function formatProjectHistoryCSV(project) {
+            return (project?.statusHistory || []).map(event =>
+                `${formatThaiDateTime(event.event_at)}: ${describeProjectEvent(event)}`
+            ).join(' | ');
         }
 
         function isQualityEventActive() {
@@ -296,7 +359,7 @@
             return now <= expiry;
         }
 
-        function MapPin({ kingdomKey, kingdom, onClick }) {
+        function MapPin({ kingdomKey, kingdom, onClick, onChampionClick }) {
             const [imgError, setImgError] = useState(false);
             const glowFilterMap = {
                 'Bascentra': 'drop-shadow(0 0 12px rgba(168,85,247,0.95)) drop-shadow(0 0 25px rgba(147,51,234,0.85)) drop-shadow(0 0 40px rgba(126,34,206,0.7))',
@@ -307,6 +370,7 @@
             };
             const activeFilter = glowFilterMap[kingdomKey] || 'drop-shadow(0 0 20px rgba(255,255,255,0.8))';
             const showLevel5Badge = isBlankheimLevel5CelebrationActive() && kingdomKey === 'Blankheimgard';
+            const showPopBossChampionBadge = kingdomKey === 'Blankheimgard';
 
             return (
                 <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
@@ -319,6 +383,16 @@
                                 title="เปิดชมวิวัฒนาการ Level 5 และอาณาจักรในวันวาน"
                             >
                                 ❄️ LEVEL 5 EVOLUTION
+                            </button>
+                        )}
+                        {showPopBossChampionBadge && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onChampionClick(); }}
+                                className="absolute -top-14 sm:-top-16 md:-top-20 left-1/2 -translate-x-1/2 z-30 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 text-amber-950 font-extrabold text-[9px] sm:text-[10px] md:text-xs px-3 py-1 rounded-full border-2 border-yellow-100 shadow-[0_0_22px_rgba(250,204,21,0.95)] animate-pulse whitespace-nowrap pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
+                                title="เปิดสารแสดงความยินดีจากสภาเมืองและถ้วยผู้ชนะ POPBOSS"
+                            >
+                                🏆 POPBOSS CHAMPION
                             </button>
                         )}
                         <div onClick={onClick} className="flex flex-col items-center group cursor-pointer animate-float">
@@ -479,7 +553,7 @@
                 e.preventDefault();
                 const normalizedPass = normalizeCityPass(realPassword);
                 const isEnglishPass = normalizedPass === 'dcweare1' || normalizedPass === 'dcwr1' || normalizedPass === 'dcvr1';
-                const isThaiPass = normalizedPass === 'เรารักมินิแบไดแคส';
+                const isThaiPass = normalizedPass === 'เรารักมินิแบไดแคส' || normalizedPass === 'เรารักพี่อ๋อง';
                 const isLegacyThaiKeyboardPass = normalizedPass === 'ฏฉไำฟพำๅ';
 
                 if (isEnglishPass || isThaiPass || isLegacyThaiKeyboardPass) {
@@ -555,6 +629,7 @@
         // COMPONENT: NewsView
         // ==========================================
         function NewsView({ onViewChange }) {
+            const showPopBossResults = isPopBossAnnouncementActive();
             return (
                 <div className="fixed inset-0 flex items-center justify-center z-40 bg-black/70 p-4 animate-fade-in backdrop-blur-sm" onClick={() => onViewChange('worldmap')}>
                     <div className="parchment max-w-4xl w-full p-6 md:p-8 rounded-2xl shadow-2xl relative border-8 border-double border-[#8b5a2b] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -564,7 +639,43 @@
                             <p className="text-[#8b5a2b] font-bold mt-2 text-sm md:text-base">อัปเดตกิจกรรมและประกาศพิเศษจากสภาเมือง</p>
                         </div>
                         <div className="space-y-6">
-                            {/* ข่าวปัจจุบัน: Quality x2 */}
+                            {showPopBossResults && (
+                                <div className="bg-gradient-to-r from-sky-950 via-blue-900 to-indigo-950 p-6 rounded-xl border-2 border-sky-300 shadow-lg flex flex-col md:flex-row items-center gap-6 text-white relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-2 text-sky-200 opacity-20 text-8xl">🏆</div>
+                                    <div className="text-6xl md:text-7xl">❄️</div>
+                                    <div className="relative z-10 flex-1">
+                                        <h3 className="font-bold text-sky-100 text-xl md:text-2xl mb-2">ประกาศผลผู้พิชิต POPBOSS</h3>
+                                        <p className="text-sm md:text-base text-blue-100 mb-3 leading-relaxed">
+                                            ขอแสดงความยินดีกับ <b className="text-yellow-200">แบลงค์ไฮม์การ์ด</b> ผู้พิชิตอันดับ 1 ด้วยพลังความสามัคคี! คะแนนปิดท้าย 4 หลักตามที่สภาประกาศไว้
+                                        </p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                            <span className="rounded-lg border-2 border-yellow-300 bg-yellow-400/20 px-3 py-2 font-extrabold text-yellow-100">👑 อันดับ 1 · แบลงค์ไฮม์การ์ด: {maskLastFourScoreDigits(3159887)}</span>
+                                            <span className="rounded-lg border border-slate-300/50 bg-slate-700/50 px-3 py-2 text-slate-100">🥈 อันดับ 2 · แคสเทอเรีย: {maskLastFourScoreDigits(757887)}</span>
+                                            <span className="rounded-lg border border-amber-500/50 bg-amber-800/30 px-3 py-2 text-amber-100">🥉 อันดับ 3 · แมคชีนโพลิส: {maskLastFourScoreDigits(550469)}</span>
+                                            <span className="rounded-lg border border-red-400/40 bg-red-950/50 px-3 py-2 text-red-100">💀 อันดับ 4 · ไฟนัลธรอน: {maskLastFourScoreDigits(117220)}</span>
+                                        </div>
+                                        <p className="text-xs text-sky-200/80 mt-2">ประกาศ 7 วัน · กระดาน POPBOSS รุ่นเดิมมี 4 อาณาจักร</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ข่าวกิจกรรม Halloween 2027 */}
+                            <div className="bg-gradient-to-r from-violet-950 via-purple-900 to-orange-950 p-6 rounded-xl border-2 border-orange-400 shadow-lg flex flex-col md:flex-row items-center gap-6 text-white group relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-2 text-orange-300 opacity-20 text-8xl transform rotate-12">🎃</div>
+                                <div className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">🧙</div>
+                                <div className="relative z-10 flex-1">
+                                    <h3 className="font-bold text-orange-200 text-xl md:text-2xl mb-2">Halloween 2027: หมอผีซ่าส์ กับ วิญญาณอลเวง</h3>
+                                    <p className="text-sm md:text-base text-purple-100 mb-4 leading-relaxed">
+                                        เตรียมตัวให้พร้อม รับบทหมอผีสายลุย! วาดยันต์ส่งเหล่าผีไปสู่สุคติ สะสมคะแนนให้ได้มากที่สุด แล้วขึ้นทำเนียบผู้เล่น 8 อันดับแรก ใครคว้าอันดับ 1 ได้ จะสร้างความภาคภูมิใจให้ทั้งอาณาจักร! และแชมป์ POPBOSS อย่างแบลงค์ไฮม์การ์ดยังมีตราพายุเหมันต์พิเศษติดตัวด้วย<br/>
+                                        <span className="text-orange-200 font-bold block mt-2 px-3 py-1 bg-black/40 rounded inline-block">⏳ วันนี้ – 30 ตุลาคม · เวลาไทย</span>
+                                    </p>
+                                    <button onClick={() => onViewChange('popboss')} className="bg-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-400 shadow-md cursor-pointer transition w-full md:w-auto text-lg border border-orange-200">
+                                        🎃 ดูกิจกรรมและทำเนียบคะแนน
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* ข่าวกิจกรรม Quality x2 */}
                             <div className="bg-gradient-to-r from-amber-100 to-yellow-300 p-6 rounded-xl border-2 border-yellow-500 shadow-md flex flex-col md:flex-row items-center gap-6">
                                 <div className="text-6xl md:text-7xl animate-pulse">💎</div>
                                 <div>
@@ -575,23 +686,6 @@
                                         🔥 <b>สำหรับคนลงมือทำ:</b> ได้รับเพิ่มจากปกติ 15 EXP เป็น <b className="text-red-700 text-lg">30 EXP</b><br/>
                                         <span className="text-yellow-900 font-bold block mt-2 px-3 py-1 bg-yellow-400/40 rounded inline-block border border-yellow-500/50">⏳ ระยะเวลากิจกรรม: ตั้งแต่วันนี้ถึง 31 ธันวาคม 2026</span>
                                     </p>
-                                </div>
-                            </div>
-
-                            {/* ข่าวที่ 3: POPBOSS Event */}
-                            <div className="bg-gradient-to-r from-slate-800 to-indigo-900 p-6 rounded-xl border-2 border-indigo-400 shadow-lg flex flex-col md:flex-row items-center gap-6 text-white group relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-2 text-indigo-400 opacity-30 text-8xl transform rotate-12"><i className="fa-solid fa-bolt"></i></div>
-                                <div className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">👆</div>
-                                <div className="relative z-10 flex-1">
-                                    <h3 className="font-bold text-indigo-200 text-xl md:text-2xl mb-2">กิจกรรมพิเศษ: ศึกจิ้มจอทลายจ้าว (POPBOSS Event)</h3>
-                                    <p className="text-sm md:text-base text-gray-300 mb-4 leading-relaxed">
-                                        มินิเกมรวมพลังแห่งแผ่นดิน! เลือกอาณาจักรของคุณแล้วมาร่วมรัวนิ้วจิ้มปราบบอสตัวร้ายที่เข้ามาในแต่ละอาณาจักร<br/>
-                                        อาณาจักรที่ทำคะแนนสูงสุด จะได้รับสิทธิ์ถ้วยรางวัล <b>"ผู้พิชิต POPBOSS Event"</b> และรับสิทธิ์พิเศษที่จะเกิดขึ้นสำหรับ <span className="bg-purple-900 text-purple-100 font-extrabold px-2.5 py-1 rounded-md border border-purple-400 shadow-md inline-block my-1 animate-pulse">🎃 กิจกรรมฮาโลวีน 👻</span><br/>
-                                        <span className="text-yellow-400 font-bold block mt-2 px-3 py-1 bg-black/40 rounded inline-block">⏳ ระยะเวลากิจกรรม: ตั้งแต่วันนี้ถึง 30 กันยายน 2026</span>
-                                    </p>
-                                    <button onClick={() => onViewChange('popboss')} className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-400 shadow-md cursor-pointer transition w-full md:w-auto text-lg border border-indigo-300">
-                                        ⚔️ เข้าร่วมศึกจิ้มจอตอนนี้!
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -786,6 +880,7 @@
             const [selectedKingdom, setSelectedKingdom] = useState(null);
             const [zoomedImg, setZoomedImg] = useState(null); 
             const [expandedTab, setExpandedTab] = useState(null);
+            const [showChampionLetter, setShowChampionLetter] = useState(false);
 
             useEffect(() => { 
                 if (!selectedKingdom) setExpandedTab(null); 
@@ -809,6 +904,10 @@
                     iconImg: 'Assets/Images/Kingdoms/Blankheimgard_8bit.png', bgImage: 'Assets/Images/Kingdoms/Blankheimgard_bg_lv5.jpg?v=20260922',
                     barColor: 'bg-gradient-to-r from-sky-400 to-blue-600',
                     trophies: [
+                        {
+                            src: 'Assets/Images/Trophies/Trophy_blankheimgard_popboss_winner.jpg',
+                            name: 'ถ้วยเกียรติยศ: ผู้พิชิตกิจกรรม POPBOSS'
+                        },
                         { 
                             src: 'Assets/Images/Trophies/Trophy_blankheim_10rising.jpg', 
                             name: 'ถ้วยเกียรติยศ: ผู้บรรลุภารกิจสาส์นพัฒนา 10 Rising' 
@@ -869,10 +968,34 @@
                                 key={key} 
                                 kingdomKey={key} 
                                 kingdom={kingdomsData[key]} 
-                                onClick={() => setSelectedKingdom(key)} 
+                                onClick={() => setSelectedKingdom(key)}
+                                onChampionClick={() => setShowChampionLetter(true)}
                             />
                         );
                     })}
+
+                    {showChampionLetter && !selectedKingdom && (
+                        <div className="fixed inset-0 z-[70] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto" onClick={() => setShowChampionLetter(false)}>
+                            <div className="parchment relative max-w-2xl w-full rounded-2xl border-double border-8 border-[#8b5a2b] p-6 md:p-9 shadow-2xl animate-fade-in" onClick={event => event.stopPropagation()}>
+                                <button onClick={() => setShowChampionLetter(false)} className="absolute top-3 right-4 text-3xl font-bold text-[#8b5a2b] hover:text-red-700" aria-label="ปิดจดหมาย">×</button>
+                                <div className="text-center text-5xl mb-3">📜❄️</div>
+                                <p className="text-center text-sm font-bold tracking-widest text-[#8b5a2b] mb-2">สารแสดงความยินดีจากสภาเมือง</p>
+                                <h2 className="text-center text-xl md:text-3xl font-bold text-[#5d3a1a] mb-5">แด่ชาวแบลงค์ไฮม์การ์ด</h2>
+                                <div className="space-y-4 text-[#5d3a1a] text-sm md:text-base leading-relaxed">
+                                    <p>สภาเมืองขอแสดงความยินดียิ่ง แด่อาณาจักรแห่งน้ำแข็งผู้พิชิตจอมปีศาจน้ำแข็งลงได้ ด้วยความสามัคคีและความมุ่งมั่นเหนือกว่าอาณาจักรใด</p>
+                                    <p>ความกล้าหาญและการไม่ย่อท้อของชาวแบลงค์ไฮม์การ์ด สมควรได้รับการจารึกไว้ในหน้าประวัติศาสตร์ สภาจึงขอมอบถ้วยรางวัล <b>The Winner — POPBOSS Event</b> เพื่อเป็นเกียรติแก่อาณาจักรน้ำแข็งผู้ทรงเกียรติ</p>
+                                </div>
+                                <div className="mt-7 text-center">
+                                    <button
+                                        onClick={() => { setShowChampionLetter(false); setSelectedKingdom('Blankheimgard'); setExpandedTab('trophy'); setZoomedImg('Assets/Images/Trophies/Trophy_blankheimgard_popboss_winner.jpg'); }}
+                                        className="rounded-xl border-2 border-yellow-700 bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-3 font-bold text-amber-950 shadow-lg hover:brightness-110"
+                                    >
+                                        🏆 เปิดดูถ้วยรางวัลผู้ชนะ POPBOSS
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
                     {selectedKingdom && (
                         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] animate-fade-in p-4 md:p-8 pointer-events-auto" onClick={() => setSelectedKingdom(null)}>
@@ -987,7 +1110,7 @@
                 { id: 'dashboard', label: 'ประกาศิตแผ่นดิน', icon: 'fa-solid fa-chart-column', badge: blueprintCount },
                 { id: 'quests', label: 'ลานส่งมอบภารกิจ', icon: 'fa-solid fa-shield-halved', badge: evidenceCount },
                 { id: 'chronicles', label: 'ตำนานและกฎแห่งสภา', icon: 'fa-solid fa-scroll' },
-                { id: 'popboss', label: '⚡ เหตุการณ์พิเศษ', icon: 'fa-solid fa-bolt text-yellow-400' },
+                { id: 'popboss', label: '🎃 กิจกรรมฮาโลวีน', icon: 'fa-solid fa-ghost text-orange-300' },
             ];
 
             const mobileNavItems = [
@@ -1125,7 +1248,7 @@
                             )}
 
                             <div className="p-3 border-t border-[#8b5a2b]/30 text-center">
-                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.1.6.0</p>)}
+                                {!isCollapsed && (<p className="font-bold text-[#ebdcb9]/60 text-xs">Diecast Kingdoms V.2.0.0</p>)}
                             </div>
                         </div>
                     </div>
@@ -1192,9 +1315,9 @@
                                         ? 'opacity-100 pointer-events-auto transform -translate-x-[25px] -translate-y-[165px] shadow-[0_0_15px_rgba(250,204,21,0.85)] scale-100' 
                                         : 'opacity-0 pointer-events-none transform translate-x-0 translate-y-0 scale-50'
                                 }`}
-                                title={isPopBossActive() ? "⚡ เหตุการณ์พิเศษ POPBOSS" : "🔒 สรุปผล PopBoss Season 1"}
+                                title={isPopBossActive() ? "🎃 กิจกรรมฮาโลวีน: หมอผีซ่าส์ กับวิญญาณอลเวง" : "🏆 สรุปผลกิจกรรมฮาโลวีน 2026"}
                             >
-                                <i className={`fa-solid ${isPopBossActive() ? 'fa-bolt text-base animate-pulse' : 'fa-trophy text-sm text-yellow-400'}`}></i>
+                                <i className={`fa-solid ${isPopBossActive() ? 'fa-ghost text-base animate-pulse' : 'fa-trophy text-sm text-yellow-400'}`}></i>
                             </button>
 
                             {/* 3. 💬 LINE OpenChat (รองล่าง / Level 2) */}
@@ -2257,9 +2380,10 @@
                 
                 if (exportProjects.length === 0) { alert('ไม่มีข้อมูลให้เบิกบันทึกค่ะ'); return; }
                 
-                const headers = ['รหัสแบบแปลน', 'รหัสพนักงาน', 'ผู้เสนอ', 'อาณาจักรต้นสังกัด', 'อาณาจักรเป้าหมาย', 'ประเภทพลังสาส์น', 'โรงงาน/สถานที่', 'กระบวนการที่พัฒนา', 'พิกัดปัญหา', 'ชื่อโครงการ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'วิธีแก้ไข(ที่เสนอ)', 'ประโยชน์ที่คาดว่าจะได้รับ', 'รูปภาพแนบ', 'สถานะ'];
+                const headers = ['รหัสแบบแปลน', 'รหัสพนักงาน', 'ผู้เสนอ', 'อาณาจักรต้นสังกัด', 'อาณาจักรเป้าหมาย', 'ประเภทพลังสาส์น', 'โรงงาน/สถานที่', 'กระบวนการที่พัฒนา', 'พิกัดปัญหา', 'ชื่อโครงการ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'วิธีแก้ไข(ที่เสนอ)', 'ประโยชน์ที่คาดว่าจะได้รับ', 'รูปภาพแนบ', 'สถานะ', 'เวลาส่งสาส์น', 'เวลาส่งหลักฐานครั้งแรก', 'เวลาส่งหลักฐานล่าสุด', 'ประวัติความเคลื่อนไหว'];
                 const csvRows = exportProjects.map(p => [
-                    p.id, p.emp, p.name, p.origin, p.target, p.category, p.factory, p.location, p.pinpoint, p.title, p.problem, p.solution, p.benefit, p.imagePreview ? 'มี' : 'ไม่มี', getDashboardStatusStr(p)
+                    p.id, p.emp, p.name, p.origin, p.target, p.category, p.factory, p.location, p.pinpoint, p.title, p.problem, p.solution, p.benefit, p.imagePreview ? 'มี' : 'ไม่มี', getDashboardStatusStr(p),
+                    formatThaiDateTime(p.created_at), formatEvidenceTimestamp(p, getEvidenceEventTimes(p).first), formatEvidenceTimestamp(p, getEvidenceEventTimes(p).latest), formatProjectHistoryCSV(p)
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
                 const csvString = [headers.join(','), ...csvRows].join('\n');
@@ -2694,6 +2818,7 @@
                                 <div className="text-center mb-6 border-b border-[#8b5a2b]/30 pb-4">
                                     <h2 className="text-2xl md:text-3xl font-bold text-[#5d3a1a] font-cinzel">📜 สาส์นพัฒนาแด่อาณาจักร 📜</h2>
                                     <p className="text-[#8b5a2b] mt-1.5 italic font-bold">รหัสแบบแปลน: {selectedProject.id}</p>
+                                    <p className="text-[#70451f] mt-1 text-xs font-bold">🕘 ส่งสาส์นเมื่อ: {formatThaiDateTime(selectedProject.created_at)}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mb-6 text-[#5d3a1a] text-xs">
                                     {isAdminMode && <p><strong>รหัสพนักงาน (Admin Only):</strong> <span className="text-red-700 font-bold">{selectedProject.emp}</span></p>}
@@ -2769,6 +2894,22 @@
                                         {selectedProject.status !== 'Blueprint' && selectedProject.status !== 'Hidden' && selectedProject.status !== 'Hall of fame' && selectedProject.comment && <span dangerouslySetInnerHTML={{ __html: selectedProject.comment }}></span>}
                                     </div>
                                 </div>
+
+                                <section className="mt-4 rounded-xl border border-[#8b5a2b]/40 bg-[#fff8e7] p-4 text-xs">
+                                    <h3 className="font-bold text-[#5d3a1a] mb-2">📜 ประวัติความเคลื่อนไหว</h3>
+                                    {selectedProject.statusHistory?.length ? (
+                                        <ol className="space-y-2">
+                                            {selectedProject.statusHistory.map(event => (
+                                                <li key={event.id} className="flex flex-wrap gap-x-2 gap-y-0.5 border-l-2 border-amber-600 pl-3">
+                                                    <time className="font-bold text-[#70451f]">{formatThaiDateTime(event.event_at)}</time>
+                                                    <span className="text-[#3d2511]">{describeProjectEvent(event)}</span>
+                                                </li>
+                                            ))}
+                                        </ol>
+                                    ) : (
+                                        <p className="text-[#70451f]">{selectedProject.created_at ? `ส่งสาส์นเมื่อ ${formatThaiDateTime(selectedProject.created_at)} · ไม่มีบันทึกเหตุการณ์อื่นก่อนเปิดระบบ Timeline ใน V2.0.0` : 'ไม่พบข้อมูลเวลาในระเบียนเดิม'}</p>
+                                    )}
+                                </section>
 
                                 {(selectedProject.status === 'Blueprint' || (selectedProject.status === 'Founding' && !selectedProject.ideaApproved)) && (
                                     <div className="mt-4 p-3.5 bg-amber-100/90 border border-amber-400 rounded-xl text-center shadow-sm">
@@ -2990,7 +3131,7 @@
                     return; 
                 }
                 
-                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'สถานะภารกิจ', 'ความคิดเห็นสภาเมือง'];
+                const headers = ['รหัสสาส์น', 'ชื่อภารกิจ', 'รายละเอียดปัญหา/ข้อร้องเรียน', 'ผู้เสนอไอเดีย (Origin)', 'ผู้รับผิดชอบ (Target)', 'สิ่งที่ลงมือแก้ไข (Action Taken)', 'งบประมาณที่ใช้จริง (บาท)', 'ผลลัพธ์ที่เกิดขึ้นจริง (Outcome)', 'สถานะภารกิจ', 'ความคิดเห็นสภาเมือง', 'เวลาส่งสาส์น', 'ส่งหลักฐานครั้งแรกเมื่อ', 'ส่งหลักฐานล่าสุดเมื่อ', 'ประวัติความเคลื่อนไหว'];
                 const csvRows = exportQuests.map(q => [
                     q.id || '', 
                     q.title || '', 
@@ -3001,7 +3142,11 @@
                     q.expense || '0', 
                     q.actualResult || '', 
                     q.status || '', 
-                    q.adminComment || ''
+                    q.adminComment || '',
+                    formatThaiDateTime(q.created_at),
+                    formatEvidenceTimestamp(q, getEvidenceEventTimes(q).first),
+                    formatEvidenceTimestamp(q, getEvidenceEventTimes(q).latest),
+                    formatProjectHistoryCSV(q)
                 ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
                 
                 const csvString = [headers.join(','), ...csvRows].join('\n');
@@ -3514,6 +3659,7 @@
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="bg-white/60 p-4 rounded-xl border border-[#8b5a2b]/30 text-xs">
                                             <h3 className="font-bold text-red-800 border-b border-red-800/30 pb-1.5 mb-3 flex items-center gap-1.5"><i className="fa-solid fa-triangle-exclamation"></i> สาส์นตั้งต้น (สิ่งที่ต้องแก้ไข)</h3>
+                                            <p className="mb-2 text-[#70451f] font-bold">🕘 ส่งสาส์นเมื่อ: {formatThaiDateTime(selectedQuest.created_at)}</p>
                                             <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">โรงงาน:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.factory}</span></p>
                                             <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">กระบวนการ:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.location}</span></p>
                                             <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">พิกัดจุดเกิดเหตุ:</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.pinpoint}</span></p>
@@ -3552,6 +3698,15 @@
                                         <div className="proof-box p-4 text-xs relative rounded-xl space-y-3">
                                             <div className="absolute top-2 right-2">{getStatusBadge(selectedQuest)}</div>
                                             <h3 className="font-bold text-green-800 border-b border-green-800/30 pb-1.5 mb-1 flex items-center gap-1.5"><i className="fa-solid fa-hammer"></i> หลักฐานจากหน้างาน (ผลลัพธ์)</h3>
+                                            {(() => {
+                                                const evidenceTimes = getEvidenceEventTimes(selectedQuest);
+                                                return (
+                                                    <div className="text-[11px] font-bold text-green-900 bg-green-50/80 rounded-lg p-2">
+                                                        <p>📤 หลักฐานครั้งแรก: {formatEvidenceTimestamp(selectedQuest, evidenceTimes.first)}</p>
+                                                        <p>🔄 หลักฐานล่าสุด: {formatEvidenceTimestamp(selectedQuest, evidenceTimes.latest)}</p>
+                                                    </div>
+                                                );
+                                            })()}
                                             <p className="mb-1 text-[#3f2a14]"><strong className="font-bold">ผู้รับผิดชอบ (Target):</strong> <span className="font-bold text-[#1e3a8a] ml-1">{selectedQuest.target}</span></p>
                                             <div>
                                                 <strong className="font-bold text-[#3f2a14]">📝 สิ่งที่ได้ลงมือแก้ไข:</strong>
@@ -3600,6 +3755,22 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <section className="rounded-xl border border-[#8b5a2b]/40 bg-[#fff8e7] p-4 text-xs">
+                                        <h3 className="font-bold text-[#5d3a1a] mb-2">📜 ประวัติความเคลื่อนไหว</h3>
+                                        {selectedQuest.statusHistory?.length ? (
+                                            <ol className="space-y-2">
+                                                {selectedQuest.statusHistory.map(event => (
+                                                    <li key={event.id} className="flex flex-wrap gap-x-2 gap-y-0.5 border-l-2 border-amber-600 pl-3">
+                                                        <time className="font-bold text-[#70451f]">{formatThaiDateTime(event.event_at)}</time>
+                                                        <span className="text-[#3d2511]">{describeProjectEvent(event)}</span>
+                                                    </li>
+                                                ))}
+                                            </ol>
+                                        ) : (
+                                            <p className="text-[#70451f]">{selectedQuest.created_at ? `ส่งสาส์นเมื่อ ${formatThaiDateTime(selectedQuest.created_at)} · ไม่มีบันทึกเหตุการณ์อื่นก่อนเปิดระบบ Timeline ใน V2.0.0` : 'ไม่พบข้อมูลเวลาในระเบียนเดิม'}</p>
+                                        )}
+                                    </section>
 
                                     {currentRole === selectedQuest.target && (selectedQuest.status === 'Founding' || selectedQuest.status === 'Ruined' || selectedQuest.status === 'Abandoned' || selectedQuest.status === 'Evidence') && (
                                         <div className="mt-6 p-4 target-panel space-y-3 bg-[#e0f2fe]/80 border-2 border-[#0284c7] rounded-xl">
@@ -4331,6 +4502,117 @@
             );
         }
 
+        function HalloweenEventView({ supabase, active, onClose }) {
+            const frameRef = useRef(null);
+            const [leaderboard, setLeaderboard] = useState([]);
+            const seasonEnded = Date.now() >= new Date('2026-10-31T00:00:00+07:00').getTime();
+            const [loadingBoard, setLoadingBoard] = useState(active || seasonEnded);
+            const [boardError, setBoardError] = useState('');
+
+            const loadLeaderboard = async () => {
+                if (!supabase) {
+                    setBoardError('ยังเชื่อมต่อกระดานคะแนนกลางไม่ได้');
+                    setLoadingBoard(false);
+                    return [];
+                }
+                const { data, error } = await supabase.rpc('get_halloween_game_leaderboard');
+                if (error) {
+                    console.error('Halloween leaderboard load failed:', error);
+                    setBoardError('กระดานคะแนนยังไม่พร้อม กรุณาลองใหม่ภายหลัง');
+                    setLoadingBoard(false);
+                    return [];
+                }
+                const rows = Array.isArray(data?.rows) ? data.rows : [];
+                setLeaderboard(rows);
+                setBoardError('');
+                setLoadingBoard(false);
+                return rows;
+            };
+
+            useEffect(() => {
+                if (active || seasonEnded) loadLeaderboard();
+            }, [active, seasonEnded]);
+
+            useEffect(() => {
+                const handleGameMessage = async (event) => {
+                    if (event.origin !== window.location.origin || event.source !== frameRef.current?.contentWindow) return;
+                    const message = event.data || {};
+                    if (!['dk-ghost-leaderboard-request', 'dk-ghost-score-submit'].includes(message.type)) return;
+
+                    let payload = {};
+                    try {
+                        if (!supabase) throw new Error('ไม่พบการเชื่อมต่อฐานข้อมูลคะแนน');
+                        if (message.type === 'dk-ghost-leaderboard-request') {
+                            const { data, error } = await supabase.rpc('get_halloween_game_leaderboard');
+                            if (error) throw error;
+                            payload = data || { rows: [] };
+                            setLeaderboard(Array.isArray(payload.rows) ? payload.rows : []);
+                            setBoardError('');
+                        } else {
+                            const record = message.payload || {};
+                            const { data, error } = await supabase.rpc('submit_halloween_game_score', {
+                                p_employee_id: record.employeeId,
+                                p_employee_name: record.name,
+                                p_kingdom: record.sect,
+                                p_score: record.score,
+                                p_kills: record.kills,
+                                p_max_combo: record.combo
+                            });
+                            if (error) throw error;
+                            payload = data || {};
+                            if (payload.result?.rows) setLeaderboard(payload.result.rows);
+                        }
+                    } catch (error) {
+                        console.error('Halloween score operation failed:', error);
+                        payload = { error: 'บันทึกคะแนนไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่' };
+                        setBoardError(payload.error);
+                    }
+                    frameRef.current?.contentWindow?.postMessage({
+                        type: 'dk-ghost-response', requestId: message.requestId, payload
+                    }, event.origin);
+                };
+                window.addEventListener('message', handleGameMessage);
+                return () => window.removeEventListener('message', handleGameMessage);
+            }, [supabase]);
+
+            const winner = leaderboard[0];
+            return (
+                <div className="fixed inset-0 z-[60] bg-[#080610]/95 flex flex-col text-[#f7e6c4] overflow-y-auto">
+                    <header className="flex items-center justify-between gap-3 p-3 md:px-6 border-b border-orange-300/30 bg-black/50">
+                        <div>
+                            <h1 className="text-lg md:text-2xl font-bold text-orange-200">🎃 กิจกรรมฮาโลวีน 2026</h1>
+                            <p className="text-xs md:text-sm text-orange-100/75">หมอผีซ่าส์ กับ วิญญาณอลเวง · ผู้ชนะคืออันดับ 1</p>
+                        </div>
+                        <button onClick={onClose} className="w-11 h-11 rounded-full bg-orange-950/70 border border-orange-300/60 text-2xl font-bold hover:bg-orange-900" aria-label="กลับสู่แผนที่">×</button>
+                    </header>
+                    {active ? (
+                        <iframe ref={frameRef} title="หมอผีซ่าส์ กับวิญญาณอลเวง" src="Assets/Special_event/GhostSlayer/index.html?v=20260927" className="w-full flex-1 min-h-0 border-0" allow="fullscreen" />
+                    ) : (
+                        <main className="w-full max-w-3xl mx-auto p-5 md:p-10">
+                            <div className="parchment rounded-2xl p-5 md:p-8 text-center">
+                                <div className="text-5xl mb-3">{new Date() < new Date('2026-09-27T00:00:00+07:00') ? '🦇' : '🏆'}</div>
+                                <h2 className="text-2xl font-bold text-[#5d3a1a]">{new Date() < new Date('2026-09-27T00:00:00+07:00') ? 'เตรียมยันต์ให้พร้อม!' : 'ปิดกิจกรรมฮาโลวีนแล้ว'}</h2>
+                                <p className="mt-2 text-[#70451f]">{new Date() < new Date('2026-09-27T00:00:00+07:00') ? 'เกมจะเปิดวันที่ 27 กันยายน 2569 เวลา 00:00 น. และปิดวันที่ 31 ตุลาคม เวลา 00:00 น. (เวลาไทย)' : 'ขอบคุณทุกคนที่ร่วมปราบผี มาดูผลคะแนนสูงสุดกันค่ะ'}</p>
+                                {(active || seasonEnded) && <section className="mt-6 text-left bg-[#fff8e7] rounded-xl border border-[#8b5a2b]/40 p-4">
+                                    <h3 className="font-bold text-[#5d3a1a] mb-3">🏅 ทำเนียบคะแนนสูงสุด</h3>
+                                    {loadingBoard ? <p className="text-[#70451f]">กำลังโหลดคะแนน…</p> : boardError ? <p className="text-red-800">{boardError}</p> : leaderboard.length ? (
+                                        <ol className="space-y-2 text-[#3d2511]">
+                                            {leaderboard.slice(0, 8).map((row, index) => (
+                                                <li key={`${row.employeeId}-${index}`} className={`flex flex-wrap justify-between gap-2 rounded-lg px-3 py-2 ${index === 0 ? 'bg-amber-200 font-bold' : 'bg-white/70'}`}>
+                                                    <span>#{index + 1} · {row.name} ({row.employeeId}) · {row.sect}</span><span>{Number(row.score).toLocaleString()} คะแนน</span>
+                                                </li>
+                                            ))}
+                                        </ol>
+                                    ) : <p className="text-[#70451f]">ยังไม่มีคะแนนในทำเนียบ</p>}
+                                    {winner && <p className="mt-4 font-bold text-amber-900">👑 ผู้ชนะ: {winner.name} · {winner.sect}</p>}
+                                </section>}
+                            </div>
+                        </main>
+                    )}
+                </div>
+            );
+        }
+
         // ==========================================
         // COMPONENT 8: Root App
         // ==========================================
@@ -4345,18 +4627,22 @@
             
             const [isMuted, setIsMuted] = useState(false);
             const audioRef = useRef(null);
-            const popbossMusicRef = useRef(null);
-            const hitSoundRef = useRef(null);
 
             // 🎵 Music Player State
-            const musicTracks = [
+            const normalMusicTracks = [
                 { id: 1, src: 'Assets/Audio/Music/Music_bg-1.mp3', title: '1. เทศกาลงานรื่นเริง' },
                 { id: 2, src: 'Assets/Audio/Music/Music_bg-2.mp3', title: '2. ทั่ง, ถ่านและอัคคี' },
                 { id: 3, src: 'Assets/Audio/Music/Music_bg-3.mp3', title: '3. ครั้งเยือนแดนเหมันต์' },
                 { id: 4, src: 'Assets/Audio/Music/Music_bg-4.mp3', title: '4. เมื่อฟันเฟื่องหมุนไป' },
                 { id: 5, src: 'Assets/Audio/Music/Music_bg-5.mp3', title: '5. บทเพลงในหมู่เมฆ' }
             ];
+            const [seasonClock, setSeasonClock] = useState(Date.now());
+            const halloweenActive = isHalloweenActive(new Date(seasonClock));
+            const musicTracks = halloweenActive
+                ? [{ id: 'halloween-2026', src: 'Assets/Audio/Special_event/Music/halloween_2026_theme.mp3', title: 'เทศกาลผีน้อยเริงร่า' }]
+                : normalMusicTracks;
             const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+            const activeTrackIndex = Math.min(currentTrackIndex, musicTracks.length - 1);
             const [isPlaying, setIsPlaying] = useState(false);
             const [isLoopingOne, setIsLoopingOne] = useState(false);
             const [isKingdomModalOpen, setIsKingdomModalOpen] = useState(false);
@@ -4366,6 +4652,13 @@
 
             const handleNextTrack = () => setCurrentTrackIndex((prev) => (prev + 1) % musicTracks.length);
             const handlePrevTrack = () => setCurrentTrackIndex((prev) => (prev - 1 + musicTracks.length) % musicTracks.length);
+
+            useEffect(() => {
+                const interval = setInterval(() => setSeasonClock(Date.now()), 30000);
+                return () => clearInterval(interval);
+            }, []);
+
+            useEffect(() => { setCurrentTrackIndex(0); }, [halloweenActive]);
 
             useEffect(() => {
                 const handleResize = () => {
@@ -4389,53 +4682,24 @@
                 if (!isAuthorized) return;
                 
                 const bgMusic = audioRef.current;
-                const popMusic = popbossMusicRef.current;
-
-                if (isMuted) {
-                    if (bgMusic) bgMusic.muted = true;
-                    if (popMusic) popMusic.muted = true;
-                } else {
-                    if (bgMusic) bgMusic.muted = false;
-                    if (popMusic) popMusic.muted = false;
-                }
-
-                if (currentView === 'popboss') {
-                    if (bgMusic) bgMusic.pause();
-                    if (popMusic) {
-                        if (isPlaying && !isMuted) {
-                            popMusic.play().catch(e => console.log("PopBoss music play blocked", e));
-                        } else {
-                            popMusic.pause();
-                        }
-                    }
-                } else {
-                    if (popMusic) popMusic.pause();
-                    if (bgMusic) {
-                        if (isPlaying && !isMuted) {
-                            bgMusic.play().catch(e => console.log("Auto-play blocked"));
-                        } else {
-                            bgMusic.pause();
-                        }
+                if (bgMusic) bgMusic.muted = isMuted;
+                if (bgMusic) {
+                    if (isPlaying && !isMuted) {
+                        bgMusic.play().catch(e => console.log("Auto-play blocked"));
+                    } else {
+                        bgMusic.pause();
                     }
                 }
-            }, [currentView, isAuthorized, isMuted, isPlaying, currentTrackIndex]);
+            }, [currentView, isAuthorized, isMuted, isPlaying, currentTrackIndex, halloweenActive]);
 
             const handleLoginSuccess = () => {
                 sessionStorage.setItem('isAuthorized', 'true');
                 setIsAuthorized(true);
                 setIsPlaying(true); 
                 if (audioRef.current) { audioRef.current.volume = 0.5; }
-                if (popbossMusicRef.current) popbossMusicRef.current.volume = 0.6;
-                if (hitSoundRef.current) hitSoundRef.current.volume = 0.8;
             };
 
             const toggleMute = () => { setIsMuted(!isMuted); };
-            const playHitSound = () => {
-                if (hitSoundRef.current && !isMuted) {
-                    hitSoundRef.current.currentTime = 0;
-                    hitSoundRef.current.play().catch(e => console.log("SFX play failed"));
-                }
-            };
 
             const [dashboardFilter, setDashboardFilter] = useState(null);
             const [questFilter, setQuestFilter] = useState(null);
@@ -4462,48 +4726,7 @@
 
             const [projects, setProjects] = useState([]);
             const [kingdomEXP, setKingdomEXP] = useState({ 'เบสเซนตร้า': 0, 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
-            const [popBossScores, setPopBossScores] = useState({ 'แคสเทอเรีย': 0, 'แบลงค์ไฮม์การ์ด': 0, 'แมคชีนโพลิส': 0, 'ไฟนัลธรอน': 0 });
-            const pendingClicksRef = useRef({});
-
-            // ⚡ ระบบดึงยอดรวมคะแนน POPBOSS ล่าสุดทุก 2 วินาทีเมื่ออยู่ในหน้า POPBOSS
-            useEffect(() => {
-                if (currentView !== 'popboss' || !supabase) return;
-                const pollInterval = setInterval(async () => {
-                    try {
-                        const { data, error } = await supabase.from('popboss_scores').select('*');
-                        if (!error && data) {
-                            const scoresMap = {};
-                            data.forEach(row => { scoresMap[row.kingdom] = row.score; });
-                            setPopBossScores(prev => ({ ...prev, ...scoresMap }));
-                        }
-                    } catch (e) { console.log("Poll POPBOSS error", e); }
-                }, 2000);
-                return () => clearInterval(pollInterval);
-            }, [currentView]);
-
-            // ⚡ ระบบรวมยอดส่งคะแนนจิ้มไปบวกสะสมใน Supabase ทุกๆ 1.5 วินาที (บวกสะสม ป้องกันการเขียนทับ)
-            useEffect(() => {
-                if (!supabase) return;
-                const flushInterval = setInterval(async () => {
-                    const kingdoms = Object.keys(pendingClicksRef.current);
-                    for (const k of kingdoms) {
-                        const delta = pendingClicksRef.current[k];
-                        if (delta > 0) {
-                            pendingClicksRef.current[k] = 0;
-                            try {
-                                const { data } = await supabase.from('popboss_scores').select('score').eq('kingdom', k).single();
-                                const currentScore = data ? (data.score || 0) : 0;
-                                await supabase.from('popboss_scores').update({ score: currentScore + delta }).eq('kingdom', k);
-                            } catch (err) {
-                                console.error("Flush click error:", err);
-                            }
-                        }
-                    }
-                }, 1500);
-                return () => clearInterval(flushInterval);
-            }, []);
-
-            // 🔄 ดึงข้อมูลสาส์นพัฒนาและคะแนน PopBoss จาก Supabase เมื่อเปิดใช้งาน
+            // 🔄 ดึงข้อมูลสาส์นพัฒนาและประวัติจาก Supabase เมื่อเปิดใช้งาน
             useEffect(() => {
                 if (!supabase) return;
 
@@ -4511,6 +4734,13 @@
                     try {
                         const { data: projData, error: projErr } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
                         if (!projErr && projData) {
+                            const { data: eventData, error: eventErr } = await supabase.from('project_events').select('*').order('event_at', { ascending: true }).order('id', { ascending: true });
+                            if (eventErr) console.warn('Project timeline is not available until the V2.0.0 database upgrade is applied:', eventErr);
+                            const eventsByProject = {};
+                            (eventData || []).forEach(event => {
+                                if (!eventsByProject[event.project_id]) eventsByProject[event.project_id] = [];
+                                eventsByProject[event.project_id].push(event);
+                            });
                             const mappedProjects = projData.map(item => ({
                                 id: item.id,
                                 emp: item.emp,
@@ -4541,6 +4771,7 @@
                                 isSecret: item.is_secret,
                                 isQualityEvent: item.is_quality_event,
                                 isSuperRising: item.is_super_rising,
+                                statusHistory: eventsByProject[item.id] || [],
                                 created_at: item.created_at || null,
                                 updated_at: item.updated_at || null
                             }));
@@ -4563,12 +4794,6 @@
                             setRunningSeq(maxSeq + 1);
                         }
 
-                        const { data: bossData, error: bossErr } = await supabase.from('popboss_scores').select('*');
-                        if (!bossErr && bossData) {
-                            const scoresMap = {};
-                            bossData.forEach(row => { scoresMap[row.kingdom] = row.score; });
-                            setPopBossScores(prev => ({ ...prev, ...scoresMap }));
-                        }
                     } catch (e) {
                         console.log("Supabase connect notice:", e);
                     }
@@ -4640,14 +4865,22 @@
                     }
                 }
 
+                let statusHistory = [];
+                if (supabase) {
+                    const { data: eventData, error: eventErr } = await supabase.from('project_events').select('*').eq('project_id', newProject.id).order('event_at', { ascending: true }).order('id', { ascending: true });
+                    if (!eventErr && eventData) statusHistory = eventData;
+                }
+                const submittedAt = statusHistory.find(event => event.event_type === 'suggestion_submitted')?.event_at || nowIso;
+
                 const { _videoFile, ...safeProject } = newProject;
                 const projectWithDates = {
                     ...safeProject,
                     images: persistedImages,
                     imagePreview: persistedImages[0] || null,
                     videoUrl,
-                    created_at: nowIso,
-                    updated_at: nowIso,
+                    created_at: submittedAt,
+                    updated_at: submittedAt,
+                    statusHistory,
                     wasRecentlyUpdated: true
                 };
                 setProjects(prev => [projectWithDates, ...prev]);
@@ -4679,6 +4912,7 @@
                 let persistedImagesAfter = normalizeMediaArray(updatedProject.imagesAfter, updatedProject.imageAfterPreview);
                 let videoUrl = updatedProject.videoUrl || null;
                 let videoAfterUrl = updatedProject.videoAfterUrl || null;
+                let statusHistory = updatedProject.statusHistory || [];
 
                 if (supabase) {
                     persistedImages = await persistImageList(persistedImages, updatedProject.id, 'before');
@@ -4720,6 +4954,8 @@
                         console.error("Supabase update error:", error);
                         throw error;
                     }
+                    const { data: eventData, error: eventErr } = await supabase.from('project_events').select('*').eq('project_id', updatedProject.id).order('event_at', { ascending: true }).order('id', { ascending: true });
+                    if (!eventErr && eventData) statusHistory = eventData;
                 }
 
                 const { _videoFile, _videoAfterFile, ...safeProject } = updatedProject;
@@ -4731,6 +4967,7 @@
                     imageAfterPreview: persistedImagesAfter[0] || null,
                     videoUrl,
                     videoAfterUrl,
+                    statusHistory,
                     updated_at: nowIso,
                     wasRecentlyUpdated: true
                 };
@@ -4742,18 +4979,15 @@
             const currentHour = new Date().getHours();
             const isDayTime = currentHour >= 6 && currentHour < 18;
             const videoSrc = isMobilePortrait 
-                ? (isDayTime ? "Assets/video/bg_portrait_day.mp4?v=20260922" : "Assets/video/bg_portrait_night.mp4")
-                : (isDayTime ? "Assets/video/bg_horizontal_day.mp4?v=20260922" : "Assets/video/bg_horizontal_night.mp4");
+                ? (halloweenActive ? "Assets/video/seasonal/halloween_2026_portrait.mp4" : (isDayTime ? "Assets/video/bg_portrait_day.mp4?v=20260922" : "Assets/video/bg_portrait_night_v200.mp4"))
+                : (halloweenActive ? "Assets/video/seasonal/halloween_2026_horizontal.mp4" : (isDayTime ? "Assets/video/bg_horizontal_day.mp4?v=20260922" : "Assets/video/bg_horizontal_night_v200.mp4"));
 
             return (
                 <div className="relative min-h-screen flex flex-col">
-                    <audio ref={audioRef} id="bgMusic" src={musicTracks[currentTrackIndex].src} loop={isLoopingOne} onEnded={handleNextTrack}></audio>
+                    <audio key={musicTracks[activeTrackIndex].src} ref={audioRef} id="bgMusic" src={musicTracks[activeTrackIndex].src} loop={isLoopingOne} onEnded={handleNextTrack}></audio>
                     
-                    <audio ref={popbossMusicRef} loop id="popbossMusic"><source src="Assets/Audio/Special_event/Music/Music_popboss.mp3" type="audio/mpeg" /></audio>
-                    <audio ref={hitSoundRef} id="hitSound"><source src="Assets/Audio/Special_event/Sfx/Hit_sound.mp3" type="audio/mpeg" /></audio>
-
                     <video 
-                        key={`${isMobilePortrait ? 'portrait' : 'horizontal'}_${isDayTime ? 'day' : 'night'}`}
+                        key={`${isMobilePortrait ? 'portrait' : 'horizontal'}_${halloweenActive ? 'halloween' : (isDayTime ? 'day' : 'night')}`}
                         autoPlay 
                         loop 
                         muted 
@@ -4774,7 +5008,7 @@
                                     currentView={currentView} onViewChange={handleViewChange} 
                                     isCollapsed={isSidebarCollapsed} onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
                                     visible={true} isMuted={isMuted} toggleMute={toggleMute} 
-                                    musicTracks={musicTracks} currentTrackIndex={currentTrackIndex} setCurrentTrackIndex={setCurrentTrackIndex}
+                                    musicTracks={musicTracks} currentTrackIndex={activeTrackIndex} setCurrentTrackIndex={setCurrentTrackIndex}
                                     isPlaying={isPlaying} setIsPlaying={setIsPlaying} isLoopingOne={isLoopingOne} setIsLoopingOne={setIsLoopingOne}
                                     handleNextTrack={handleNextTrack} handlePrevTrack={handlePrevTrack}
                                     projects={projects}
@@ -4831,11 +5065,7 @@
                             )}
 
                             {currentView === 'popboss' && (
-                                <PopBossEvent globalScores={popBossScores} updateGlobalScores={(kingdom) => {
-                                    if (!kingdom) return;
-                                    setPopBossScores(prev => ({ ...prev, [kingdom]: (prev[kingdom] || 0) + 1 }));
-                                    pendingClicksRef.current[kingdom] = (pendingClicksRef.current[kingdom] || 0) + 1;
-                                }} onClose={() => handleViewChange('worldmap')} playHitSound={playHitSound} />
+                                <HalloweenEventView supabase={supabase} active={halloweenActive} onClose={() => handleViewChange('worldmap')} />
                             )}
                         </>
                     )}
