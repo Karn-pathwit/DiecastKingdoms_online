@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diecast Kingdoms V2.0.0 - Halloween 2027</title>
+    <title>Diecast Kingdoms V2.0.1 - Halloween 2026</title>
 
     <!-- PWA & Mobile App Settings (Full Screen App Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -353,12 +353,6 @@
             return now >= start && now <= expiry;
         }
 
-        function isBlankheimLevel5CelebrationActive() {
-            const now = new Date();
-            const expiry = new Date('2026-09-29T23:59:59+07:00');
-            return now <= expiry;
-        }
-
         function MapPin({ kingdomKey, kingdom, onClick, onChampionClick }) {
             const [imgError, setImgError] = useState(false);
             const glowFilterMap = {
@@ -369,22 +363,11 @@
                 'Finalthron': 'drop-shadow(0 0 12px rgba(250,204,21,0.95)) drop-shadow(0 0 25px rgba(217,119,6,0.85)) drop-shadow(0 0 40px rgba(180,83,9,0.7))'
             };
             const activeFilter = glowFilterMap[kingdomKey] || 'drop-shadow(0 0 20px rgba(255,255,255,0.8))';
-            const showLevel5Badge = isBlankheimLevel5CelebrationActive() && kingdomKey === 'Blankheimgard';
             const showPopBossChampionBadge = kingdomKey === 'Blankheimgard';
 
             return (
                 <div className={`absolute z-20 pointer-events-auto pin-${kingdomKey.toLowerCase()}`} style={{ top: kingdom.position.top, left: kingdom.position.left }}>
                     <div className="absolute transform -translate-x-1/2 -translate-y-1/2">
-                        {showLevel5Badge && (
-                            <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); onClick(); }}
-                                className="absolute -top-8 sm:-top-9 md:-top-11 left-1/2 -translate-x-1/2 z-30 bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-600 text-sky-950 font-extrabold text-[9px] sm:text-[10px] md:text-xs px-3 py-1 rounded-full border-2 border-cyan-100 shadow-[0_0_22px_rgba(56,189,248,0.95)] animate-bounce whitespace-nowrap pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
-                                title="เปิดชมวิวัฒนาการ Level 5 และอาณาจักรในวันวาน"
-                            >
-                                ❄️ LEVEL 5 EVOLUTION
-                            </button>
-                        )}
                         {showPopBossChampionBadge && (
                             <button
                                 type="button"
@@ -659,12 +642,12 @@
                                 </div>
                             )}
 
-                            {/* ข่าวกิจกรรม Halloween 2027 */}
+                            {/* ข่าวกิจกรรม Halloween 2026 */}
                             <div className="bg-gradient-to-r from-violet-950 via-purple-900 to-orange-950 p-6 rounded-xl border-2 border-orange-400 shadow-lg flex flex-col md:flex-row items-center gap-6 text-white group relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-2 text-orange-300 opacity-20 text-8xl transform rotate-12">🎃</div>
                                 <div className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">🧙</div>
                                 <div className="relative z-10 flex-1">
-                                    <h3 className="font-bold text-orange-200 text-xl md:text-2xl mb-2">Halloween 2027: หมอผีซ่าส์ กับ วิญญาณอลเวง</h3>
+                                    <h3 className="font-bold text-orange-200 text-xl md:text-2xl mb-2">Halloween 2026: หมอผีซ่าส์ กับ วิญญาณอลเวง</h3>
                                     <p className="text-sm md:text-base text-purple-100 mb-4 leading-relaxed">
                                         เตรียมตัวให้พร้อม รับบทหมอผีสายลุย! วาดยันต์ส่งเหล่าผีไปสู่สุคติ สะสมคะแนนให้ได้มากที่สุด แล้วขึ้นทำเนียบผู้เล่น 8 อันดับแรก ใครคว้าอันดับ 1 ได้ จะสร้างความภาคภูมิใจให้ทั้งอาณาจักร! และแชมป์ POPBOSS อย่างแบลงค์ไฮม์การ์ดยังมีตราพายุเหมันต์พิเศษติดตัวด้วย<br/>
                                         <span className="text-orange-200 font-bold block mt-2 px-3 py-1 bg-black/40 rounded inline-block">⏳ วันนี้ – 30 ตุลาคม · เวลาไทย</span>
@@ -4586,7 +4569,7 @@
                         <button onClick={onClose} className="w-11 h-11 rounded-full bg-orange-950/70 border border-orange-300/60 text-2xl font-bold hover:bg-orange-900" aria-label="กลับสู่แผนที่">×</button>
                     </header>
                     {active ? (
-                        <iframe ref={frameRef} title="หมอผีซ่าส์ กับวิญญาณอลเวง" src="Assets/Special_event/GhostSlayer/index.html?v=20260927" className="w-full flex-1 min-h-0 border-0" allow="fullscreen" />
+                        <iframe ref={frameRef} title="หมอผีซ่าส์ กับวิญญาณอลเวง" src="Assets/Special_event/GhostSlayer/index.html?v=20260927-201" className="w-full flex-1 min-h-0 border-0" allow="fullscreen" />
                     ) : (
                         <main className="w-full max-w-3xl mx-auto p-5 md:p-10">
                             <div className="parchment rounded-2xl p-5 md:p-8 text-center">

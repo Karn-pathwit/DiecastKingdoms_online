@@ -19,7 +19,7 @@
       overflow:auto; padding:clamp(22px,5vw,58px) 18px;
       background:
         linear-gradient(180deg,rgba(2,4,8,.28),rgba(3,4,8,.92)),
-        url("assets/ghost-slayer/cemetery-night-2p5d.png") center / cover no-repeat;
+        url("assets/cemetery-night-2p5d.png") center / cover no-repeat;
     }
     .menu-main { width:min(680px,100%); margin:0 auto; text-align:center; }
     .eyebrow { margin:0 0 8px; color:#ffe193; font-weight:900; font-size:.75rem; letter-spacing:.18em; }
@@ -172,11 +172,11 @@
     var SIGNS = ["—","|","V","^","Z"];
     var SIGN_COLORS = {"—":"#ff9f5c","|":"#61d8ff","V":"#81e48c","^":"#d79aff","Z":"#ffe66d"};
     var SECTS = [
-      { id:"bascentra", name:"เบสเซนตร้า", color:"#c084fc", note:"นครเวทมนตร์แห่งความกลมเกลียว" },
-      { id:"casteria", name:"แคสเทอเรีย", color:"#ef4444", note:"เปลวเพลิงและพลังแห่งการหลอม" },
-      { id:"ice", name:"แบลงค์ไฮม์การ์ด", color:"#38bdf8", note:"แดนเหมันต์ · ได้ตราพลังพิเศษจากแชมป์ POPBOSS" },
-      { id:"machinepolis", name:"แมคชีนโพลิส", color:"#22c55e", note:"จักรกลและนวัตกรรม" },
-      { id:"finalthron", name:"ไฟนัลธรอน", color:"#facc15", note:"แสงศักดิ์สิทธิ์และคำภาวนา" }
+      { id:"bascentra", name:"สำนักมณีปราบผี", kingdom:"เบสเซนตร้า", color:"#c084fc", note:"มนตร์มณีพิทักษ์นคร" },
+      { id:"casteria", name:"สำนักเร่าร้อนเซ็กซี่", kingdom:"แคสเทอเรีย", color:"#ef4444", note:"เปลวเพลิงอาคม" },
+      { id:"ice", name:"สำนักเหน็บหนาวเหงาใจ", kingdom:"แบลงค์ไฮม์การ์ด", color:"#06b6d4", note:"ไอเย็นสะกดวิญญาณ · ตราผู้ชนะ POPBOSS" },
+      { id:"machinepolis", name:"สำนักไฮเทคไฮโซ", kingdom:"แมคชีนโพลิส", color:"#22c55e", note:"มนต์นีออนสายฟ้า" },
+      { id:"finalthron", name:"สำนักอะปัดไชเย", kingdom:"ไฟนัลธรอน", color:"#eab308", note:"แสงธรรมศักดิ์สิทธิ์" }
     ];
     var TYPES = {
       kuman:{ label:"กุมารทอง", runes:1, speed:.105, size:1, value:1, color:"#f5a65b", sprite:"kuman" },
@@ -195,15 +195,15 @@
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
     var bg = new Image();
-    bg.src = "assets/ghost-slayer/cemetery-night-2p5d.png";
-    var kumanSprite = new Image(); kumanSprite.src = "assets/ghost-slayer/ghost-kuman-cartoon.png";
-    var taihongSprite = new Image(); taihongSprite.src = "assets/ghost-slayer/ghost-taihong-cartoon.png";
-    var popSprite = new Image(); popSprite.src = "assets/ghost-slayer/ghost-pop-cartoon.png";
-    var widowSprite = new Image(); widowSprite.src = "assets/ghost-slayer/ghost-widow-cartoon.png";
-    var krasueSprite = new Image(); krasueSprite.src = "assets/ghost-slayer/ghost-krasue-cartoon.png";
-    var krahangSprite = new Image(); krahangSprite.src = "assets/ghost-slayer/ghost-krahang-cartoon.png";
-    var taniSprite = new Image(); taniSprite.src = "assets/ghost-slayer/ghost-tani-cartoon.png";
-    var pretSprite = new Image(); pretSprite.src = "assets/ghost-slayer/ghost-pret-cartoon.png";
+    bg.src = "assets/cemetery-night-2p5d.png";
+    var kumanSprite = new Image(); kumanSprite.src = "assets/ghost-kuman-cartoon.png";
+    var taihongSprite = new Image(); taihongSprite.src = "assets/ghost-taihong-cartoon.png";
+    var popSprite = new Image(); popSprite.src = "assets/ghost-pop-cartoon.png";
+    var widowSprite = new Image(); widowSprite.src = "assets/ghost-widow-cartoon.png";
+    var krasueSprite = new Image(); krasueSprite.src = "assets/ghost-krasue-cartoon.png";
+    var krahangSprite = new Image(); krahangSprite.src = "assets/ghost-krahang-cartoon.png";
+    var taniSprite = new Image(); taniSprite.src = "assets/ghost-tani-cartoon.png";
+    var pretSprite = new Image(); pretSprite.src = "assets/ghost-pret-cartoon.png";
     var SPRITES = {
       kuman:{sheet:kumanSprite,scale:2.45}, taihong:{sheet:taihongSprite,scale:2.7},
       pop:{sheet:popSprite,scale:2.7}, widow:{sheet:widowSprite,scale:2.75},
@@ -610,7 +610,7 @@
     async function save(){
       if(state.saved)return state.rankResult;
       state.saved=true;if(!state.score)return null;
-      var rows=readHall(),record={employeeId:el.employeeId.value.trim().slice(0,20),name:(el.name.value.trim()||"หมอผีน้อย").slice(0,14),sect:selected.name,color:selected.color,score:Math.round(state.score),kills:state.kills,combo:state.maxCombo};
+      var rows=readHall(),record={employeeId:el.employeeId.value.trim().slice(0,20),name:(el.name.value.trim()||"หมอผีน้อย").slice(0,14),sect:selected.kingdom,color:selected.color,score:Math.round(state.score),kills:state.kills,combo:state.maxCombo};
       if(embeddedInKingdoms){
         var response=await askHost("dk-ghost-score-submit",record);
         if(response&&response.result){state.rankResult=response.result;remoteLeaderboard=response.result.rows||[];return state.rankResult;}
@@ -620,7 +620,8 @@
       rows.push(record);rows.sort(function(a,b){return b.score-a.score;});var result={rank:rows.indexOf(record)+1,record:record,rows:rows.slice(0,8)};state.rankResult=result;
       try{localStorage.setItem(STORE,JSON.stringify(result.rows));}catch(e){}return result;
     }
-    function boardTable(rows,current){return "<table class='table'><thead><tr><th>#</th><th>รหัสพนักงาน</th><th>ชื่อหมอผี</th><th>อาณาจักร</th><th>คะแนน</th></tr></thead><tbody>"+rows.slice(0,8).map(function(r,i){return"<tr"+(r===current?" class='current-rank'":"")+"><td>"+(i+1)+"</td><td>"+safe(r.employeeId||"—")+"</td><td><b>"+safe(r.name)+"</b></td><td>"+safe(r.sect||r.kingdom||"—")+"</td><td>"+fmt(r.score)+"</td></tr>";}).join("")+"</tbody></table>";}
+    function sectTitle(kingdom){var match=SECTS.find(function(s){return s.kingdom===kingdom||s.name===kingdom;});return match?match.name:(kingdom||"—");}
+    function boardTable(rows,current){return "<table class='table'><thead><tr><th>#</th><th>รหัสพนักงาน</th><th>ชื่อหมอผี</th><th>สำนัก</th><th>คะแนน</th></tr></thead><tbody>"+rows.slice(0,8).map(function(r,i){return"<tr"+(r===current?" class='current-rank'":"")+"><td>"+(i+1)+"</td><td>"+safe(r.employeeId||"—")+"</td><td><b>"+safe(r.name)+"</b></td><td>"+safe(sectTitle(r.sect||r.kingdom)) +"</td><td>"+fmt(r.score)+"</td></tr>";}).join("")+"</tbody></table>";}
     function overRanking(result){
       if(!result)return "<div class='rank-callout roast'>กระจอกงอกง่อย! ยังไม่มีคะแนนพอให้ขึ้นทำเนียบ</div>";
       if(result.error)return "<div class='rank-callout roast'>คะแนนรอบนี้ยังบันทึกไม่ได้: "+safe(result.error)+"</div>"+(result.rows&&result.rows.length?boardTable(result.rows,null):"");
@@ -638,7 +639,7 @@
     canvas.addEventListener("pointerdown",pointerDown,{passive:false});canvas.addEventListener("pointermove",pointerMove,{passive:false});canvas.addEventListener("pointerup",pointerUp,{passive:false});canvas.addEventListener("pointercancel",pointerUp,{passive:false});
     canvas.addEventListener("dblclick",function(e){e.preventDefault();activate();});window.addEventListener("keydown",function(e){if((e.key===" "||e.key.toLowerCase()==="x")&&state.active){e.preventDefault();activate();}if(e.key==="Escape"&&state.active&&!state.paused){state.paused=true;modals.pause.hidden=false;}});
     window.addEventListener("resize",resize); if(window.ResizeObserver)new ResizeObserver(resize).observe(canvas);
-    window.GhostSlayerShaman={start:start,stop:stop,showHall:hall,version:"2.0.0"};
+    window.GhostSlayerShaman={start:start,stop:stop,showHall:hall,version:"2.0.1"};
     buildSects();
   }());
   </script>
