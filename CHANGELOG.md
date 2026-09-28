@@ -1,5 +1,15 @@
 # Diecast Kingdoms Changelog
 
+## V2.1.0 — Halloween game challenge and usability
+
+- Removed the simultaneous-ghost cap and the nine-enemy wave ceiling. Waves now scale upward, spawn intervals shorten from 1.30 seconds by 0.09 seconds per wave to a 0.34-second floor, and the pause between waves is removed.
+- Reworked waves 1–5 into a slower warm-up with a total of 37 ghosts, giving players time to learn and collect spirit energy before wave 6.
+- Ensured rune symbols do not repeat within one ghost; added a boss-only closed-circle O rune for the Pret and taught the game to recognize it.
+- Added an x2 speed toggle, a prominent current-score display, a smaller-but-clearer COMBO counter, and a compact live top-three board with projected Top 8 / first-place score gaps. Combo 100+ triggers a blue neon Overdrive glow.
+- Expanded spirit energy to 100 and added a hold-still-for-0.8s recovery spell that restores one candle up to the three-candle limit, with a visible charge ring; the existing 30/50 double-tap spells remain unchanged.
+- Enlarged the ward candles, repositioning them on portrait screens to avoid the spell panel.
+- Changed the pause-menu exit action to end the run, submit its score, and show the score summary without waiting for all three candles to go out.
+
 ## V2.0.1 — Halloween 2026 fixes
 
 - Corrected the season label to 2026 and removed the temporary Level 5 Evolution map badge while keeping the Blankheimgard POPBOSS congratulations badge.
